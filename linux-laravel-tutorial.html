@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux for Laravel Developers — Hinglish Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --teal: #39d353;
+    --cmd-bg: #010409;
+    --cmd-border: #238636;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  /* SIDEBAR */
+  #sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar-header {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  #sidebar-header h1 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  #sidebar-header p {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .search-box {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+  }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-box input:focus { border-color: var(--accent); }
+  .nav-section {
+    padding: 8px 0;
+  }
+  .nav-section-title {
+    padding: 6px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(88,166,255,0.07); }
+  .nav-item .num {
+    font-size: 10px;
+    background: var(--bg3);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--muted);
+    min-width: 22px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .nav-item.active .num { background: rgba(88,166,255,0.2); color: var(--accent); }
+  /* MAIN */
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 40px 80px;
+    max-width: 900px;
+  }
+  .page-header {
+    padding: 40px 0 30px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .page-header .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(88,166,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.3);
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .page-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .page-header .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  /* TOPIC BLOCKS */
+  .topic-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .topic-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .topic-header:hover { background: var(--bg3); }
+  .topic-header.open { border-bottom-color: var(--border); }
+  .topic-header .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .topic-header h3 {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .topic-header .chevron {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+  .topic-header.open .chevron { transform: rotate(90deg); }
+  .topic-body {
+    display: none;
+    padding: 20px;
+  }
+  .topic-body.open { display: block; }
+  /* CMD BLOCK */
+  .cmd-block {
+    background: var(--cmd-bg);
+    border: 1px solid var(--cmd-border);
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .cmd-header {
+    background: rgba(35,134,54,0.15);
+    padding: 6px 14px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--green);
+    border-bottom: 1px solid rgba(35,134,54,0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cmd-header .copy-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 10px;
+    font-family: inherit;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .cmd-header .copy-btn:hover { color: var(--green); background: rgba(35,134,54,0.2); }
+  .cmd-body {
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #e6edf3;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .cmd-body .prompt { color: var(--green); }
+  .cmd-body .comment { color: var(--muted); font-style: italic; }
+  .cmd-body .flag { color: var(--orange); }
+  .cmd-body .path { color: var(--purple); }
+  .cmd-body .output { color: var(--muted); }
+  /* INFO BOXES */
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    border-left: 3px solid;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .info-box.tip { background: rgba(63,185,80,0.07); border-color: var(--green); }
+  .info-box.warn { background: rgba(210,153,34,0.07); border-color: var(--orange); }
+  .info-box.danger { background: rgba(248,81,73,0.07); border-color: var(--red); }
+  .info-box.info { background: rgba(88,166,255,0.07); border-color: var(--accent); }
+  .info-box .label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .info-box.tip .label { color: var(--green); }
+  .info-box.warn .label { color: var(--orange); }
+  .info-box.danger .label { color: var(--red); }
+  .info-box.info .label { color: var(--accent); }
+  h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 16px 0 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  p { margin: 8px 0; font-size: 14px; }
+  code { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--purple); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
+  .tag.green { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag.orange { background: rgba(210,153,34,0.15); color: var(--orange); }
+  .tag.red { background: rgba(248,81,73,0.15); color: var(--red); }
+  .tag.blue { background: rgba(88,166,255,0.15); color: var(--accent); }
+  /* CHEAT SHEET TABLE */
+  .cmd-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  .cmd-table th { background: var(--bg3); color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+  .cmd-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .cmd-table tr:last-child td { border-bottom: none; }
+  .cmd-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .cmd-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--green); min-width: 200px; }
+  .cmd-table td:nth-child(2) { color: var(--muted); font-size: 12.5px; }
+  /* CHECKLIST */
+  .checklist { list-style: none; margin: 12px 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13.5px; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "□"; font-family: 'JetBrains Mono'; color: var(--muted); font-size: 16px; line-height: 1.3; flex-shrink: 0; }
+  .checklist li.done::before { content: "✓"; color: var(--green); }
+  /* ROADMAP */
+  .roadmap-week { background: var(--bg3); border-radius: 8px; margin: 10px 0; padding: 14px 16px; border-left: 3px solid; }
+  .roadmap-week.w1 { border-color: var(--accent); }
+  .roadmap-week.w2 { border-color: var(--green); }
+  .roadmap-week.w3 { border-color: var(--orange); }
+  .roadmap-week.w4 { border-color: var(--purple); }
+  .roadmap-week h5 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .roadmap-week.w1 h5 { color: var(--accent); }
+  .roadmap-week.w2 h5 { color: var(--green); }
+  .roadmap-week.w3 h5 { color: var(--orange); }
+  .roadmap-week.w4 h5 { color: var(--purple); }
+  .roadmap-week ul { list-style: none; }
+  .roadmap-week ul li { font-size: 12.5px; color: var(--muted); padding: 2px 0; }
+  .roadmap-week ul li::before { content: "→ "; color: inherit; }
+  /* SECTION TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+  .tab-btn.active { background: rgba(88,166,255,0.15); border-color: var(--accent); color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 3px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 3px; transition: width 0.3s; }
+  /* INTERVIEW BOX */
+  .interview-box { background: rgba(188,140,255,0.07); border: 1px solid rgba(188,140,255,0.2); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  .interview-box .ib-title { font-size: 11px; color: var(--purple); text-transform: uppercase; font-family: 'JetBrains Mono'; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .interview-box p { font-size: 13.5px; color: var(--muted); }
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  /* DEPLOY FLOW */
+  .deploy-step { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .deploy-step:last-child { border-bottom: none; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: rgba(88,166,255,0.15); border: 1px solid var(--accent); color: var(--accent); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'JetBrains Mono'; }
+  .step-content h5 { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .step-content p { font-size: 12.5px; color: var(--muted); margin: 0; }
+  /* HIDDEN */
+  .hidden { display: none !important; }
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    #sidebar { display: none; }
+    #main { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <h1>🐧 Linux for Laravel</h1>
+    <p>Hinglish Tutorial — Beginner to Advanced</p>
+  </div>
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="Topic search karo..." oninput="filterNav(this.value)">
+  </div>
+  <div id="nav-list"></div>
+</nav>
+
+<main id="main">
+  <div id="content-area"></div>
+</main>
+
+<script>
+const sections = [
+  { id: "home", title: "Home — Overview", icon: "🏠", color: "#58a6ff", nav: "overview" },
+  { id: "basics", title: "Linux Basics", icon: "📖", color: "#58a6ff", nav: "basics" },
+  { id: "ssh", title: "SSH / PuTTY", icon: "🔐", color: "#3fb950", nav: "basics" },
+  { id: "navigation", title: "File Navigation", icon: "📂", color: "#3fb950", nav: "basics" },
+  { id: "fileops", title: "File Operations", icon: "✂️", color: "#3fb950", nav: "basics" },
+  { id: "viewing", title: "File Viewing & Editing", icon: "👁️", color: "#d29922", nav: "basics" },
+  { id: "permissions", title: "Permissions & Ownership", icon: "🔒", color: "#d29922", nav: "intermediate" },
+  { id: "php_laravel", title: "PHP & Laravel Commands", icon: "⚡", color: "#bc8cff", nav: "intermediate" },
+  { id: "webserver", title: "Web Server Basics", icon: "🌐", color: "#bc8cff", nav: "intermediate" },
+  { id: "logs", title: "Logs & Debugging", icon: "🐛", color: "#f85149", nav: "intermediate" },
+  { id: "database", title: "Database Commands", icon: "🗃️", color: "#f85149", nav: "intermediate" },
+  { id: "backup", title: "Backup & Restore", icon: "💾", color: "#39d353", nav: "advanced" },
+  { id: "upload", title: "Upload / Download", icon: "📤", color: "#39d353", nav: "advanced" },
+  { id: "monitoring", title: "Process Monitoring", icon: "📊", color: "#58a6ff", nav: "advanced" },
+  { id: "cron", title: "Cron & Laravel Scheduler", icon: "⏰", color: "#d29922", nav: "advanced" },
+  { id: "git", title: "Git on Server", icon: "🌿", color: "#3fb950", nav: "advanced" },
+  { id: "security", title: "Security Basics", icon: "🛡️", color: "#f85149", nav: "advanced" },
+  { id: "issues", title: "Common Laravel Issues", icon: "🔧", color: "#bc8cff", nav: "advanced" },
+  { id: "deploy", title: "Deployment Flow", icon: "🚀", color: "#58a6ff", nav: "advanced" },
+  { id: "cheatsheet", title: "Cheat Sheet", icon: "📋", color: "#d29922", nav: "resources" },
+  { id: "roadmap", title: "30-Day Roadmap", icon: "🗺️", color: "#39d353", nav: "resources" },
+  { id: "checklist", title: "Deploy Checklist", icon: "✅", color: "#3fb950", nav: "resources" },
+];
+
+const contentMap = {
+  home: `
+    <div class="page-header">
+      <div class="badge">🐧 Linux for Laravel Developers</div>
+      <h2>Linux Sikhne Ka Sahi Tarika — Hinglish Mein</h2>
+      <p class="subtitle">Ek complete, practical, production-ready tutorial for PHP/Laravel developers. Har topic Hinglish mein, real commands ke saath.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:32px">
+      ${[["18","Topics Covered"],["100+","Real Commands"],["30","Day Roadmap"],["50+","Common Issues"]].map(([n,l])=>`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--accent)">${n}</div><div style="font-size:12px;color:var(--muted);margin-top:4px">${l}</div></div>`).join("")}
+    </div>
+    <div class="info-box tip"><div class="label">💡 Kaise Use Karein</div>Left sidebar mein topics click karo. Har topic mein concept, commands, examples, aur common mistakes sab milegi. <code>cmd</code> blocks pe click karke copy kar sakte ho.</div>
+    <h4>Learning Path</h4>
+    ${[["🟢","Week 1-2","Basics: SSH, Navigation, Files, Permissions"],["🟡","Week 3","Intermediate: PHP, Apache/Nginx, Logs, Database"],["🟠","Week 4","Advanced: Git, Backup, Security, Cron"],["🔴","Ongoing","Real Deployments, Debugging, Optimization"]].map(([e,w,t])=>`<div class="roadmap-week w1" style="margin:8px 0;border-color:#30363d"><h5 style="color:var(--text)">${e} ${w}</h5><p style="font-size:12.5px;color:var(--muted)">${t}</p></div>`).join("")}
+    <div class="info-box info" style="margin-top:24px"><div class="label">🎯 Goal</div>Tutorial khatam hone ke baad tum confidently kisi bhi Linux server pe Laravel project deploy, debug, backup, aur maintain kar sakte ho.</div>
+  `,
+
+  basics: `
+    <div class="page-header">
+      <div class="badge">Topic 1</div>
+      <h2>Linux Basics for Developers</h2>
+      <p class="subtitle">Linux server kya hota hai, Windows se kya fark hai, aur kaise kaam karta hai — ekdum simple language mein.</p>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(88,166,255,0.15)">🖥️</div>
+        <h3>Linux Server Kya Hota Hai?</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body">
+        <p><strong>Simple Explanation:</strong> Linux ek operating system hai — bilkul Windows/Mac ki tarah. Lekin ye servers pe use hota hai kyunki ye <em>free, fast, stable, aur secure</em> hai.</p>
+        <p>Jab tum XAMPP apne Windows PC pe chalate ho, woh ek "fake server" hai. Real duniya mein, tera website ek Linux server pe run karta hai — jo 24/7 internet se connected hota hai.</p>
+        <div class="info-box tip">
+          <div class="label">Real Life Example</div>
+          Soch, tumhara ghar = Windows PC (local). Hotel = Linux server (live). Ghar pe khana banana = local development. Hotel ka kitchen = production server.
+        </div>
+        <h4>Windows XAMPP vs Linux Server</h4>
+        <table class="cmd-table">
+          <tr><th>Feature</th><th>Windows / XAMPP</th><th>Linux Server</th></tr>
+          <tr><td>OS</td><td>Windows</td><td>Ubuntu / CentOS / Debian</td></tr>
+          <tr><td>Access</td><td>Direct / GUI</td><td>Terminal / SSH only</td></tr>
+          <tr><td>Cost</td><td>Free locally</td><td>VPS rent lagta hai</td></tr>
+          <tr><td>GUI</td><td>Full GUI</td><td>Mostly command line</td></tr>
+          <tr><td>Performance</td><td>Slow, testing only</td><td>Fast, production ready</td></tr>
+          <tr><td>File paths</td><td>C:\\xampp\\htdocs</td><td>/var/www/html</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">👤</div>
+        <h3>Root User vs Normal User & sudo</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body">
+        <p><strong>Root User:</strong> Linux ka "God" — poori system ka full control. Har kuch kar sakta hai — files delete, services install, users create.</p>
+        <p><strong>Normal User:</strong> Limited access. Sirf apne folder mein kaam kar sakta hai.</p>
+        <p><strong>sudo:</strong> "Super User DO" — Normal user ko temporary root powers deta hai ek command ke liye.</p>
+        <div class="cmd-block">
+          <div class="cmd-header">Terminal — sudo examples <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="prompt">$</span> whoami                    <span class="comment"># apna username check karo</span>
+<span class="prompt">$</span> sudo whoami               <span class="comment"># root ban ke check karo</span>
+<span class="prompt">$</span> sudo apt install nginx    <span class="comment"># nginx install karo (root power chahiye)</span>
+<span class="prompt">$</span> sudo -i                   <span class="comment"># permanently root ban jao (careful!)</span>
+<span class="prompt">$</span> exit                      <span class="comment"># root se bahar niklo</span></div>
+        </div>
+        <div class="info-box danger">
+          <div class="label">⚠️ Common Mistake</div>
+          Hamesha root user se kaam mat karo! Normal user + sudo use karo. <code>sudo rm -rf /</code> jaise command poora server wipe kar deta hai!
+        </div>
+        <div class="interview-box">
+          <div class="ib-title">Interview Answer</div>
+          <p>"Root user Linux ka superuser hota hai jiske paas full system access hota hai. Production servers pe hum normal users use karte hain with sudo for specific admin tasks — ye principle of least privilege follow karta hai for security."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(188,140,255,0.15)">📁</div>
+        <h3>Important Linux Folders — Developer ke liye</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body">
+        <table class="cmd-table">
+          <tr><th>Folder</th><th>Kya hai?</th></tr>
+          <tr><td>/var/www/html</td><td>Websites yahan rakhi jaati hain (Apache default)</td></tr>
+          <tr><td>/etc</td><td>Saari configuration files (Apache, PHP, MySQL config)</td></tr>
+          <tr><td>/var/log</td><td>Saare logs — Apache, PHP, system errors</td></tr>
+          <tr><td>/home/username</td><td>Normal user ka home folder</td></tr>
+          <tr><td>/tmp</td><td>Temporary files — server restart pe delete ho jaati hain</td></tr>
+          <tr><td>/usr/bin</td><td>Commands jaise php, composer, git</td></tr>
+          <tr><td>/etc/php</td><td>PHP configuration (php.ini)</td></tr>
+          <tr><td>/etc/nginx</td><td>Nginx configuration files</td></tr>
+          <tr><td>/etc/apache2</td><td>Apache configuration files</td></tr>
+        </table>
+        <div class="cmd-block">
+          <div class="cmd-header">Laravel Project Structure on Server <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="path">/var/www/html/myproject/</span>
+├── app/             <span class="comment"># PHP classes, Models, Controllers</span>
+├── bootstrap/cache/ <span class="comment"># ⚠️ writable chahiye (Laravel cache)</span>
+├── config/          <span class="comment"># Configuration files</span>
+├── database/        <span class="comment"># Migrations, seeds</span>
+├── public/          <span class="comment"># ← Web server yahan point karta hai!</span>
+│   └── index.php    <span class="comment"># Entry point</span>
+├── resources/       <span class="comment"># Blade views, JS, CSS</span>
+├── routes/          <span class="comment"># web.php, api.php</span>
+├── storage/         <span class="comment"># ⚠️ writable chahiye (logs, uploads)</span>
+├── vendor/          <span class="comment"># Composer packages (git ignore karo)</span>
+└── .env             <span class="comment"># ⚠️ Never publicly expose!</span></div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  ssh: `
+    <div class="page-header">
+      <div class="badge">Topic 2</div>
+      <h2>SSH / PuTTY — Server se Connect Karna</h2>
+      <p class="subtitle">PuTTY se server connect karna, SSH kya hai, aur safely kaise kaam karna hai.</p>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">🔌</div>
+        <h3>SSH Kya Hai?</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <p><strong>SSH = Secure Shell</strong> — Ek encrypted tunnel jiske through tum apne laptop se remote Linux server ko control kar sakte ho. PuTTY ek Windows software hai jo SSH connection banata hai.</p>
+        <div class="info-box info">
+          <div class="label">Real Life Example</div>
+          SSH = CCTV camera ka remote control. Tum ghar baithe apne server ki screen dekh aur control kar sakte ho — securely.
+        </div>
+        <h4>PuTTY se Connect Karna</h4>
+        <table class="cmd-table">
+          <tr><th>Field</th><th>Value</th><th>Explanation</th></tr>
+          <tr><td>Host Name</td><td>192.168.1.100 or domain.com</td><td>Server ka IP ya domain</td></tr>
+          <tr><td>Port</td><td>22 (default)</td><td>SSH default port</td></tr>
+          <tr><td>Connection Type</td><td>SSH</td><td>Always SSH select karo</td></tr>
+          <tr><td>Username</td><td>ubuntu / root / deploy</td><td>Server ka username</td></tr>
+          <tr><td>Auth</td><td>Password ya Private Key (.ppk)</td><td>Hosting provider deta hai</td></tr>
+        </table>
+        <div class="cmd-block">
+          <div class="cmd-header">Terminal se SSH (Mac/Linux/Windows Terminal) <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Password se connect</span>
+<span class="prompt">$</span> ssh username@192.168.1.100
+
+<span class="comment"># Private key se connect</span>
+<span class="prompt">$</span> ssh -i /path/to/key.pem username@192.168.1.100
+
+<span class="comment"># Custom port pe connect</span>
+<span class="prompt">$</span> ssh -p 2222 username@server.com
+
+<span class="comment"># Safely exit karna</span>
+<span class="prompt">$</span> exit</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-block">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(248,81,73,0.15)">🔐</div>
+        <h3>SSH Security Basics</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body">
+        <div class="cmd-block">
+          <div class="cmd-header">SSH Security Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># SSH config file edit karo (security settings)</span>
+<span class="prompt">$</span> sudo nano /etc/ssh/sshd_config
+
+<span class="comment"># Recommended settings (sshd_config mein):</span>
+PermitRootLogin no          <span class="comment"># root login band karo</span>
+PasswordAuthentication no   <span class="comment"># password login band, key only</span>
+Port 2222                   <span class="comment"># default port change karo</span>
+
+<span class="comment"># SSH service restart karo changes apply hone ke liye</span>
+<span class="prompt">$</span> sudo systemctl restart sshd
+
+<span class="comment"># Active SSH connections dekho</span>
+<span class="prompt">$</span> who
+<span class="prompt">$</span> last</div>
+        </div>
+        <div class="info-box warn">
+          <div class="label">⚠️ Important</div>
+          SSH config change karne ke baad ek aur SSH session open rakhna — agar kuch galat ho gaya to locked out mat ho jao!
+        </div>
+        <div class="interview-box">
+          <div class="ib-title">Interview Answer</div>
+          <p>"SSH ek cryptographic protocol hai jo client-server communication ko encrypt karta hai. Port 22 pe kaam karta hai. Key-based authentication password se zyada secure hoti hai kyunki private key kabhi network pe nahi jaati."</p>
+        </div>
+      </div>
+    </div>
+  `,
+
+  navigation: `
+    <div class="page-header">
+      <div class="badge">Topic 3</div>
+      <h2>File & Folder Navigation</h2>
+      <p class="subtitle">Server pe navigate karna — pwd, ls, cd aur paths samajhna.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">🧭</div>
+        <h3>pwd, ls, cd — Navigation Commands</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">Navigation Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># pwd — Print Working Directory (main kahan hun?)</span>
+<span class="prompt">$</span> pwd
+<span class="output">/var/www/html/myproject</span>
+
+<span class="comment"># ls — List files aur folders</span>
+<span class="prompt">$</span> ls                   <span class="comment"># basic list</span>
+<span class="prompt">$</span> ls <span class="flag">-la</span>               <span class="comment"># detailed list with hidden files</span>
+<span class="prompt">$</span> ls <span class="flag">-lh</span>               <span class="comment"># human readable sizes</span>
+<span class="prompt">$</span> ls <span class="flag">-lt</span>               <span class="comment"># sort by time (newest first)</span>
+
+<span class="comment"># cd — Change Directory</span>
+<span class="prompt">$</span> cd /var/www/html      <span class="comment"># absolute path pe jao</span>
+<span class="prompt">$</span> cd myproject          <span class="comment"># relative path se jao</span>
+<span class="prompt">$</span> cd ..                 <span class="comment"># ek folder upar jao</span>
+<span class="prompt">$</span> cd ../..              <span class="comment"># do folder upar jao</span>
+<span class="prompt">$</span> cd ~                  <span class="comment"># home directory pe jao</span>
+<span class="prompt">$</span> cd -                  <span class="comment"># previous directory pe wapas jao</span></div>
+        </div>
+        <h4>Absolute vs Relative Path</h4>
+        <table class="cmd-table">
+          <tr><th>Type</th><th>Example</th><th>Kab use karein</th></tr>
+          <tr><td>Absolute</td><td>/var/www/html/project</td><td>Kisi bhi location se — / se shuru</td></tr>
+          <tr><td>Relative</td><td>../project aur ./file.php</td><td>Current folder se relative</td></tr>
+        </table>
+        <div class="info-box tip">
+          <div class="label">Pro Tip</div>
+          <code>Tab</code> key dabao — command auto-complete ho jaata hai! <code>cd /var/www/h[TAB]</code> → automatically complete ho jaata hai.
+        </div>
+      </div>
+    </div>
+  `,
+
+  fileops: `
+    <div class="page-header">
+      <div class="badge">Topic 4</div>
+      <h2>File & Folder Operations</h2>
+      <p class="subtitle">mkdir, touch, cp, mv, rm — files aur folders ko create, move, aur delete karna.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(210,153,34,0.15)">✂️</div>
+        <h3>Create, Copy, Move, Delete</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">File Operations <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># mkdir — Folder banao</span>
+<span class="prompt">$</span> mkdir myproject
+<span class="prompt">$</span> mkdir <span class="flag">-p</span> /var/www/html/myproject/public   <span class="comment"># nested folders ek saath</span>
+
+<span class="comment"># touch — Empty file banao</span>
+<span class="prompt">$</span> touch .env
+<span class="prompt">$</span> touch index.php
+
+<span class="comment"># cp — Copy karo</span>
+<span class="prompt">$</span> cp file.php file_backup.php           <span class="comment"># file copy</span>
+<span class="prompt">$</span> cp <span class="flag">-r</span> oldfolder/ newfolder/          <span class="comment"># folder copy (-r = recursive)</span>
+
+<span class="comment"># mv — Move ya rename karo</span>
+<span class="prompt">$</span> mv oldname.php newname.php            <span class="comment"># rename</span>
+<span class="prompt">$</span> mv myproject/ /var/www/html/          <span class="comment"># move</span>
+
+<span class="comment"># rm — Delete karo</span>
+<span class="prompt">$</span> rm file.php                            <span class="comment"># single file delete</span>
+<span class="prompt">$</span> rm <span class="flag">-r</span> oldfolder/                     <span class="comment"># folder delete (confirm maangta hai)</span>
+<span class="prompt">$</span> rm <span class="flag">-rf</span> oldfolder/                    <span class="comment"># force delete — NO WARNING!</span></div>
+        </div>
+        <div class="info-box danger">
+          <div class="label">☠️ Danger — rm -rf</div>
+          <code>rm -rf</code> koi bhi file/folder bina warning ke permanently delete kar deta hai. Koi Recycle Bin nahi! <code>rm -rf /var/www/html/</code> jaise bhool se mat chalao!
+        </div>
+        <h4>Safe Delete Practice</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">Safe Deletion <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Delete se pehle confirm karo — kya delete ho raha hai?</span>
+<span class="prompt">$</span> ls /var/www/html/old_project/
+
+<span class="comment"># Pehle backup le lo</span>
+<span class="prompt">$</span> cp <span class="flag">-r</span> old_project/ old_project_backup/
+
+<span class="comment"># Ab delete karo</span>
+<span class="prompt">$</span> rm <span class="flag">-rf</span> old_project/</div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  viewing: `
+    <div class="page-header">
+      <div class="badge">Topic 5</div>
+      <h2>File Viewing & Editing</h2>
+      <p class="subtitle">cat, less, tail, nano, vim — server pe files padhna aur edit karna.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(88,166,255,0.15)">👁️</div>
+        <h3>File Viewing Commands</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">Viewing Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># cat — Poori file print karo (short files ke liye)</span>
+<span class="prompt">$</span> cat .env
+<span class="prompt">$</span> cat /etc/php/8.1/apache2/php.ini
+
+<span class="comment"># less — Scrollable viewer (q = quit, /search = find)</span>
+<span class="prompt">$</span> less /var/log/apache2/error.log
+
+<span class="comment"># head — Pehli N lines dekho</span>
+<span class="prompt">$</span> head <span class="flag">-20</span> storage/logs/laravel.log
+
+<span class="comment"># tail — Aakhiri N lines dekho</span>
+<span class="prompt">$</span> tail <span class="flag">-50</span> storage/logs/laravel.log
+
+<span class="comment"># tail -f — LIVE LOG WATCHING (most useful!)</span>
+<span class="prompt">$</span> tail <span class="flag">-f</span> storage/logs/laravel.log
+<span class="prompt">$</span> tail <span class="flag">-f</span> /var/log/nginx/error.log
+
+<span class="comment"># grep — Search inside files</span>
+<span class="prompt">$</span> grep "ERROR" storage/logs/laravel.log
+<span class="prompt">$</span> grep <span class="flag">-n</span> "exception" storage/logs/laravel.log   <span class="comment"># line numbers ke saath</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">✏️</div>
+        <h3>nano Editor — Beginners ke liye</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body">
+        <div class="cmd-block">
+          <div class="cmd-header">nano Usage <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># nano se file open karo ya create karo</span>
+<span class="prompt">$</span> nano .env
+<span class="prompt">$</span> sudo nano /etc/nginx/sites-available/mysite.conf
+
+<span class="comment"># nano ke andar keyboard shortcuts:</span>
+Ctrl+O    <span class="comment"># Save (write Out)</span>
+Enter     <span class="comment"># Save confirm karo</span>
+Ctrl+X    <span class="comment"># Exit</span>
+Ctrl+W    <span class="comment"># Search (Where is)</span>
+Ctrl+K    <span class="comment"># Line cut karo</span>
+Ctrl+U    <span class="comment"># Paste karo</span>
+Ctrl+G    <span class="comment"># Help</span></div>
+        </div>
+        <div class="info-box tip">
+          <div class="label">💡 Tip</div>
+          Beginners ke liye <strong>nano</strong> use karo. vim powerful hai lekin pehle nano seekho. vim se bahar nikalna hai? <code>:q!</code> type karo aur Enter dabaao!
+        </div>
+        <h4>vim Survival Commands (Emergency ke liye)</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">vim Basics <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body">i         <span class="comment"># Insert mode (typing start karo)</span>
+Esc       <span class="comment"># Normal mode wapas jao</span>
+:w        <span class="comment"># Save karo</span>
+:q        <span class="comment"># Quit (only if saved)</span>
+:q!       <span class="comment"># Force quit WITHOUT saving</span>
+:wq       <span class="comment"># Save AND quit</span>
+:wq!      <span class="comment"># Force save and quit</span>
+dd        <span class="comment"># Current line delete karo</span>
+/word     <span class="comment"># Search karo</span></div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  permissions: `
+    <div class="page-header">
+      <div class="badge">Topic 6</div>
+      <h2>Permissions & Ownership</h2>
+      <p class="subtitle">chmod, chown, aur Laravel permission setup — ye Laravel developers ke liye sabse important topic hai!</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(210,153,34,0.15)">🔒</div>
+        <h3>chmod — File Permissions Samajhna</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <p>Linux mein har file ke teen types ke permissions hote hain:</p>
+        <table class="cmd-table">
+          <tr><th>Permission</th><th>Number</th><th>Kya allow karta hai</th></tr>
+          <tr><td>read (r)</td><td>4</td><td>File padhna / folder contents dekhna</td></tr>
+          <tr><td>write (w)</td><td>2</td><td>File likhna / modify karna</td></tr>
+          <tr><td>execute (x)</td><td>1</td><td>File run karna / folder enter karna</td></tr>
+        </table>
+        <p>Aur teen groups ke liye:</p>
+        <table class="cmd-table">
+          <tr><th>Group</th><th>Kaun?</th></tr>
+          <tr><td>Owner (u)</td><td>File ka malik</td></tr>
+          <tr><td>Group (g)</td><td>Ek group ke log (e.g., www-data)</td></tr>
+          <tr><td>Others (o)</td><td>Baaki sab</td></tr>
+        </table>
+        <h4>Common Permission Values</h4>
+        <table class="cmd-table">
+          <tr><th>Value</th><th>Meaning</th><th>Use Case</th></tr>
+          <tr><td>755</td><td>rwxr-xr-x</td><td>Folders, executables</td></tr>
+          <tr><td>644</td><td>rw-r--r--</td><td>Normal files (.php, .html)</td></tr>
+          <tr><td>775</td><td>rwxrwxr-x</td><td>Shared group folders (storage)</td></tr>
+          <tr><td>777</td><td>rwxrwxrwx</td><td>⚠️ Everyone can do everything — DANGEROUS!</td></tr>
+        </table>
+        <div class="cmd-block">
+          <div class="cmd-header">chmod Examples <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Single file permission set karo</span>
+<span class="prompt">$</span> chmod 644 config.php
+
+<span class="comment"># Folder aur uske andar sab kuch (-R = recursive)</span>
+<span class="prompt">$</span> chmod <span class="flag">-R</span> 755 /var/www/html/myproject
+
+<span class="comment"># Laravel ke liye — storage aur cache writable chahiye</span>
+<span class="prompt">$</span> chmod <span class="flag">-R</span> 775 storage/
+<span class="prompt">$</span> chmod <span class="flag">-R</span> 775 bootstrap/cache/</div>
+        </div>
+        <div class="info-box danger">
+          <div class="label">☠️ 777 Dangerous Kyun Hai?</div>
+          777 matlab duniya mein <em>koi bhi</em> file likh, padhh, aur run kar sakta hai — including hackers! Kabhi bhi production pe 777 mat karo. 775 ya 755 use karo.
+        </div>
+      </div>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">👥</div>
+        <h3>chown — Ownership & www-data</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body">
+        <p><strong>www-data</strong> = Apache/Nginx ka user. Jab web server koi file access karta hai, woh <code>www-data</code> user ke naam se karta hai. Laravel ko is user se read/write access chahiye.</p>
+        <div class="cmd-block">
+          <div class="cmd-header">Laravel Permission Setup — Complete <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Project ka owner change karo</span>
+<span class="prompt">$</span> sudo chown <span class="flag">-R</span> www-data:www-data /var/www/html/myproject
+
+<span class="comment"># Ya apne user ko www-data group mein add karo</span>
+<span class="prompt">$</span> sudo usermod <span class="flag">-aG</span> www-data ubuntu
+
+<span class="comment"># Complete Laravel permission setup:</span>
+<span class="prompt">$</span> cd /var/www/html/myproject
+<span class="prompt">$</span> sudo chown <span class="flag">-R</span> $USER:www-data .
+<span class="prompt">$</span> find . <span class="flag">-type</span> f -exec chmod 664 {} \;
+<span class="prompt">$</span> find . <span class="flag">-type</span> d -exec chmod 775 {} \;
+<span class="prompt">$</span> chmod <span class="flag">-R</span> 775 storage bootstrap/cache
+
+<span class="comment"># .env file sirf owner ko readable hona chahiye</span>
+<span class="prompt">$</span> chmod 600 .env</div>
+        </div>
+        <div class="interview-box">
+          <div class="ib-title">Interview Answer</div>
+          <p>"Laravel mein storage/ aur bootstrap/cache/ directories ko web server user (www-data) ke liye writable hona chahiye kyunki Laravel wahan logs, cache files, aur uploaded files store karta hai. Hum 775 use karte hain instead of 777 for security — group can write, but others cannot."</p>
+        </div>
+      </div>
+    </div>
+  `,
+
+  php_laravel: `
+    <div class="page-header">
+      <div class="badge">Topic 7</div>
+      <h2>PHP & Laravel Server Commands</h2>
+      <p class="subtitle">Composer, artisan, aur PHP server management — production deployment ke liye must-know commands.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(188,140,255,0.15)">⚡</div>
+        <h3>Essential Laravel Artisan Commands</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">PHP & Composer <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># PHP version check</span>
+<span class="prompt">$</span> php <span class="flag">-v</span>
+<span class="output">PHP 8.2.5 (cli) ...</span>
+
+<span class="comment"># Composer install (vendor/ folder banana)</span>
+<span class="prompt">$</span> composer install <span class="flag">--no-dev --optimize-autoloader</span>
+
+<span class="comment"># Composer update (packages update karo)</span>
+<span class="prompt">$</span> composer update
+
+<span class="comment"># Composer memory error fix</span>
+<span class="prompt">$</span> COMPOSER_MEMORY_LIMIT=-1 composer install</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Laravel Artisan Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Database migrations run karo</span>
+<span class="prompt">$</span> php artisan migrate
+<span class="prompt">$</span> php artisan migrate <span class="flag">--force</span>    <span class="comment"># production pe (confirmation skip)</span>
+
+<span class="comment"># Cache management</span>
+<span class="prompt">$</span> php artisan cache:clear          <span class="comment"># application cache</span>
+<span class="prompt">$</span> php artisan config:clear         <span class="comment"># config cache clear</span>
+<span class="prompt">$</span> php artisan config:cache         <span class="comment"># config cache rebuild (fast)</span>
+<span class="prompt">$</span> php artisan route:clear          <span class="comment"># route cache clear</span>
+<span class="prompt">$</span> php artisan route:cache          <span class="comment"># route cache rebuild</span>
+<span class="prompt">$</span> php artisan view:clear           <span class="comment"># compiled views clear</span>
+
+<span class="comment"># Storage link banana (public/storage → storage/app/public)</span>
+<span class="prompt">$</span> php artisan storage:link
+
+<span class="comment"># Application key generate karo (fresh install pe)</span>
+<span class="prompt">$</span> php artisan key:generate
+
+<span class="comment"># All clear at once</span>
+<span class="prompt">$</span> php artisan optimize:clear
+
+<span class="comment"># Optimize for production</span>
+<span class="prompt">$</span> php artisan optimize</div>
+        </div>
+        <div class="info-box tip">
+          <div class="label">💡 Deployment Order</div>
+          git pull → composer install → php artisan migrate --force → php artisan config:cache → php artisan route:cache → php artisan view:cache → permissions fix
+        </div>
+      </div>
+    </div>
+  `,
+
+  webserver: `
+    <div class="page-header">
+      <div class="badge">Topic 8</div>
+      <h2>Web Server Basics</h2>
+      <p class="subtitle">Apache vs Nginx, virtual hosts, aur Laravel ke liye document root setup.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(88,166,255,0.15)">🌐</div>
+        <h3>Apache vs Nginx</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <table class="cmd-table">
+          <tr><th>Feature</th><th>Apache</th><th>Nginx</th></tr>
+          <tr><td>Config style</td><td>.htaccess support</td><td>Centralized config</td></tr>
+          <tr><td>Performance</td><td>Good</td><td>Excellent (static files)</td></tr>
+          <tr><td>Laravel support</td><td>✅ (mod_rewrite)</td><td>✅ (try_files)</td></tr>
+          <tr><td>Popular on</td><td>Shared hosting</td><td>VPS / Cloud</td></tr>
+        </table>
+        <div class="cmd-block">
+          <div class="cmd-header">Apache Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Apache start/stop/restart</span>
+<span class="prompt">$</span> sudo systemctl start apache2
+<span class="prompt">$</span> sudo systemctl stop apache2
+<span class="prompt">$</span> sudo systemctl restart apache2
+<span class="prompt">$</span> sudo systemctl reload apache2    <span class="comment"># Downtime ke bina reload</span>
+<span class="prompt">$</span> sudo systemctl status apache2    <span class="comment"># Status check</span>
+
+<span class="comment"># mod_rewrite enable karo (Laravel ke liye zaruri)</span>
+<span class="prompt">$</span> sudo a2enmod rewrite
+<span class="prompt">$</span> sudo systemctl restart apache2</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Nginx Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Nginx commands</span>
+<span class="prompt">$</span> sudo systemctl start nginx
+<span class="prompt">$</span> sudo systemctl restart nginx
+<span class="prompt">$</span> sudo systemctl reload nginx
+<span class="prompt">$</span> sudo systemctl status nginx
+<span class="prompt">$</span> sudo nginx <span class="flag">-t</span>               <span class="comment"># Config test karo pehle!</span></div>
+        </div>
+        <h4>Laravel Virtual Host — Nginx Config</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">/etc/nginx/sites-available/mylaravel.conf <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body">server {
+    listen 80;
+    server_name mysite.com www.mysite.com;
+    <span class="path">root /var/www/html/myproject/public;</span>  <span class="comment"># public/ folder!</span>
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    index index.php index.html;
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Site Enable & Restart <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Site enable karo</span>
+<span class="prompt">$</span> sudo ln -s /etc/nginx/sites-available/mylaravel.conf /etc/nginx/sites-enabled/
+
+<span class="comment"># Config test karo</span>
+<span class="prompt">$</span> sudo nginx <span class="flag">-t</span>
+
+<span class="comment"># Reload</span>
+<span class="prompt">$</span> sudo systemctl reload nginx</div>
+        </div>
+        <div class="info-box warn">
+          <div class="label">⚠️ Common Mistake</div>
+          Laravel ka root <code>/var/www/html/myproject</code> nahi, <code>/var/www/html/myproject/<strong>public</strong></code> hona chahiye! Warna .env aur sensitive files expose ho jaati hain.
+        </div>
+      </div>
+    </div>
+  `,
+
+  logs: `
+    <div class="page-header">
+      <div class="badge">Topic 9</div>
+      <h2>Logs & Debugging</h2>
+      <p class="subtitle">500 error, permission denied, blank page — inhe diagnose karna seekho.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(248,81,73,0.15)">🐛</div>
+        <h3>Log Files aur Live Monitoring</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">Important Log Files <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Laravel logs — SABSE PEHLE YE DEKHO!</span>
+<span class="prompt">$</span> tail <span class="flag">-f</span> storage/logs/laravel.log
+<span class="prompt">$</span> tail <span class="flag">-100</span> storage/logs/laravel.log | grep ERROR
+
+<span class="comment"># Apache error logs</span>
+<span class="prompt">$</span> sudo tail <span class="flag">-f</span> /var/log/apache2/error.log
+
+<span class="comment"># Nginx error logs</span>
+<span class="prompt">$</span> sudo tail <span class="flag">-f</span> /var/log/nginx/error.log
+
+<span class="comment"># PHP error logs</span>
+<span class="prompt">$</span> sudo tail <span class="flag">-f</span> /var/log/php8.2-fpm.log</div>
+        </div>
+        <h4>500 Error Debug Kaise Karein?</h4>
+        <ol style="padding-left:20px;font-size:13.5px;color:var(--muted);line-height:2">
+          <li>Laravel log check karo: <code>tail -100 storage/logs/laravel.log</code></li>
+          <li>.env mein <code>APP_DEBUG=true</code> temporarily set karo</li>
+          <li>Web server error log check karo</li>
+          <li>Permissions check karo: <code>ls -la storage/</code></li>
+          <li>PHP syntax check: <code>php -l filename.php</code></li>
+        </ol>
+        <h4>Permission Denied Debug</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">Permission Fix <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Current permissions check karo</span>
+<span class="prompt">$</span> ls <span class="flag">-la</span> storage/
+<span class="prompt">$</span> ls <span class="flag">-la</span> bootstrap/cache/
+
+<span class="comment"># Fix karo</span>
+<span class="prompt">$</span> sudo chmod <span class="flag">-R</span> 775 storage/ bootstrap/cache/
+<span class="prompt">$</span> sudo chown <span class="flag">-R</span> www-data:www-data storage/ bootstrap/cache/</div>
+        </div>
+        <div class="info-box tip">
+          <div class="label">💡 Debug Workflow</div>
+          1️⃣ Laravel log → 2️⃣ Web server log → 3️⃣ PHP log → 4️⃣ APP_DEBUG=true → 5️⃣ Permissions check
+        </div>
+      </div>
+    </div>
+  `,
+
+  database: `
+    <div class="page-header">
+      <div class="badge">Topic 10</div>
+      <h2>Database Commands</h2>
+      <p class="subtitle">MySQL/MariaDB login, backup, restore, aur Laravel .env DB issues.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(248,81,73,0.15)">🗃️</div>
+        <h3>MySQL Commands</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">MySQL Access & Management <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># MySQL mein login karo</span>
+<span class="prompt">$</span> mysql <span class="flag">-u</span> root <span class="flag">-p</span>
+<span class="prompt">$</span> mysql <span class="flag">-u</span> myuser <span class="flag">-p</span> mydatabase
+
+<span class="comment"># MySQL ke andar commands:</span>
+mysql> SHOW DATABASES;
+mysql> USE mylaraveldb;
+mysql> SHOW TABLES;
+mysql> DESCRIBE users;
+mysql> SELECT COUNT(*) FROM users;
+mysql> EXIT;
+
+<span class="comment"># Database banao</span>
+mysql> CREATE DATABASE mylaraveldb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+<span class="comment"># User banao aur permissions do</span>
+mysql> CREATE USER 'laraveluser'@'localhost' IDENTIFIED BY 'password123';
+mysql> GRANT ALL PRIVILEGES ON mylaraveldb.* TO 'laraveluser'@'localhost';
+mysql> FLUSH PRIVILEGES;</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Import / Export Database <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># SQL file import karo (restore)</span>
+<span class="prompt">$</span> mysql <span class="flag">-u</span> root <span class="flag">-p</span> mydb < backup.sql
+
+<span class="comment"># Database export karo (backup)</span>
+<span class="prompt">$</span> mysqldump <span class="flag">-u</span> root <span class="flag">-p</span> mydb > backup.sql
+<span class="prompt">$</span> mysqldump <span class="flag">-u</span> root <span class="flag">-p</span> mydb | gzip > backup_$(date +%Y%m%d).sql.gz
+
+<span class="comment"># Database size check karo</span>
+<span class="prompt">$</span> mysql <span class="flag">-u</span> root <span class="flag">-p</span> -e "SELECT table_schema AS 'DB', ROUND(SUM(data_length+index_length)/1024/1024,2) AS 'Size (MB)' FROM information_schema.tables GROUP BY table_schema;"</div>
+        </div>
+        <h4>Common Laravel .env DB Issues</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">.env Database Config <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body">DB_CONNECTION=mysql
+DB_HOST=127.0.0.1         <span class="comment"># localhost nahi, 127.0.0.1 use karo</span>
+DB_PORT=3306
+DB_DATABASE=mylaraveldb
+DB_USERNAME=laraveluser
+DB_PASSWORD=password123
+
+<span class="comment"># Config change ke baad ZARURI hai:</span>
+<span class="prompt">$</span> php artisan config:clear
+<span class="prompt">$</span> php artisan config:cache</div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  backup: `
+    <div class="page-header">
+      <div class="badge">Topic 11</div>
+      <h2>Backup & Restore</h2>
+      <p class="subtitle">Zip, tar.gz, database backup aur full Laravel project restore karna.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">💾</div>
+        <h3>zip vs tar.gz — Difference</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <table class="cmd-table">
+          <tr><th>Format</th><th>Speed</th><th>Size</th><th>Use Case</th></tr>
+          <tr><td>zip</td><td>Fast</td><td>Slightly bigger</td><td>Windows compatible, sharing</td></tr>
+          <tr><td>tar.gz</td><td>Slower</td><td>Smaller</td><td>Linux servers, production backups</td></tr>
+        </table>
+        <div class="cmd-block">
+          <div class="cmd-header">Backup Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># zip backup</span>
+<span class="prompt">$</span> zip <span class="flag">-r</span> myproject_backup.zip /var/www/html/myproject/
+
+<span class="comment"># tar.gz backup (recommended — smaller size)</span>
+<span class="prompt">$</span> tar <span class="flag">-czf</span> myproject_backup.tar.gz /var/www/html/myproject/
+
+<span class="comment"># Vendor folder exclude karo (save space)</span>
+<span class="prompt">$</span> tar <span class="flag">-czf</span> backup.tar.gz <span class="flag">--exclude</span>=vendor <span class="flag">--exclude</span>=.git /var/www/html/myproject/
+
+<span class="comment"># Database backup bhi saath mein</span>
+<span class="prompt">$</span> mysqldump <span class="flag">-u</span> root <span class="flag">-p</span> mydb > db_backup.sql
+
+<span class="comment"># Full backup script (project + DB)</span>
+<span class="prompt">$</span> BACKUP_DIR=/home/ubuntu/backups
+<span class="prompt">$</span> mkdir -p $BACKUP_DIR
+<span class="prompt">$</span> tar -czf $BACKUP_DIR/project_$(date +%Y%m%d_%H%M).tar.gz --exclude=vendor /var/www/html/myproject/
+<span class="prompt">$</span> mysqldump -u root -pYOURPASS mydb > $BACKUP_DIR/db_$(date +%Y%m%d_%H%M).sql</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Extract / Restore <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># zip extract karo</span>
+<span class="prompt">$</span> unzip myproject_backup.zip <span class="flag">-d</span> /var/www/html/
+
+<span class="comment"># tar.gz extract karo</span>
+<span class="prompt">$</span> tar <span class="flag">-xzf</span> myproject_backup.tar.gz <span class="flag">-C</span> /var/www/html/
+
+<span class="comment"># Database restore karo</span>
+<span class="prompt">$</span> mysql <span class="flag">-u</span> root <span class="flag">-p</span> mydb < db_backup.sql</div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  upload: `
+    <div class="page-header">
+      <div class="badge">Topic 12</div>
+      <h2>Upload & Download Files</h2>
+      <p class="subtitle">scp, rsync, wget, aur FileZilla — files server pe push/pull karna.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(57,211,83,0.15)">📤</div>
+        <h3>scp, rsync, wget</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">File Transfer Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># scp — Secure Copy (local → server)</span>
+<span class="prompt">$</span> scp localfile.zip username@server:/var/www/html/
+
+<span class="comment"># scp — server → local (download)</span>
+<span class="prompt">$</span> scp username@server:/var/www/html/backup.zip ./
+
+<span class="comment"># scp folder copy (-r recursive)</span>
+<span class="prompt">$</span> scp <span class="flag">-r</span> myproject/ username@server:/var/www/html/
+
+<span class="comment"># rsync — Incremental sync (only changed files)</span>
+<span class="prompt">$</span> rsync <span class="flag">-avz</span> myproject/ username@server:/var/www/html/myproject/
+
+<span class="comment"># rsync with exclude</span>
+<span class="prompt">$</span> rsync <span class="flag">-avz --exclude</span>=vendor <span class="flag">--exclude</span>=.env myproject/ username@server:/var/www/html/
+
+<span class="comment"># wget — Internet se file download karo</span>
+<span class="prompt">$</span> wget https://example.com/file.zip
+
+<span class="comment"># curl — API calls ya download</span>
+<span class="prompt">$</span> curl <span class="flag">-O</span> https://example.com/file.zip</div>
+        </div>
+        <div class="info-box info">
+          <div class="label">FileZilla / SFTP</div>
+          FileZilla mein: Protocol = SFTP, Host = server IP, Port = 22, Username + Password. Drag-and-drop se files transfer kar sakte ho GUI mein.
+        </div>
+      </div>
+    </div>
+  `,
+
+  monitoring: `
+    <div class="page-header">
+      <div class="badge">Topic 13</div>
+      <h2>Process & Resource Monitoring</h2>
+      <p class="subtitle">top, htop, df, du, free — server health check karna aur problems diagnose karna.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(88,166,255,0.15)">📊</div>
+        <h3>Server Health Check Commands</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">Monitoring Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># top — Live processes (q = quit)</span>
+<span class="prompt">$</span> top
+
+<span class="comment"># htop — Better version of top (install: sudo apt install htop)</span>
+<span class="prompt">$</span> htop
+
+<span class="comment"># df — Disk space check karo</span>
+<span class="prompt">$</span> df <span class="flag">-h</span>
+<span class="output">Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        50G   30G   18G  63% /</span>
+
+<span class="comment"># du — Folder size check karo</span>
+<span class="prompt">$</span> du <span class="flag">-sh</span> /var/www/html/
+<span class="prompt">$</span> du <span class="flag">-sh</span> *               <span class="comment"># sab folders ki size</span>
+
+<span class="comment"># free — Memory/RAM check karo</span>
+<span class="prompt">$</span> free <span class="flag">-m</span>
+<span class="output">              total        used        free
+Mem:           2048        1200         848</span>
+
+<span class="comment"># ps aux — Running processes dekho</span>
+<span class="prompt">$</span> ps aux | grep php
+<span class="prompt">$</span> ps aux | grep nginx
+
+<span class="comment"># Process kill karo</span>
+<span class="prompt">$</span> kill 1234               <span class="comment"># PID se kill karo</span>
+<span class="prompt">$</span> kill <span class="flag">-9</span> 1234            <span class="comment"># Force kill</span>
+<span class="prompt">$</span> pkill php               <span class="comment"># Name se kill karo</span></div>
+        </div>
+        <h4>Disk Full Issue Fix</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">Disk Space Reclaim <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Kya occupy kar raha hai?</span>
+<span class="prompt">$</span> du <span class="flag">-sh</span> /var/www/html/*
+<span class="prompt">$</span> du <span class="flag">-sh</span> /var/log/*
+
+<span class="comment"># Old logs clean karo</span>
+<span class="prompt">$</span> sudo truncate <span class="flag">-s</span> 0 /var/log/apache2/access.log
+<span class="prompt">$</span> sudo journalctl <span class="flag">--vacuum-time</span>=7d    <span class="comment"># 7 din purani logs delete</span>
+
+<span class="comment"># Laravel logs clean karo</span>
+<span class="prompt">$</span> php artisan log:clear   <span class="comment"># ya manually:</span>
+<span class="prompt">$</span> echo "" > storage/logs/laravel.log</div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  cron: `
+    <div class="page-header">
+      <div class="badge">Topic 14</div>
+      <h2>Cron Jobs & Laravel Scheduler</h2>
+      <p class="subtitle">Automated tasks, queue workers, aur Supervisor setup for production.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(210,153,34,0.15)">⏰</div>
+        <h3>Cron Job Setup</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">Crontab Syntax <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Crontab format:</span>
+<span class="comment"># MIN HOUR DAY MONTH WEEKDAY COMMAND</span>
+<span class="comment"># *   *    *   *     *       command</span>
+
+* * * * *    <span class="comment"># Har minute</span>
+0 * * * *    <span class="comment"># Har ghante mein ek baar (minute=0)</span>
+0 0 * * *    <span class="comment"># Har roz midnight</span>
+0 0 * * 0    <span class="comment"># Har Sunday</span>
+
+<span class="comment"># Crontab edit karo</span>
+<span class="prompt">$</span> crontab <span class="flag">-e</span>
+
+<span class="comment"># Laravel Scheduler — har minute run karo</span>
+* * * * * cd /var/www/html/myproject && php artisan schedule:run >> /dev/null 2>&1
+
+<span class="comment"># Current cron jobs dekho</span>
+<span class="prompt">$</span> crontab <span class="flag">-l</span></div>
+        </div>
+        <h4>Laravel Queue Worker</h4>
+        <div class="cmd-block">
+          <div class="cmd-header">Queue Worker & Supervisor <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Queue worker run karo (manually test karne ke liye)</span>
+<span class="prompt">$</span> php artisan queue:work
+
+<span class="comment"># Supervisor install karo (queue ko background mein rakhne ke liye)</span>
+<span class="prompt">$</span> sudo apt install supervisor
+
+<span class="comment"># Supervisor config file banao</span>
+<span class="prompt">$</span> sudo nano /etc/supervisor/conf.d/laravel-worker.conf</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Supervisor Config File <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body">[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/html/myproject/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=2
+redirect_stderr=true
+stdout_logfile=/var/www/html/myproject/storage/logs/worker.log</div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Supervisor Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="prompt">$</span> sudo supervisorctl reread
+<span class="prompt">$</span> sudo supervisorctl update
+<span class="prompt">$</span> sudo supervisorctl start laravel-worker:*
+<span class="prompt">$</span> sudo supervisorctl status</div>
+        </div>
+      </div>
+    </div>
+  `,
+
+  git: `
+    <div class="page-header">
+      <div class="badge">Topic 15</div>
+      <h2>Git on Server</h2>
+      <p class="subtitle">git clone, pull, branch management, aur deployment workflow with git.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">🌿</div>
+        <h3>Git Deployment Commands</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">Git on Server <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Git install check karo</span>
+<span class="prompt">$</span> git <span class="flag">--version</span>
+
+<span class="comment"># Project clone karo server pe</span>
+<span class="prompt">$</span> cd /var/www/html
+<span class="prompt">$</span> git clone https://github.com/username/myproject.git
+
+<span class="comment"># Latest code pull karo (deployment)</span>
+<span class="prompt">$</span> cd /var/www/html/myproject
+<span class="prompt">$</span> git pull origin main
+
+<span class="comment"># Specific branch pe jao</span>
+<span class="prompt">$</span> git checkout production
+<span class="prompt">$</span> git pull origin production
+
+<span class="comment"># Current status check karo</span>
+<span class="prompt">$</span> git status
+<span class="prompt">$</span> git log <span class="flag">--oneline -10</span>  <span class="comment"># last 10 commits</span></div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Git Conflict Fix <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Pull conflict ho jaye to:</span>
+<span class="prompt">$</span> git status                  <span class="comment"># conflicts dekho</span>
+<span class="prompt">$</span> git stash                   <span class="comment"># local changes temporarily save karo</span>
+<span class="prompt">$</span> git pull origin main        <span class="comment"># pull karo</span>
+<span class="prompt">$</span> git stash pop               <span class="comment"># stashed changes wapas lao</span>
+
+<span class="comment"># Ya force pull (local changes discard karke)</span>
+<span class="prompt">$</span> git fetch origin
+<span class="prompt">$</span> git reset <span class="flag">--hard</span> origin/main</div>
+        </div>
+        <div class="info-box warn">
+          <div class="label">⚠️ .env & vendor Best Practices</div>
+          <code>.env</code> aur <code>vendor/</code> kabhi git mein mat daalo! <code>.gitignore</code> mein add karo. Server pe .env manually create karo aur <code>composer install</code> se vendor/ generate karo.
+        </div>
+      </div>
+    </div>
+  `,
+
+  security: `
+    <div class="page-header">
+      <div class="badge">Topic 16</div>
+      <h2>Security Basics</h2>
+      <p class="subtitle">Firewall, SSL, .env protection, aur basic server hardening.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(248,81,73,0.15)">🛡️</div>
+        <h3>UFW Firewall & SSL</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        <div class="cmd-block">
+          <div class="cmd-header">UFW Firewall Commands <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># UFW status check karo</span>
+<span class="prompt">$</span> sudo ufw status
+
+<span class="comment"># Basic rules set karo</span>
+<span class="prompt">$</span> sudo ufw allow ssh          <span class="comment"># SSH allow karo (PEHLE YE KARO!)</span>
+<span class="prompt">$</span> sudo ufw allow 80/tcp       <span class="comment"># HTTP allow</span>
+<span class="prompt">$</span> sudo ufw allow 443/tcp      <span class="comment"># HTTPS allow</span>
+<span class="prompt">$</span> sudo ufw enable             <span class="comment"># Firewall on karo</span>
+
+<span class="comment"># Specific IP allow karo (database access)</span>
+<span class="prompt">$</span> sudo ufw allow from 192.168.1.100 to any port 3306
+
+<span class="comment"># Port block karo</span>
+<span class="prompt">$</span> sudo ufw deny 3306          <span class="comment"># MySQL public access band karo</span></div>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-header">Let's Encrypt SSL Certificate <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+          <div class="cmd-body"><span class="comment"># Certbot install karo</span>
+<span class="prompt">$</span> sudo apt install certbot python3-certbot-nginx
+
+<span class="comment"># SSL certificate generate karo (free!)</span>
+<span class="prompt">$</span> sudo certbot <span class="flag">--nginx</span> <span class="flag">-d</span> mysite.com <span class="flag">-d</span> www.mysite.com
+
+<span class="comment"># Auto renewal test karo</span>
+<span class="prompt">$</span> sudo certbot renew <span class="flag">--dry-run</span></div>
+        </div>
+        <div class="info-box danger">
+          <div class="label">🚨 NEVER DO THESE</div>
+          ❌ .env file publicly accessible mat chhodho<br>
+          ❌ APP_DEBUG=true production pe mat rakhho<br>
+          ❌ 777 permissions mat do<br>
+          ❌ Root user se direct SSH mat karo<br>
+          ❌ MySQL 3306 port publicly open mat rakhho
+        </div>
+      </div>
+    </div>
+  `,
+
+  issues: `
+    <div class="page-header">
+      <div class="badge">Topic 17</div>
+      <h2>Common Laravel Server Issues</h2>
+      <p class="subtitle">Real production mein aane wali problems aur unka solution.</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(188,140,255,0.15)">🔧</div>
+        <h3>Issue Solutions Handbook</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        ${[
+          ["🔴 500 Internal Server Error", "Laravel log check karo, permissions fix karo, APP_DEBUG=true temporarily set karo", "tail -100 storage/logs/laravel.log\nchmod -R 775 storage/ bootstrap/cache/"],
+          ["🔴 Permission Denied", "storage/ aur bootstrap/cache/ ko writable banao", "sudo chmod -R 775 storage/ bootstrap/cache/\nsudo chown -R www-data:www-data ."],
+          ["🟡 Composer Memory Error", "PHP memory limit increase karo ya environment variable set karo", "COMPOSER_MEMORY_LIMIT=-1 composer install\n# Ya php.ini mein: memory_limit = 512M"],
+          ["🟡 Storage Link Issue", "storage:link command dobara run karo", "rm -rf public/storage\nphp artisan storage:link"],
+          ["🟡 Route Not Found After Deploy", "Route cache clear karo aur rebuild karo", "php artisan route:clear\nphp artisan route:cache"],
+          ["🟡 Cache Not Updating", "Saare caches clear karo", "php artisan optimize:clear\nphp artisan cache:clear\nphp artisan config:cache"],
+          ["🔴 Database Connection Refused", ".env mein DB_HOST=127.0.0.1 use karo, user permissions check karo", "php artisan config:clear\nmysql -u laraveluser -p mydb"],
+          ["🟡 File Upload Size Issue", "php.ini mein upload_max_filesize aur post_max_size badhao", "sudo nano /etc/php/8.2/apache2/php.ini\n# Set: upload_max_filesize = 50M\n# Set: post_max_size = 50M\nsudo systemctl restart apache2"],
+          ["🔴 Disk Full Issue", "Logs aur old files clean karo", "df -h\ndu -sh /var/log/*\nsudo journalctl --vacuum-time=7d"],
+          ["🟡 Queue Not Running", "Supervisor status check karo, restart karo", "sudo supervisorctl status\nsudo supervisorctl restart laravel-worker:*"],
+        ].map(([issue, desc, cmd]) => `
+          <div style="background:var(--bg3);border-radius:8px;margin:10px 0;padding:14px">
+            <div style="font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:5px">${issue}</div>
+            <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px">${desc}</p>
+            <div style="background:var(--cmd-bg);border-radius:6px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green)">${cmd.replace(/\n/g,'<br>')}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `,
+
+  deploy: `
+    <div class="page-header">
+      <div class="badge">Topic 18</div>
+      <h2>Real-World Laravel Deployment Flow</h2>
+      <p class="subtitle">Step-by-step complete deployment process — ye woh hai jo production mein harta hai!</p>
+    </div>
+    <div class="topic-block">
+      <div class="topic-header open" onclick="toggle(this)">
+        <div class="icon" style="background:rgba(88,166,255,0.15)">🚀</div>
+        <h3>Complete Deployment Steps</h3>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="topic-body open">
+        ${[
+          ["1","PuTTY se Connect Karo","Server pe SSH se connect karo","ssh username@your-server-ip"],
+          ["2","Project Folder Pe Jao","Website ka directory change karo","cd /var/www/html/myproject"],
+          ["3","Latest Code Pull Karo","Git se latest changes fetch karo","git pull origin main"],
+          ["4","Composer Install","New PHP packages install karo","composer install --no-dev --optimize-autoloader"],
+          ["5","Migrations Run Karo","New database changes apply karo","php artisan migrate --force"],
+          ["6","Cache Clear Karo","Purana cache hatao","php artisan optimize:clear"],
+          ["7","Config Cache Banao","Performance ke liye config cache karo","php artisan config:cache\nphp artisan route:cache\nphp artisan view:cache"],
+          ["8","Permissions Set Karo","Storage aur cache writable hona chahiye","sudo chown -R www-data:www-data .\nchmod -R 775 storage/ bootstrap/cache/"],
+          ["9","Services Restart Karo","Web server refresh karo","sudo systemctl reload nginx\n# ya apache ke liye:\nsudo systemctl reload apache2"],
+          ["10","Logs Check Karo","Koi error hai? Check karo","tail -50 storage/logs/laravel.log"],
+          ["11","Site Verify Karo","Browser mein open karo, test karo","curl -I https://mysite.com"],
+        ].map(([n,t,d,cmd])=>`
+          <div class="deploy-step">
+            <div class="step-num">${n}</div>
+            <div class="step-content">
+              <h5>${t}</h5>
+              <p>${d}</p>
+              <div style="background:var(--cmd-bg);border-radius:6px;padding:8px 12px;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green)">${cmd.replace(/\n/g,'<br>')}</div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+    <div class="info-box tip">
+      <div class="label">💡 Pro Tip — Deployment Script</div>
+      Inhe ek script file mein save karo: <code>nano deploy.sh</code> aur <code>bash deploy.sh</code> se ek command mein sab run karo!
+    </div>
+    <div class="cmd-block">
+      <div class="cmd-header">deploy.sh — One-Click Deployment Script <button class="copy-btn" onclick="copyCmd(this)">copy</button></div>
+      <div class="cmd-body"><span class="comment">#!/bin/bash</span>
+echo "🚀 Deployment shuru ho raha hai..."
+cd /var/www/html/myproject
+git pull origin main
+composer install <span class="flag">--no-dev --optimize-autoloader</span>
+php artisan migrate <span class="flag">--force</span>
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+sudo chown <span class="flag">-R</span> www-data:www-data .
+chmod <span class="flag">-R</span> 775 storage/ bootstrap/cache/
+sudo systemctl reload nginx
+echo "✅ Deployment complete!"</div>
+    </div>
+  `,
+
+  cheatsheet: `
+    <div class="page-header">
+      <div class="badge">Resources</div>
+      <h2>🗒️ Linux Command Cheat Sheet</h2>
+      <p class="subtitle">Sabse zyada use hone wale commands — ek jagah pe.</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'cs-nav')">Navigation</button>
+      <button class="tab-btn" onclick="switchTab(this,'cs-files')">Files</button>
+      <button class="tab-btn" onclick="switchTab(this,'cs-perm')">Permissions</button>
+      <button class="tab-btn" onclick="switchTab(this,'cs-laravel')">Laravel</button>
+      <button class="tab-btn" onclick="switchTab(this,'cs-db')">Database</button>
+      <button class="tab-btn" onclick="switchTab(this,'cs-server')">Server</button>
+    </div>
+    <div id="cs-nav" class="tab-content active">
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Kya karta hai</th></tr>
+        <tr><td>pwd</td><td>Current directory dikhao</td></tr>
+        <tr><td>ls -la</td><td>Files list with permissions</td></tr>
+        <tr><td>cd /path</td><td>Directory change karo</td></tr>
+        <tr><td>cd ..</td><td>Ek folder upar jao</td></tr>
+        <tr><td>cd ~</td><td>Home directory pe jao</td></tr>
+        <tr><td>find /path -name "*.php"</td><td>Files dhundho</td></tr>
+        <tr><td>grep -r "text" /path</td><td>Text search across files</td></tr>
+        <tr><td>which php</td><td>PHP binary ka path</td></tr>
+      </table>
+    </div>
+    <div id="cs-files" class="tab-content">
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Kya karta hai</th></tr>
+        <tr><td>mkdir -p /path/folder</td><td>Nested folders create karo</td></tr>
+        <tr><td>touch filename</td><td>Empty file create karo</td></tr>
+        <tr><td>cp -r src/ dest/</td><td>Folder copy karo</td></tr>
+        <tr><td>mv old new</td><td>Move ya rename karo</td></tr>
+        <tr><td>rm -rf folder/</td><td>Force delete (careful!)</td></tr>
+        <tr><td>tar -czf backup.tar.gz folder/</td><td>Compressed archive banao</td></tr>
+        <tr><td>tar -xzf backup.tar.gz</td><td>Archive extract karo</td></tr>
+        <tr><td>unzip file.zip -d /path</td><td>Zip extract karo</td></tr>
+        <tr><td>cat file.txt</td><td>File contents print karo</td></tr>
+        <tr><td>tail -f file.log</td><td>Live log watch karo</td></tr>
+        <tr><td>nano file.txt</td><td>File edit karo</td></tr>
+      </table>
+    </div>
+    <div id="cs-perm" class="tab-content">
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Kya karta hai</th></tr>
+        <tr><td>chmod 755 folder/</td><td>Folder permissions set karo</td></tr>
+        <tr><td>chmod 644 file.php</td><td>File permissions set karo</td></tr>
+        <tr><td>chmod -R 775 storage/</td><td>Recursive permissions</td></tr>
+        <tr><td>chown www-data:www-data file</td><td>Ownership change karo</td></tr>
+        <tr><td>chown -R $USER:www-data .</td><td>Full project ownership</td></tr>
+        <tr><td>ls -la</td><td>Permissions check karo</td></tr>
+        <tr><td>id</td><td>Current user aur groups</td></tr>
+        <tr><td>groups username</td><td>User ke groups</td></tr>
+      </table>
+    </div>
+    <div id="cs-laravel" class="tab-content">
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Kya karta hai</th></tr>
+        <tr><td>php artisan migrate --force</td><td>Migrations run karo</td></tr>
+        <tr><td>php artisan optimize:clear</td><td>Sab cache clear karo</td></tr>
+        <tr><td>php artisan config:cache</td><td>Config cache banao</td></tr>
+        <tr><td>php artisan route:cache</td><td>Route cache banao</td></tr>
+        <tr><td>php artisan view:cache</td><td>View cache banao</td></tr>
+        <tr><td>php artisan storage:link</td><td>Storage symlink banao</td></tr>
+        <tr><td>php artisan queue:work</td><td>Queue worker run karo</td></tr>
+        <tr><td>composer install --no-dev</td><td>Production packages install</td></tr>
+        <tr><td>php artisan tinker</td><td>Interactive REPL</td></tr>
+        <tr><td>php artisan list</td><td>Sab artisan commands dekho</td></tr>
+      </table>
+    </div>
+    <div id="cs-db" class="tab-content">
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Kya karta hai</th></tr>
+        <tr><td>mysql -u root -p</td><td>MySQL login karo</td></tr>
+        <tr><td>SHOW DATABASES;</td><td>Sab databases dekho</td></tr>
+        <tr><td>USE mydb;</td><td>Database select karo</td></tr>
+        <tr><td>SHOW TABLES;</td><td>Tables dekho</td></tr>
+        <tr><td>mysqldump -u root -p mydb > backup.sql</td><td>Database export</td></tr>
+        <tr><td>mysql -u root -p mydb < backup.sql</td><td>Database import</td></tr>
+        <tr><td>mysql -u root -p -e "SHOW DATABASES;"</td><td>Non-interactive query</td></tr>
+      </table>
+    </div>
+    <div id="cs-server" class="tab-content">
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Kya karta hai</th></tr>
+        <tr><td>sudo systemctl restart nginx</td><td>Nginx restart karo</td></tr>
+        <tr><td>sudo systemctl restart apache2</td><td>Apache restart karo</td></tr>
+        <tr><td>sudo systemctl status nginx</td><td>Nginx status check</td></tr>
+        <tr><td>df -h</td><td>Disk space check karo</td></tr>
+        <tr><td>free -m</td><td>RAM check karo</td></tr>
+        <tr><td>htop</td><td>Live process monitor</td></tr>
+        <tr><td>sudo ufw status</td><td>Firewall status</td></tr>
+        <tr><td>sudo ufw allow 80</td><td>Port allow karo</td></tr>
+        <tr><td>ps aux | grep php</td><td>PHP processes dekho</td></tr>
+        <tr><td>crontab -l</td><td>Cron jobs dekho</td></tr>
+        <tr><td>crontab -e</td><td>Cron jobs edit karo</td></tr>
+      </table>
+    </div>
+  `,
+
+  roadmap: `
+    <div class="page-header">
+      <div class="badge">Resources</div>
+      <h2>🗺️ 30-Day Linux Learning Roadmap</h2>
+      <p class="subtitle">Laravel developer ke liye structured, practical learning plan.</p>
+    </div>
+    <div class="roadmap-week w1">
+      <h5>📘 Week 1 (Day 1-7) — Foundation</h5>
+      <ul>
+        <li>Day 1: Linux kya hai, VPS setup, PuTTY install</li>
+        <li>Day 2: pwd, ls, cd — navigation practice</li>
+        <li>Day 3: mkdir, touch, cp, mv, rm — file operations</li>
+        <li>Day 4: cat, tail, less, grep — file viewing</li>
+        <li>Day 5: nano editor — .env files edit karna</li>
+        <li>Day 6: chmod aur chown basics</li>
+        <li>Day 7: Review + mini project: Laravel project folder manually create karo</li>
+      </ul>
+    </div>
+    <div class="roadmap-week w2">
+      <h5>📗 Week 2 (Day 8-14) — Intermediate</h5>
+      <ul>
+        <li>Day 8: PHP aur Composer setup server pe</li>
+        <li>Day 9: Laravel artisan commands — migrate, cache, storage:link</li>
+        <li>Day 10: Apache ya Nginx install aur configure</li>
+        <li>Day 11: Virtual host setup, document root, .htaccess</li>
+        <li>Day 12: MySQL login, database create, import/export</li>
+        <li>Day 13: Log files — laravel.log, apache/nginx error logs</li>
+        <li>Day 14: Practice: Pehla Laravel project server pe deploy karo!</li>
+      </ul>
+    </div>
+    <div class="roadmap-week w3">
+      <h5>📙 Week 3 (Day 15-22) — Advanced Topics</h5>
+      <ul>
+        <li>Day 15: scp aur rsync — file transfer</li>
+        <li>Day 16: Git clone, pull, deployment with git</li>
+        <li>Day 17: Cron job setup, Laravel scheduler</li>
+        <li>Day 18: Queue worker, Supervisor setup</li>
+        <li>Day 19: Backup automation — project aur database</li>
+        <li>Day 20: UFW firewall configuration</li>
+        <li>Day 21: Let's Encrypt SSL certificate</li>
+        <li>Day 22: Process monitoring — htop, df, free</li>
+      </ul>
+    </div>
+    <div class="roadmap-week w4">
+      <h5>📕 Week 4 (Day 23-30) — Production Ready</h5>
+      <ul>
+        <li>Day 23: 500 error debug karna — full workflow</li>
+        <li>Day 24: Permission issues fix karna</li>
+        <li>Day 25: Composer memory aur PHP config</li>
+        <li>Day 26: Disk full issue handle karna</li>
+        <li>Day 27: Deployment script banana</li>
+        <li>Day 28: Security hardening checklist</li>
+        <li>Day 29: Full backup + restore practice</li>
+        <li>Day 30: Real project deploy + debug + verify</li>
+      </ul>
+    </div>
+    <h4>Daily Practice Tasks</h4>
+    <div class="info-box tip">
+      <div class="label">📋 Daily Routine (15-30 minutes)</div>
+      <ol style="padding-left:18px;font-size:13px;line-height:2;color:var(--muted)">
+        <li>SSH se server connect karo</li>
+        <li>Disk space aur memory check karo: <code>df -h && free -m</code></li>
+        <li>Laravel logs check karo: <code>tail -20 storage/logs/laravel.log</code></li>
+        <li>Ek naya command try karo jo aaj seekha</li>
+        <li>Koi bhi error fix karo jo mile</li>
+      </ol>
+    </div>
+  `,
+
+  checklist: `
+    <div class="page-header">
+      <div class="badge">Resources</div>
+      <h2>✅ Deployment & Troubleshooting Checklist</h2>
+      <p class="subtitle">Production deploy se pehle aur baad mein ye sab check karo.</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'cl-deploy')">Deploy Checklist</button>
+      <button class="tab-btn" onclick="switchTab(this,'cl-trouble')">Troubleshooting</button>
+      <button class="tab-btn" onclick="switchTab(this,'cl-security')">Security</button>
+    </div>
+    <div id="cl-deploy" class="tab-content active">
+      <ul class="checklist">
+        <li>Server pe SSH connect ho gaya</li>
+        <li>git pull origin main successfully run hua</li>
+        <li>composer install --no-dev successfully complete hua</li>
+        <li>.env file exist karta hai aur correct settings hain</li>
+        <li>APP_KEY set hai (php artisan key:generate)</li>
+        <li>php artisan migrate --force successfully run hua</li>
+        <li>php artisan optimize:clear run hua</li>
+        <li>php artisan config:cache run hua</li>
+        <li>php artisan route:cache run hua</li>
+        <li>php artisan storage:link run hua</li>
+        <li>storage/ folder permissions 775 hain</li>
+        <li>bootstrap/cache/ permissions 775 hain</li>
+        <li>Web server (nginx/apache) reload ya restart hua</li>
+        <li>Laravel log mein koi error nahi hai</li>
+        <li>Site browser mein successfully open ho rahi hai</li>
+        <li>Login aur basic features work kar rahe hain</li>
+        <li>File uploads kaam kar rahe hain</li>
+        <li>Database connection work kar raha hai</li>
+      </ul>
+    </div>
+    <div id="cl-trouble" class="tab-content">
+      <h4>🔴 500 Error</h4>
+      <ul class="checklist">
+        <li>storage/logs/laravel.log check kiya?</li>
+        <li>APP_DEBUG=true temporarily set kiya?</li>
+        <li>storage/ permissions 775 hain?</li>
+        <li>bootstrap/cache/ permissions 775 hain?</li>
+        <li>.env file exists aur readable hai?</li>
+        <li>composer install run kiya?</li>
+        <li>php artisan config:clear run kiya?</li>
+        <li>Web server error log check kiya?</li>
+      </ul>
+      <h4>🟡 Database Issues</h4>
+      <ul class="checklist">
+        <li>.env mein DB_HOST=127.0.0.1 hai (localhost nahi)?</li>
+        <li>Database exist karta hai?</li>
+        <li>DB user ko correct permissions hain?</li>
+        <li>php artisan config:clear run kiya?</li>
+        <li>MySQL service running hai?</li>
+      </ul>
+      <h4>🟡 File Upload Issues</h4>
+      <ul class="checklist">
+        <li>php.ini mein upload_max_filesize set hai?</li>
+        <li>post_max_size upload size se bada hai?</li>
+        <li>storage/app/public folder writable hai?</li>
+        <li>storage:link run kiya hai?</li>
+        <li>Disk space full nahi hai?</li>
+      </ul>
+    </div>
+    <div id="cl-security" class="tab-content">
+      <ul class="checklist">
+        <li>APP_DEBUG=false production pe</li>
+        <li>.env file publicly accessible nahi hai</li>
+        <li>Root SSH login disabled hai</li>
+        <li>SSH key authentication use ho raha hai</li>
+        <li>UFW firewall active hai</li>
+        <li>MySQL 3306 port publicly open nahi hai</li>
+        <li>SSL certificate installed aur valid hai</li>
+        <li>vendor/ folder properly configured hai</li>
+        <li>Files 777 permission nahi hain</li>
+        <li>Regular backups schedule kiye hain</li>
+        <li>Web server latest version pe hai</li>
+        <li>PHP latest stable version pe hai</li>
+      </ul>
+    </div>
+  `,
+};
+
+// Build nav
+function buildNav() {
+  const groups = { overview: "Overview", basics: "Basics", intermediate: "Intermediate", advanced: "Advanced", resources: "Resources" };
+  const grouped = {};
+  sections.forEach(s => {
+    if (!grouped[s.nav]) grouped[s.nav] = [];
+    grouped[s.nav].push(s);
+  });
+  let html = "";
+  Object.entries(groups).forEach(([key, label]) => {
+    if (!grouped[key]) return;
+    html += `<div class="nav-section"><div class="nav-section-title">${label}</div>`;
+    grouped[key].forEach((s, i) => {
+      const num = String(i + 1).padStart(2, "0");
+      html += `<div class="nav-item" id="nav-${s.id}" onclick="loadSection('${s.id}')"><span class="num">${num}</span>${s.icon} ${s.title}</div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById("nav-list").innerHTML = html;
+}
+
+function loadSection(id) {
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+  const navEl = document.getElementById("nav-" + id);
+  if (navEl) navEl.classList.add("active");
+  document.getElementById("content-area").innerHTML = contentMap[id] || "<p>Coming soon...</p>";
+  document.getElementById("main").scrollTop = 0;
+}
+
+function toggle(header) {
+  header.classList.toggle("open");
+  const body = header.nextElementSibling;
+  body.classList.toggle("open");
+}
+
+function copyCmd(btn) {
+  const block = btn.closest(".cmd-block");
+  const text = block.querySelector(".cmd-body").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "copied!";
+    setTimeout(() => btn.textContent = "copy", 1500);
+  });
+}
+
+function switchTab(btn, contentId) {
+  const parent = btn.closest("div").nextElementSibling.parentElement;
+  parent.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  parent.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  btn.classList.add("active");
+  const target = document.getElementById(contentId);
+  if (target) target.classList.add("active");
+}
+
+function filterNav(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+buildNav();
+loadSection("home");
+</script>
+</body>
+</html>
