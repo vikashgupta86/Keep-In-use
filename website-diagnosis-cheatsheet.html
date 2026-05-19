@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website Down — Diagnosis Cheatsheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --green: #22c55e;
+    --green-dim: #14532d;
+    --green-bg: #052e16;
+    --red: #ef4444;
+    --red-dim: #7f1d1d;
+    --red-bg: #1c0a0a;
+    --yellow: #eab308;
+    --yellow-bg: #1c1a05;
+    --blue: #3b82f6;
+    --blue-bg: #0c1829;
+    --purple: #a855f7;
+    --purple-bg: #1a0a2e;
+    --cyan: #06b6d4;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-main: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .header-left h1 span { color: var(--red); }
+  .header-left p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .badge {
+    background: var(--red-bg);
+    border: 1px solid var(--red-dim);
+    color: var(--red);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* FAST CHECK */
+  .fast-check {
+    background: linear-gradient(135deg, #0f2027, #203a43, #0f2027);
+    border: 1px solid var(--cyan);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .fast-check .icon {
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .fast-check h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .fast-check p {
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+  }
+  .fast-check p strong { color: var(--cyan); }
+
+  /* STEPS */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .step-num.purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple); }
+  .step-num.blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue); }
+  .step-num.cyan-c { background: #051a1f; color: var(--cyan); border: 1px solid var(--cyan); }
+
+  .step-title { font-size: 13px; font-weight: 700; color: #fff; }
+  .step-subtitle { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 1px; }
+
+  .step-body { padding: 12px 14px; }
+
+  .cmd-box {
+    background: #060a12;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--green);
+    margin-bottom: 12px;
+    word-break: break-all;
+  }
+  .cmd-box .prompt { color: var(--muted); user-select: none; }
+
+  .result-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 0;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .result-row:first-of-type { border-top: none; }
+  .result-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .result-text { flex: 1; }
+  .result-label { font-family: var(--font-mono); font-weight: 600; }
+  .result-label.ok { color: var(--green); }
+  .result-label.fail { color: var(--red); }
+  .result-label.warn { color: var(--yellow); }
+  .result-desc { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  /* ERROR TABLE */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .error-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 28px;
+    font-size: 12px;
+  }
+  .error-table th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+  .error-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .error-table tr { background: var(--surface); }
+  .error-table tr:nth-child(even) { background: var(--surface2); }
+
+  .error-code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    background: var(--red-bg);
+    border: 1px solid var(--red-dim);
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .tag-green {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--green);
+    background: var(--green-bg);
+    border: 1px solid var(--green-dim);
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .tag-yellow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--yellow);
+    background: var(--yellow-bg);
+    border: 1px solid #713f12;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .meaning { color: var(--text); }
+  .fix { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; }
+  .layer { color: var(--purple); font-size: 11px; font-weight: 600; }
+
+  /* DECISION FLOW */
+  .flow-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 10px;
+  }
+  .flow-q {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px 0 0 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    min-width: 260px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-q .q-num {
+    background: var(--purple-bg);
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-answers {
+    display: flex;
+    flex: 1;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    overflow: hidden;
+  }
+  .flow-ans {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-right: 1px solid var(--border);
+  }
+  .flow-ans:last-child { border-right: none; }
+  .flow-ans.ok { background: var(--green-bg); }
+  .flow-ans.fail { background: var(--red-bg); }
+  .flow-ans.warn { background: var(--yellow-bg); }
+  .flow-ans-label {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 11px;
+    margin-bottom: 3px;
+    display: block;
+  }
+  .flow-ans.ok .flow-ans-label { color: var(--green); }
+  .flow-ans.fail .flow-ans-label { color: var(--red); }
+  .flow-ans.warn .flow-ans-label { color: var(--yellow); }
+  .flow-ans-text { color: var(--muted); font-size: 11px; }
+
+  /* BOTTOM GRID */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .info-card h4 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmd-list { list-style: none; }
+  .cmd-list li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--green);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .cmd-list li:last-child { border-bottom: none; }
+  .cmd-list li span { color: var(--muted); flex-shrink: 0; }
+
+  .contact-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .contact-icon { font-size: 16px; }
+  .contact-val { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; }
+  .contact-lbl { color: var(--muted); font-size: 11px; }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer p { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+  .legend { display: flex; gap: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.g { background: var(--green); }
+  .dot.r { background: var(--red); }
+  .dot.y { background: var(--yellow); }
+
+  @media print {
+    body { background: #fff; color: #000; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Website <span>DOWN</span> — Exact Issue Diagnosis</h1>
+      <p>// Step-by-step checklist • ERR reference • Commands ready to run</p>
+    </div>
+    <div class="badge">v1.0 • beeindia.gov.in case</div>
+  </div>
+
+  <!-- FAST CHECK -->
+  <div class="fast-check">
+    <div class="icon">⚡</div>
+    <div>
+      <h3>Sabse Fast Check — 10 seconds</h3>
+      <p><strong>Mobile data ON karo</strong> → same URL kholo → <strong>Khul gaya?</strong> WiFi/ISP issue hai | <strong>Nahi khula?</strong> Website ka server hi down hai</p>
+    </div>
+  </div>
+
+  <!-- 3 STEPS -->
+  <div class="section-title">3 Steps — Ek ke baad ek chalao</div>
+  <div class="steps-grid">
+
+    <!-- Step 1 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num purple">1</div>
+        <div>
+          <div class="step-title">DNS Check</div>
+          <div class="step-subtitle">Domain → IP resolve ho raha hai?</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="cmd-box"><span class="prompt">C:\&gt; </span>nslookup beeindia.gov.in</div>
+        <div class="result-row">
+          <div class="result-icon">✅</div>
+          <div class="result-text">
+            <div class="result-label ok">IP address mila (164.x.x.x)</div>
+            <div class="result-desc">DNS bilkul theek hai → Step 2 jao</div>
+          </div>
+        </div>
+        <div class="result-row">
+          <div class="result-icon">❌</div>
+          <div class="result-text">
+            <div class="result-label fail">"can't find" ya "NXDOMAIN"</div>
+            <div class="result-desc">DNS server problem → Control Panel &gt; DNS: 8.8.8.8 set karo</div>
+          </div>
+        </div>
+        <div class="result-row">
+          <div class="result-icon">⚠️</div>
+          <div class="result-text">
+            <div class="result-label warn">"Server: Unknown"</div>
+            <div class="result-desc">Sirf router DNS use ho raha — normal hai, chinta mat karo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num blue">2</div>
+        <div>
+          <div class="step-title">Network / Routing Check</div>
+          <div class="step-subtitle">Kahan pe ruk raha hai connection?</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="cmd-box"><span class="prompt">C:\&gt; </span>tracert beeindia.gov.in</div>
+        <div class="result-row">
+          <div class="result-icon">✅</div>
+          <div class="result-text">
+            <div class="result-label ok">Trace complete — last hop = server IP</div>
+            <div class="result-desc">Network theek hai, server tak pahunche → Step 3 jao</div>
+          </div>
+        </div>
+        <div class="result-row">
+          <div class="result-icon">❌</div>
+          <div class="result-text">
+            <div class="result-label fail">Beech mein "* * * Request timed out"</div>
+            <div class="result-desc">Us hop pe ISP ya firewall block kar raha — VPN try karo</div>
+          </div>
+        </div>
+        <div class="result-row">
+          <div class="result-icon">⚠️</div>
+          <div class="result-text">
+            <div class="result-label warn">Last hop pe * * * aaya</div>
+            <div class="result-desc">Server ICMP ping block karta hai — curl se confirm karo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num cyan-c">3</div>
+        <div>
+          <div class="step-title">Port / Web Service Check</div>
+          <div class="step-subtitle">HTTP/HTTPS respond kar raha hai?</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="cmd-box"><span class="prompt">C:\&gt; </span>curl -v https://site.com<br><span class="prompt">C:\&gt; </span>curl -v http://site.com</div>
+        <div class="result-row">
+          <div class="result-icon">✅</div>
+          <div class="result-text">
+            <div class="result-label ok">HTTP 200 OK</div>
+            <div class="result-desc">Server theek — browser cache clear karo, Ctrl+Shift+Del</div>
+          </div>
+        </div>
+        <div class="result-row">
+          <div class="result-icon">❌</div>
+          <div class="result-text">
+            <div class="result-label fail">port 443 failed: Timed out</div>
+            <div class="result-desc">HTTPS service crash/down — sirf server admin fix kar sakta</div>
+          </div>
+        </div>
+        <div class="result-row">
+          <div class="result-icon">⚠️</div>
+          <div class="result-text">
+            <div class="result-label warn">HTTP 301/302 → redirect</div>
+            <div class="result-desc">Domain change ya http→https redirect — follow the redirect</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DECISION FLOW -->
+  <div class="section-title">Decision Flow — Result dekho aur seedha answer pao</div>
+  <div class="flow-section">
+
+    <div class="flow-row">
+      <div class="flow-q"><span class="q-num">Q1</span>nslookup ne IP diya?</div>
+      <div class="flow-answers">
+        <div class="flow-ans ok">
+          <span class="flow-ans-label">✅ Haan</span>
+          <span class="flow-ans-text">DNS theek → tracert chalao</span>
+        </div>
+        <div class="flow-ans fail">
+          <span class="flow-ans-label">❌ Nahi</span>
+          <span class="flow-ans-text">DNS broken → 8.8.8.8 set karo ya ISP call</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-row">
+      <div class="flow-q"><span class="q-num">Q2</span>tracert complete hua?</div>
+      <div class="flow-answers">
+        <div class="flow-ans ok">
+          <span class="flow-ans-label">✅ Haan (last hop = server)</span>
+          <span class="flow-ans-text">Network OK → curl se port check karo</span>
+        </div>
+        <div class="flow-ans fail">
+          <span class="flow-ans-label">❌ Beech mein * * *</span>
+          <span class="flow-ans-text">ISP/Firewall block → VPN try karo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-row">
+      <div class="flow-q"><span class="q-num">Q3</span>curl port 443 timed out?</div>
+      <div class="flow-answers">
+        <div class="flow-ans ok">
+          <span class="flow-ans-label">✅ 200 OK aaya</span>
+          <span class="flow-ans-text">Server theek — browser ya cache issue</span>
+        </div>
+        <div class="flow-ans fail">
+          <span class="flow-ans-label">❌ Timed out</span>
+          <span class="flow-ans-text">🎯 CONFIRMED: Web service server pe down hai</span>
+        </div>
+        <div class="flow-ans warn">
+          <span class="flow-ans-label">⚠️ Connection refused</span>
+          <span class="flow-ans-text">Firewall ne port block kiya — server side issue</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-row">
+      <div class="flow-q"><span class="q-num">Q4</span>Mobile data pe khul raha?</div>
+      <div class="flow-answers">
+        <div class="flow-ans ok">
+          <span class="flow-ans-label">✅ Haan, mobile pe khula</span>
+          <span class="flow-ans-text">Tera WiFi/ISP problem hai — router restart karo</span>
+        </div>
+        <div class="flow-ans fail">
+          <span class="flow-ans-label">❌ Mobile pe bhi nahi khula</span>
+          <span class="flow-ans-text">Website hi down hai — NIC/BEE ka server issue</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ERROR REFERENCE TABLE -->
+  <div class="section-title">Error Code Reference Table</div>
+  <table class="error-table">
+    <tr>
+      <th>Error / Result</th>
+      <th>Layer</th>
+      <th>Matlab kya hai</th>
+      <th>Fix / Next step</th>
+    </tr>
+    <tr>
+      <td><span class="error-code">ERR_CONNECTION_TIMED_OUT</span></td>
+      <td><span class="layer">Port / Server</span></td>
+      <td class="meaning">Browser connect karta raha, server ne reply nahi diya (port 443 ya 80 dead)</td>
+      <td class="fix">curl -v se port confirm karo</td>
+    </tr>
+    <tr>
+      <td><span class="error-code">ERR_NAME_NOT_RESOLVED</span></td>
+      <td><span class="layer">DNS</span></td>
+      <td class="meaning">Domain ka IP nahi mila — DNS server fail hai</td>
+      <td class="fix">DNS: 8.8.8.8 set karo</td>
+    </tr>
+    <tr>
+      <td><span class="error-code">ERR_CONNECTION_REFUSED</span></td>
+      <td><span class="layer">Port / Firewall</span></td>
+      <td class="meaning">Server ne actively reject kiya — port band hai ya firewall block kar raha</td>
+      <td class="fix">telnet IP 443 se check karo</td>
+    </tr>
+    <tr>
+      <td><span class="error-code">ERR_SSL_PROTOCOL_ERROR</span></td>
+      <td><span class="layer">SSL / HTTPS</span></td>
+      <td class="meaning">SSL handshake fail — certificate expired ya HTTPS misconfigured</td>
+      <td class="fix">http:// se try karo</td>
+    </tr>
+    <tr>
+      <td><span class="error-code">ERR_CERT_AUTHORITY_INVALID</span></td>
+      <td><span class="layer">SSL</span></td>
+      <td class="meaning">SSL certificate invalid ya self-signed hai</td>
+      <td class="fix">System clock theek karo, ya proceed anyway</td>
+    </tr>
+    <tr>
+      <td><span class="error-code">ERR_NETWORK_CHANGED</span></td>
+      <td><span class="layer">Local Network</span></td>
+      <td class="meaning">Request ke beech network change hua (WiFi switch etc.)</td>
+      <td class="fix">Page reload karo</td>
+    </tr>
+    <tr>
+      <td><span class="tag-green">curl: 200 OK</span></td>
+      <td><span class="layer">Server OK</span></td>
+      <td class="meaning">Server bilkul theek hai, response de raha hai</td>
+      <td class="fix">Browser cache clear: Ctrl+Shift+Del</td>
+    </tr>
+    <tr>
+      <td><span class="tag-yellow">tracert: * * * (mid)</span></td>
+      <td><span class="layer">ISP / Routing</span></td>
+      <td class="meaning">Kisi intermediate router ne packet drop kiya — ISP ya firewall</td>
+      <td class="fix">VPN use karo / ISP call karo</td>
+    </tr>
+    <tr>
+      <td><span class="tag-green">ping: Reply from IP</span></td>
+      <td><span class="layer">Network</span></td>
+      <td class="meaning">Server IP alive hai — lekin web service alag ho sakti</td>
+      <td class="fix">Curl se port check karo</td>
+    </tr>
+  </table>
+
+  <!-- BOTTOM GRID -->
+  <div class="bottom-grid">
+    <div class="info-card">
+      <h4>Useful Commands — Ready to Copy</h4>
+      <ul class="cmd-list">
+        <li><span>#DNS</span> nslookup beeindia.gov.in</li>
+        <li><span>#Route</span> tracert beeindia.gov.in</li>
+        <li><span>#HTTPS</span> curl -v https://beeindia.gov.in</li>
+        <li><span>#HTTP</span> curl -v http://beeindia.gov.in</li>
+        <li><span>#Ping</span> ping beeindia.gov.in</li>
+        <li><span>#Port</span> telnet 164.100.65.149 443</li>
+        <li><span>#DNS flush</span> ipconfig /flushdns</li>
+        <li><span>#Alt DNS</span> nslookup site.com 8.8.8.8</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>BEE / NIC Contact — Escalation</h4>
+      <div class="contact-row">
+        <div class="contact-item">
+          <span class="contact-icon">📞</span>
+          <div>
+            <div class="contact-lbl">BEE Helpline</div>
+            <div class="contact-val">+91 11 2617 9699</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📧</span>
+          <div>
+            <div class="contact-lbl">Email</div>
+            <div class="contact-val">beeindiagoi@gmail.com</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">🌐</span>
+          <div>
+            <div class="contact-lbl">Working Subdomains</div>
+            <div class="contact-val">adeetie.beeindia.gov.in</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">🔍</span>
+          <div>
+            <div class="contact-lbl">Site Down Check</div>
+            <div class="contact-val">downforeveryoneorjustme.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>// beeindia.gov.in case: DNS ✅ → Routing ✅ → Port 443 ❌ = Server-side web service DOWN</p>
+    <div class="legend">
+      <div class="legend-item"><div class="dot g"></div>OK</div>
+      <div class="legend-item"><div class="dot r"></div>FAIL</div>
+      <div class="legend-item"><div class="dot y"></div>WARN</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

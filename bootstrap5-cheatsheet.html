@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bootstrap 5 CSS Cheat Sheet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f6fb; color: #1a1a2e; }
+
+  header { background: #0d6efd; color: #fff; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+  header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+
+  .controls { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  #search { flex: 1; min-width: 200px; max-width: 320px; font-size: 13px; padding: 7px 12px; border-radius: 8px; border: 1px solid #d1d5db; outline: none; }
+  #search:focus { border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
+  .tab { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid #d1d5db; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; }
+  .tab:hover { border-color: #0d6efd; color: #0d6efd; }
+  .tab.active { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+
+  main { padding: 1.5rem 2rem 3rem; max-width: 1200px; margin: auto; }
+  .section { margin-bottom: 2.5rem; }
+  .section-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+
+  .card { background: #fff; border: 1px solid #e8ecf1; border-radius: 10px; padding: 14px 16px; }
+  .card-title { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 10px; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px solid #f1f5f9; gap: 8px; }
+  .row:last-of-type { border-bottom: none; }
+  .cls { font-family: 'Consolas', 'Fira Code', monospace; font-size: 11.5px; color: #1d4ed8; background: #eff6ff; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .desc { font-size: 11px; color: #94a3b8; text-align: right; }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .badge { font-family: monospace; font-size: 11px; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+  .b-primary   { background: #dbeafe; color: #1d4ed8; }
+  .b-success   { background: #dcfce7; color: #166534; }
+  .b-danger    { background: #fee2e2; color: #991b1b; }
+  .b-warning   { background: #fef9c3; color: #854d0e; }
+  .b-info      { background: #cffafe; color: #155e75; }
+  .b-dark      { background: #f1f5f9; color: #1e293b; }
+  .b-light     { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+  .b-secondary { background: #f1f5f9; color: #475569; }
+
+  .tip { font-size: 11px; color: #64748b; background: #f0f7ff; border-left: 3px solid #0d6efd; padding: 6px 10px; border-radius: 0 6px 6px 0; margin-top: 8px; line-height: 1.5; }
+
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; background: #fff; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚡ Bootstrap 5 CSS Cheat Sheet</h1>
+    <p>Sabse important utility classes — ek jagah, search ke saath</p>
+  </div>
+  <span style="font-size:11px;opacity:0.7;">Bootstrap 5.x</span>
+</header>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="🔍  class dhundho... (e.g. flex, mt-3, btn)" oninput="filterCards()" />
+  <div style="display:flex;gap:5px;flex-wrap:wrap;">
+    <button class="tab active" onclick="setTab('all',this)">Sab</button>
+    <button class="tab" onclick="setTab('layout',this)">Layout</button>
+    <button class="tab" onclick="setTab('spacing',this)">Spacing</button>
+    <button class="tab" onclick="setTab('typography',this)">Typography</button>
+    <button class="tab" onclick="setTab('color',this)">Color</button>
+    <button class="tab" onclick="setTab('flex',this)">Flexbox</button>
+    <button class="tab" onclick="setTab('display',this)">Display</button>
+    <button class="tab" onclick="setTab('components',this)">Components</button>
+  </div>
+</div>
+
+<main>
+
+<!-- GRID -->
+<div class="section" data-cat="layout">
+  <div class="section-title">📐 Grid System</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Container</div>
+      <div class="row"><span class="cls">.container</span><span class="desc">fixed-width centered</span></div>
+      <div class="row"><span class="cls">.container-fluid</span><span class="desc">full width</span></div>
+      <div class="row"><span class="cls">.container-sm/md/lg/xl</span><span class="desc">responsive</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Row &amp; Columns</div>
+      <div class="row"><span class="cls">.row</span><span class="desc">flex row wrapper</span></div>
+      <div class="row"><span class="cls">.col</span><span class="desc">auto width</span></div>
+      <div class="row"><span class="cls">.col-6</span><span class="desc">half width (1–12)</span></div>
+      <div class="row"><span class="cls">.col-md-4</span><span class="desc">responsive col</span></div>
+      <div class="tip">Breakpoints: xs &lt;576 | sm 576 | md 768 | lg 992 | xl 1200 | xxl 1400</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gutter / Gap</div>
+      <div class="row"><span class="cls">.g-0 to .g-5</span><span class="desc">row + col gap</span></div>
+      <div class="row"><span class="cls">.gx-3</span><span class="desc">horizontal gap</span></div>
+      <div class="row"><span class="cls">.gy-3</span><span class="desc">vertical gap</span></div>
+      <div class="row"><span class="cls">.row-cols-3</span><span class="desc">3 equal cols/row</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Offset &amp; Order</div>
+      <div class="row"><span class="cls">.offset-md-2</span><span class="desc">left margin (cols)</span></div>
+      <div class="row"><span class="cls">.order-1</span><span class="desc">flex order 1</span></div>
+      <div class="row"><span class="cls">.order-last</span><span class="desc">push to end</span></div>
+      <div class="row"><span class="cls">.order-first</span><span class="desc">pull to front</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SPACING -->
+<div class="section" data-cat="spacing">
+  <div class="section-title">📏 Spacing — Margin &amp; Padding</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Margin (m)</div>
+      <div class="row"><span class="cls">.m-0 to .m-5</span><span class="desc">sab taraf margin</span></div>
+      <div class="row"><span class="cls">.mt-3</span><span class="desc">margin-top</span></div>
+      <div class="row"><span class="cls">.mb-3</span><span class="desc">margin-bottom</span></div>
+      <div class="row"><span class="cls">.ms-3</span><span class="desc">margin-start (left)</span></div>
+      <div class="row"><span class="cls">.me-3</span><span class="desc">margin-end (right)</span></div>
+      <div class="row"><span class="cls">.mx-auto</span><span class="desc">horizontal center</span></div>
+      <div class="row"><span class="cls">.mx-3</span><span class="desc">left + right</span></div>
+      <div class="row"><span class="cls">.my-3</span><span class="desc">top + bottom</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Padding (p)</div>
+      <div class="row"><span class="cls">.p-0 to .p-5</span><span class="desc">sab taraf padding</span></div>
+      <div class="row"><span class="cls">.pt-3</span><span class="desc">padding-top</span></div>
+      <div class="row"><span class="cls">.pb-3</span><span class="desc">padding-bottom</span></div>
+      <div class="row"><span class="cls">.ps-3</span><span class="desc">padding-start</span></div>
+      <div class="row"><span class="cls">.pe-3</span><span class="desc">padding-end</span></div>
+      <div class="row"><span class="cls">.px-3</span><span class="desc">left + right</span></div>
+      <div class="row"><span class="cls">.py-3</span><span class="desc">top + bottom</span></div>
+      <div class="tip">Scale: 0=0 | 1=0.25rem | 2=0.5rem | 3=1rem | 4=1.5rem | 5=3rem</div>
+    </div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="section" data-cat="typography">
+  <div class="section-title">🔤 Typography</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Headings &amp; Size</div>
+      <div class="row"><span class="cls">.h1 to .h6</span><span class="desc">heading style</span></div>
+      <div class="row"><span class="cls">.display-1 to .display-6</span><span class="desc">bade display fonts</span></div>
+      <div class="row"><span class="cls">.fs-1 to .fs-6</span><span class="desc">font-size utility</span></div>
+      <div class="row"><span class="cls">.lead</span><span class="desc">bada intro text</span></div>
+      <div class="row"><span class="cls">.small</span><span class="desc">chota text (85%)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Alignment &amp; Transform</div>
+      <div class="row"><span class="cls">.text-start</span><span class="desc">left align</span></div>
+      <div class="row"><span class="cls">.text-center</span><span class="desc">center</span></div>
+      <div class="row"><span class="cls">.text-end</span><span class="desc">right align</span></div>
+      <div class="row"><span class="cls">.text-uppercase</span><span class="desc">CAPS</span></div>
+      <div class="row"><span class="cls">.text-lowercase</span><span class="desc">small case</span></div>
+      <div class="row"><span class="cls">.text-capitalize</span><span class="desc">First Letter Cap</span></div>
+      <div class="row"><span class="cls">.text-nowrap</span><span class="desc">no line break</span></div>
+      <div class="row"><span class="cls">.text-truncate</span><span class="desc">ellipsis overflow</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Weight &amp; Style</div>
+      <div class="row"><span class="cls">.fw-bold</span><span class="desc">bold (700)</span></div>
+      <div class="row"><span class="cls">.fw-semibold</span><span class="desc">semibold (600)</span></div>
+      <div class="row"><span class="cls">.fw-normal</span><span class="desc">regular (400)</span></div>
+      <div class="row"><span class="cls">.fw-light</span><span class="desc">light (300)</span></div>
+      <div class="row"><span class="cls">.fst-italic</span><span class="desc">italic</span></div>
+      <div class="row"><span class="cls">.text-decoration-none</span><span class="desc">underline hatao</span></div>
+      <div class="row"><span class="cls">.lh-1 / .lh-lg</span><span class="desc">line-height</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- COLOR -->
+<div class="section" data-cat="color">
+  <div class="section-title">🎨 Colors</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Text Colors</div>
+      <div class="badge-row">
+        <span class="badge b-primary">.text-primary</span>
+        <span class="badge b-secondary">.text-secondary</span>
+        <span class="badge b-success">.text-success</span>
+        <span class="badge b-danger">.text-danger</span>
+        <span class="badge b-warning">.text-warning</span>
+        <span class="badge b-info">.text-info</span>
+        <span class="badge b-dark">.text-dark</span>
+        <span class="badge b-light">.text-light</span>
+        <span class="badge b-secondary">.text-muted</span>
+        <span class="badge b-primary">.text-white</span>
+        <span class="badge b-dark">.text-black</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Background Colors</div>
+      <div class="badge-row">
+        <span class="badge b-primary">.bg-primary</span>
+        <span class="badge b-secondary">.bg-secondary</span>
+        <span class="badge b-success">.bg-success</span>
+        <span class="badge b-danger">.bg-danger</span>
+        <span class="badge b-warning">.bg-warning</span>
+        <span class="badge b-info">.bg-info</span>
+        <span class="badge b-dark">.bg-dark</span>
+        <span class="badge b-light">.bg-light</span>
+        <span class="badge b-secondary">.bg-transparent</span>
+        <span class="badge b-light">.bg-white</span>
+      </div>
+      <div class="tip">.bg-opacity-{10|25|50|75} se opacity control karo</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Border Color</div>
+      <div class="badge-row">
+        <span class="badge b-primary">.border-primary</span>
+        <span class="badge b-success">.border-success</span>
+        <span class="badge b-danger">.border-danger</span>
+        <span class="badge b-warning">.border-warning</span>
+        <span class="badge b-info">.border-info</span>
+        <span class="badge b-dark">.border-dark</span>
+        <span class="badge b-secondary">.border-secondary</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLEXBOX -->
+<div class="section" data-cat="flex">
+  <div class="section-title">↔️ Flexbox</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Flex Container</div>
+      <div class="row"><span class="cls">.d-flex</span><span class="desc">flex on</span></div>
+      <div class="row"><span class="cls">.d-inline-flex</span><span class="desc">inline flex</span></div>
+      <div class="row"><span class="cls">.flex-row</span><span class="desc">horizontal (default)</span></div>
+      <div class="row"><span class="cls">.flex-column</span><span class="desc">vertical stack</span></div>
+      <div class="row"><span class="cls">.flex-wrap</span><span class="desc">wrap items</span></div>
+      <div class="row"><span class="cls">.flex-nowrap</span><span class="desc">no wrap</span></div>
+      <div class="row"><span class="cls">.flex-row-reverse</span><span class="desc">reverse direction</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Justify &amp; Align</div>
+      <div class="row"><span class="cls">.justify-content-start</span><span class="desc">left</span></div>
+      <div class="row"><span class="cls">.justify-content-center</span><span class="desc">center</span></div>
+      <div class="row"><span class="cls">.justify-content-end</span><span class="desc">right</span></div>
+      <div class="row"><span class="cls">.justify-content-between</span><span class="desc">space between</span></div>
+      <div class="row"><span class="cls">.justify-content-around</span><span class="desc">space around</span></div>
+      <div class="row"><span class="cls">.align-items-center</span><span class="desc">vertically center</span></div>
+      <div class="row"><span class="cls">.align-items-start</span><span class="desc">top align</span></div>
+      <div class="row"><span class="cls">.align-items-end</span><span class="desc">bottom align</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Flex Items</div>
+      <div class="row"><span class="cls">.flex-fill</span><span class="desc">fill available</span></div>
+      <div class="row"><span class="cls">.flex-grow-1</span><span class="desc">grow karo</span></div>
+      <div class="row"><span class="cls">.flex-shrink-0</span><span class="desc">shrink mat karo</span></div>
+      <div class="row"><span class="cls">.align-self-center</span><span class="desc">self v-center</span></div>
+      <div class="row"><span class="cls">.order-1 to .order-5</span><span class="desc">item order</span></div>
+      <div class="row"><span class="cls">.gap-1 to .gap-5</span><span class="desc">flex/grid gap</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DISPLAY -->
+<div class="section" data-cat="display">
+  <div class="section-title">👁️ Display, Sizing &amp; Position</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Display Utilities</div>
+      <div class="row"><span class="cls">.d-none</span><span class="desc">hide karo</span></div>
+      <div class="row"><span class="cls">.d-block</span><span class="desc">block element</span></div>
+      <div class="row"><span class="cls">.d-inline</span><span class="desc">inline element</span></div>
+      <div class="row"><span class="cls">.d-inline-block</span><span class="desc">inline-block</span></div>
+      <div class="row"><span class="cls">.d-grid</span><span class="desc">CSS grid</span></div>
+      <div class="row"><span class="cls">.d-md-none</span><span class="desc">md pe hide</span></div>
+      <div class="row"><span class="cls">.d-md-block</span><span class="desc">md pe show</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sizing</div>
+      <div class="row"><span class="cls">.w-25/50/75/100</span><span class="desc">width %</span></div>
+      <div class="row"><span class="cls">.w-auto</span><span class="desc">auto width</span></div>
+      <div class="row"><span class="cls">.h-25/50/75/100</span><span class="desc">height %</span></div>
+      <div class="row"><span class="cls">.mw-100</span><span class="desc">max-width: 100%</span></div>
+      <div class="row"><span class="cls">.vw-100</span><span class="desc">width: 100vw</span></div>
+      <div class="row"><span class="cls">.vh-100</span><span class="desc">height: 100vh</span></div>
+      <div class="row"><span class="cls">.min-vw-100</span><span class="desc">min-width: 100vw</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Position</div>
+      <div class="row"><span class="cls">.position-relative</span><span class="desc">relative</span></div>
+      <div class="row"><span class="cls">.position-absolute</span><span class="desc">absolute</span></div>
+      <div class="row"><span class="cls">.position-fixed</span><span class="desc">fixed</span></div>
+      <div class="row"><span class="cls">.position-sticky</span><span class="desc">sticky</span></div>
+      <div class="row"><span class="cls">.top-0 / .bottom-0</span><span class="desc">edge se 0</span></div>
+      <div class="row"><span class="cls">.start-50</span><span class="desc">left: 50%</span></div>
+      <div class="row"><span class="cls">.translate-middle</span><span class="desc">perfectly center</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPONENTS -->
+<div class="section" data-cat="components">
+  <div class="section-title">🧩 Components</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Buttons</div>
+      <div class="row"><span class="cls">.btn</span><span class="desc">base class</span></div>
+      <div class="row"><span class="cls">.btn-primary</span><span class="desc">filled primary</span></div>
+      <div class="row"><span class="cls">.btn-outline-primary</span><span class="desc">outline style</span></div>
+      <div class="row"><span class="cls">.btn-sm / .btn-lg</span><span class="desc">size variants</span></div>
+      <div class="row"><span class="cls">.btn-link</span><span class="desc">link style</span></div>
+      <div class="row"><span class="cls">.disabled</span><span class="desc">disabled state</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cards</div>
+      <div class="row"><span class="cls">.card</span><span class="desc">card wrapper</span></div>
+      <div class="row"><span class="cls">.card-body</span><span class="desc">content area</span></div>
+      <div class="row"><span class="cls">.card-title</span><span class="desc">heading</span></div>
+      <div class="row"><span class="cls">.card-text</span><span class="desc">paragraph</span></div>
+      <div class="row"><span class="cls">.card-header</span><span class="desc">top bar</span></div>
+      <div class="row"><span class="cls">.card-footer</span><span class="desc">bottom bar</span></div>
+      <div class="row"><span class="cls">.card-img-top</span><span class="desc">image at top</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Badges &amp; Alerts</div>
+      <div class="row"><span class="cls">.badge</span><span class="desc">badge base</span></div>
+      <div class="row"><span class="cls">.badge.bg-primary</span><span class="desc">colored badge</span></div>
+      <div class="row"><span class="cls">.rounded-pill</span><span class="desc">pill badge</span></div>
+      <div class="row"><span class="cls">.alert</span><span class="desc">alert base</span></div>
+      <div class="row"><span class="cls">.alert-success</span><span class="desc">green alert</span></div>
+      <div class="row"><span class="cls">.alert-dismissible</span><span class="desc">closeable alert</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Forms</div>
+      <div class="row"><span class="cls">.form-control</span><span class="desc">input / textarea</span></div>
+      <div class="row"><span class="cls">.form-label</span><span class="desc">label style</span></div>
+      <div class="row"><span class="cls">.form-select</span><span class="desc">select dropdown</span></div>
+      <div class="row"><span class="cls">.form-check</span><span class="desc">checkbox wrapper</span></div>
+      <div class="row"><span class="cls">.form-check-input</span><span class="desc">checkbox / radio</span></div>
+      <div class="row"><span class="cls">.form-text</span><span class="desc">helper text</span></div>
+      <div class="row"><span class="cls">.is-valid / .is-invalid</span><span class="desc">validation state</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Borders &amp; Radius</div>
+      <div class="row"><span class="cls">.border</span><span class="desc">sab taraf border</span></div>
+      <div class="row"><span class="cls">.border-0</span><span class="desc">border hatao</span></div>
+      <div class="row"><span class="cls">.border-top/end/bottom/start</span><span class="desc">ek taraf</span></div>
+      <div class="row"><span class="cls">.rounded</span><span class="desc">corner rounded</span></div>
+      <div class="row"><span class="cls">.rounded-circle</span><span class="desc">gol shape</span></div>
+      <div class="row"><span class="cls">.rounded-pill</span><span class="desc">pill shape</span></div>
+      <div class="row"><span class="cls">.rounded-0</span><span class="desc">sharp corners</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Shadow &amp; Overflow</div>
+      <div class="row"><span class="cls">.shadow-sm</span><span class="desc">choti shadow</span></div>
+      <div class="row"><span class="cls">.shadow</span><span class="desc">normal shadow</span></div>
+      <div class="row"><span class="cls">.shadow-lg</span><span class="desc">badi shadow</span></div>
+      <div class="row"><span class="cls">.shadow-none</span><span class="desc">shadow hatao</span></div>
+      <div class="row"><span class="cls">.overflow-auto</span><span class="desc">scroll on overflow</span></div>
+      <div class="row"><span class="cls">.overflow-hidden</span><span class="desc">clip content</span></div>
+      <div class="row"><span class="cls">.overflow-scroll</span><span class="desc">always scroll</span></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>Bootstrap 5 CSS Cheat Sheet &nbsp;|&nbsp; Claude dwara banaya gaya</footer>
+
+<script>
+function filterCards() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.section').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.card')].some(c => c.style.display !== 'none');
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+function setTab(cat, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.card').forEach(c => c.style.display = '');
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.style.display = (cat === 'all' || sec.dataset.cat === cat) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Admin Simulator — Full Environment</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0e14;color:#b3c5d6;font-family:'Courier New',monospace;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* TOP BAR */
+#topbar{background:#0d1117;border-bottom:1px solid #1e2d3d;padding:6px 16px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+#topbar .logo{color:#58a6ff;font-weight:700;font-size:14px;letter-spacing:1px;}
+#topbar .info-pills{display:flex;gap:8px;margin-left:auto;}
+.pill{background:#131e2b;border:1px solid #1e2d3d;border-radius:4px;padding:3px 10px;font-size:11px;display:flex;align-items:center;gap:5px;}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:#3fb950;}
+.pill.warn .dot{background:#d29922;}
+.pill.danger .dot{background:#f85149;}
+#clock{color:#58a6ff;font-size:11px;}
+
+/* MAIN LAYOUT */
+#workspace{display:flex;flex:1;overflow:hidden;}
+
+/* LEFT PANEL */
+#left-panel{width:200px;background:#0d1117;border-right:1px solid #1e2d3d;display:flex;flex-direction:column;flex-shrink:0;}
+.panel-title{padding:8px 12px;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #1e2d3d;}
+#filetree{flex:1;overflow-y:auto;padding:4px 0;}
+.ft-item{padding:4px 8px 4px;cursor:pointer;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:4px;}
+.ft-item:hover{background:#131e2b;}
+.ft-item.selected{background:#1a2633;color:#58a6ff;}
+.ft-item .ft-icon{font-size:12px;flex-shrink:0;}
+.ft-depth-0{padding-left:8px;}
+.ft-depth-1{padding-left:20px;}
+.ft-depth-2{padding-left:32px;}
+.ft-depth-3{padding-left:44px;}
+
+/* SYSTEM MONITOR */
+#sysmon{border-top:1px solid #1e2d3d;padding:10px 12px;}
+.mon-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.mon-label{font-size:10px;color:#4a5568;}
+.mon-val{font-size:10px;color:#58a6ff;}
+.bar-bg{height:4px;background:#131e2b;border-radius:2px;flex:1;margin:0 8px;}
+.bar-fill{height:100%;border-radius:2px;transition:width 1s;}
+.bar-cpu{background:#58a6ff;}
+.bar-mem{background:#3fb950;}
+.bar-disk{background:#d29922;}
+
+/* CENTER - TERMINAL */
+#center{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#tabs{background:#0d1117;border-bottom:1px solid #1e2d3d;display:flex;align-items:center;gap:0;padding:0 8px;}
+.tab{padding:7px 14px;font-size:11px;cursor:pointer;border-bottom:2px solid transparent;color:#4a5568;transition:all .15s;}
+.tab:hover{color:#b3c5d6;}
+.tab.active{color:#58a6ff;border-bottom-color:#58a6ff;}
+#tab-add{color:#4a5568;cursor:pointer;padding:0 8px;font-size:16px;}
+#tab-add:hover{color:#58a6ff;}
+
+#terminal-wrap{flex:1;overflow:hidden;position:relative;}
+#terminal{height:100%;overflow-y:auto;padding:12px 16px;background:#0a0e14;}
+.line{margin:1px 0;line-height:1.6;white-space:pre-wrap;word-break:break-all;}
+.prompt-line{display:flex;align-items:flex-start;gap:4px;}
+.ps1-user{color:#3fb950;}
+.ps1-at{color:#4a5568;}
+.ps1-host{color:#58a6ff;}
+.ps1-sep{color:#4a5568;}
+.ps1-path{color:#d29922;}
+.ps1-dollar{color:#b3c5d6;}
+.output{color:#8b9ab0;}
+.output.error{color:#f85149;}
+.output.success{color:#3fb950;}
+.output.warn{color:#d29922;}
+.output.info{color:#58a6ff;}
+.output.bold{color:#e6edf3;font-weight:bold;}
+.output.muted{color:#4a5568;}
+.output.purple{color:#bc8cff;}
+.output.cyan{color:#39c5cf;}
+
+#input-row{display:flex;align-items:center;gap:4px;padding:0 16px 12px;background:#0a0e14;}
+#prompt-display{white-space:nowrap;flex-shrink:0;}
+#cmd-input{flex:1;background:none;border:none;outline:none;color:#e6edf3;font-family:'Courier New',monospace;font-size:13px;caret-color:#58a6ff;}
+
+/* RIGHT PANEL */
+#right-panel{width:220px;background:#0d1117;border-left:1px solid #1e2d3d;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+#rp-tabs{display:flex;border-bottom:1px solid #1e2d3d;}
+.rp-tab{flex:1;text-align:center;padding:7px 4px;font-size:10px;cursor:pointer;color:#4a5568;border-bottom:2px solid transparent;}
+.rp-tab:hover{color:#b3c5d6;}
+.rp-tab.active{color:#58a6ff;border-bottom-color:#58a6ff;}
+#rp-content{flex:1;overflow-y:auto;padding:10px;}
+.rp-section{margin-bottom:14px;}
+.rp-section-title{font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.rp-row{display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid #0d1117;}
+.rp-row .k{color:#4a5568;}
+.rp-row .v{color:#b3c5d6;}
+.rp-row .v.green{color:#3fb950;}
+.rp-row .v.red{color:#f85149;}
+.rp-row .v.yellow{color:#d29922;}
+.service-row{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-radius:4px;margin-bottom:3px;cursor:pointer;font-size:11px;}
+.service-row:hover{background:#131e2b;}
+.svc-status{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.svc-status.running{background:#3fb950;}
+.svc-status.stopped{background:#f85149;}
+.svc-status.inactive{background:#4a5568;}
+.proc-row{display:flex;gap:6px;padding:2px 0;font-size:10px;border-bottom:1px solid #0a0e14;}
+.proc-row .pid{color:#58a6ff;min-width:36px;}
+.proc-row .cpu{color:#d29922;min-width:32px;}
+.proc-row .name{color:#8b9ab0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* BOTTOM STATUS */
+#statusbar{background:#0d1117;border-top:1px solid #1e2d3d;padding:4px 16px;display:flex;align-items:center;gap:16px;font-size:10px;flex-shrink:0;}
+.sb-item{color:#4a5568;display:flex;align-items:center;gap:4px;}
+.sb-item .v{color:#8b9ab0;}
+#autocomplete-box{position:absolute;bottom:40px;left:16px;background:#131e2b;border:1px solid #1e2d3d;border-radius:6px;padding:4px 0;max-width:400px;z-index:100;display:none;}
+.ac-item{padding:4px 12px;font-size:12px;cursor:pointer;color:#8b9ab0;}
+.ac-item:hover,.ac-item.selected{background:#1a2633;color:#58a6ff;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#1e2d3d;border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="logo">🐧 LINUX ADMIN SIMULATOR</span>
+  <span style="color:#4a5568;font-size:11px;">Ubuntu 22.04 LTS — Production Server</span>
+  <div class="info-pills" id="status-pills">
+    <div class="pill"><div class="dot"></div><span>nginx: running</span></div>
+    <div class="pill"><div class="dot"></div><span>mysql: running</span></div>
+    <div class="pill warn"><div class="dot"></div><span>disk: 67%</span></div>
+  </div>
+  <div id="clock"></div>
+</div>
+
+<div id="workspace">
+  <!-- LEFT: File Tree -->
+  <div id="left-panel">
+    <div class="panel-title">📁 Filesystem</div>
+    <div id="filetree"></div>
+    <div id="sysmon">
+      <div class="rp-section-title">System</div>
+      <div class="mon-row">
+        <span class="mon-label">CPU</span>
+        <div class="bar-bg"><div class="bar-fill bar-cpu" id="cpu-bar" style="width:23%"></div></div>
+        <span class="mon-val" id="cpu-val">23%</span>
+      </div>
+      <div class="mon-row">
+        <span class="mon-label">MEM</span>
+        <div class="bar-bg"><div class="bar-fill bar-mem" id="mem-bar" style="width:58%"></div></div>
+        <span class="mon-val" id="mem-val">58%</span>
+      </div>
+      <div class="mon-row">
+        <span class="mon-label">DSK</span>
+        <div class="bar-bg"><div class="bar-fill bar-disk" id="disk-bar" style="width:67%"></div></div>
+        <span class="mon-val">67%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: Terminal -->
+  <div id="center">
+    <div id="tabs">
+      <div class="tab active" id="tab-1">Terminal 1</div>
+      <div id="tab-add" onclick="addTab()">＋</div>
+    </div>
+    <div id="terminal-wrap">
+      <div id="terminal"></div>
+      <div id="autocomplete-box"></div>
+    </div>
+    <div id="input-row">
+      <div id="prompt-display"></div>
+      <input id="cmd-input" autofocus autocomplete="off" spellcheck="false" placeholder="command type karo...">
+    </div>
+  </div>
+
+  <!-- RIGHT: Info Panel -->
+  <div id="right-panel">
+    <div id="rp-tabs">
+      <div class="rp-tab active" onclick="rpSwitch(this,'rp-services')">Services</div>
+      <div class="rp-tab" onclick="rpSwitch(this,'rp-procs')">Procs</div>
+      <div class="rp-tab" onclick="rpSwitch(this,'rp-net')">Network</div>
+      <div class="rp-tab" onclick="rpSwitch(this,'rp-users')">Users</div>
+    </div>
+    <div id="rp-content">
+      <div id="rp-services">
+        <div class="rp-section-title">System Services</div>
+        <div id="svc-list"></div>
+      </div>
+      <div id="rp-procs" style="display:none">
+        <div class="rp-section-title">Top Processes</div>
+        <div id="proc-list"></div>
+      </div>
+      <div id="rp-net" style="display:none">
+        <div class="rp-section-title">Network</div>
+        <div id="net-info"></div>
+      </div>
+      <div id="rp-users" style="display:none">
+        <div class="rp-section-title">System Users</div>
+        <div id="user-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="statusbar">
+  <div class="sb-item">Shell: <span class="v">/bin/bash</span></div>
+  <div class="sb-item">User: <span class="v" id="sb-user">ubuntu</span></div>
+  <div class="sb-item">Host: <span class="v">prod-server-01</span></div>
+  <div class="sb-item">Uptime: <span class="v" id="sb-uptime">0d 0h 0m</span></div>
+  <div class="sb-item" style="margin-left:auto">Tab = autocomplete | ↑↓ = history | Ctrl+L = clear</div>
+</div>
+
+<script>
+// ===================== STATE =====================
+const STATE = {
+  user: 'ubuntu',
+  hostname: 'prod-server-01',
+  cwd: '/home/ubuntu',
+  env: { HOME:'/home/ubuntu', USER:'ubuntu', PATH:'/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', SHELL:'/bin/bash', EDITOR:'nano', TERM:'xterm-256color' },
+  history: [],
+  histIdx: -1,
+  tabCount: 1,
+  startTime: Date.now(),
+  vars: {},
+};
+
+// ===================== FILESYSTEM =====================
+const FS = {
+  '/': { type:'dir', owner:'root', group:'root', perm:'755', children:['bin','boot','dev','etc','home','lib','opt','proc','root','run','srv','sys','tmp','usr','var'] },
+  '/bin': { type:'dir', owner:'root', group:'root', perm:'755' },
+  '/etc': { type:'dir', owner:'root', group:'root', perm:'755', children:['apache2','nginx','php','mysql','ssh','cron.d','hosts','hostname','passwd','group','fstab','environment','resolv.conf'] },
+  '/etc/nginx': { type:'dir', owner:'root', group:'root', perm:'755', children:['nginx.conf','sites-available','sites-enabled','conf.d'] },
+  '/etc/nginx/nginx.conf': { type:'file', owner:'root', group:'root', perm:'644', content:`user www-data;\nworker_processes auto;\nerror_log /var/log/nginx/error.log;\npid /run/nginx.pid;\n\nevents {\n    worker_connections 1024;\n}\n\nhttp {\n    include /etc/nginx/conf.d/*.conf;\n    include /etc/nginx/sites-enabled/*;\n}` },
+  '/etc/nginx/sites-available': { type:'dir', owner:'root', group:'root', perm:'755', children:['default','mylaravel.conf'] },
+  '/etc/nginx/sites-enabled': { type:'dir', owner:'root', group:'root', perm:'755', children:['mylaravel.conf'] },
+  '/etc/nginx/sites-available/mylaravel.conf': { type:'file', owner:'root', group:'root', perm:'644', content:`server {\n    listen 80;\n    server_name mysite.com www.mysite.com;\n    root /var/www/html/mylaravel/public;\n\n    index index.php;\n\n    location / {\n        try_files $uri $uri/ /index.php?$query_string;\n    }\n\n    location ~ \\.php$ {\n        fastcgi_pass unix:/run/php/php8.2-fpm.sock;\n        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;\n        include fastcgi_params;\n    }\n}` },
+  '/etc/nginx/sites-available/default': { type:'file', owner:'root', group:'root', perm:'644', content:`server {\n    listen 80 default_server;\n    root /var/www/html;\n    index index.html;\n    server_name _;\n    location / { try_files $uri $uri/ =404; }\n}` },
+  '/etc/nginx/sites-enabled/mylaravel.conf': { type:'symlink', target:'/etc/nginx/sites-available/mylaravel.conf' },
+  '/etc/apache2': { type:'dir', owner:'root', group:'root', perm:'755', children:['apache2.conf','sites-available','sites-enabled','mods-enabled'] },
+  '/etc/php': { type:'dir', owner:'root', group:'root', perm:'755', children:['8.2'] },
+  '/etc/php/8.2': { type:'dir', owner:'root', group:'root', perm:'755', children:['cli','fpm'] },
+  '/etc/php/8.2/cli': { type:'dir', owner:'root', group:'root', perm:'755', children:['php.ini'] },
+  '/etc/php/8.2/cli/php.ini': { type:'file', owner:'root', group:'root', perm:'644', content:`[PHP]\nmemory_limit = 256M\nmax_execution_time = 300\nupload_max_filesize = 10M\npost_max_size = 12M\nerror_reporting = E_ALL\ndisplay_errors = Off\nlog_errors = On\nerror_log = /var/log/php_errors.log\ndate.timezone = Asia/Kolkata` },
+  '/etc/mysql': { type:'dir', owner:'root', group:'root', perm:'755', children:['my.cnf','mysql.conf.d'] },
+  '/etc/mysql/my.cnf': { type:'file', owner:'root', group:'root', perm:'644', content:`[mysqld]\nuser = mysql\npid-file = /var/run/mysqld/mysqld.pid\nbind-address = 127.0.0.1\nmax_connections = 150\ninnodb_buffer_pool_size = 128M\ncharacter-set-server = utf8mb4\ncollation-server = utf8mb4_unicode_ci` },
+  '/etc/ssh': { type:'dir', owner:'root', group:'root', perm:'755', children:['sshd_config'] },
+  '/etc/ssh/sshd_config': { type:'file', owner:'root', group:'root', perm:'644', content:`Port 22\nPermitRootLogin no\nPasswordAuthentication yes\nPubkeyAuthentication yes\nX11Forwarding no\nAllowUsers ubuntu deploy\nMaxAuthTries 3` },
+  '/etc/hosts': { type:'file', owner:'root', group:'root', perm:'644', content:`127.0.0.1   localhost\n127.0.1.1   prod-server-01\n::1         localhost ip6-localhost\n192.168.1.10  db-server\n192.168.1.11  redis-server` },
+  '/etc/hostname': { type:'file', owner:'root', group:'root', perm:'644', content:`prod-server-01` },
+  '/etc/passwd': { type:'file', owner:'root', group:'root', perm:'644', content:`root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nmysql:x:111:114:MySQL Server,,,:/var/lib/mysql:/bin/false\nubuntu:x:1000:1000:Ubuntu,,,:/home/ubuntu:/bin/bash\ndeploy:x:1001:1001:Deploy User,,,:/home/deploy:/bin/bash` },
+  '/etc/group': { type:'file', owner:'root', group:'root', perm:'644', content:`root:x:0:\ndaemon:x:1:\nwww-data:x:33:ubuntu,deploy\nsudo:x:27:ubuntu\ndocker:x:999:ubuntu\nubuntu:x:1000:\ndeploy:x:1001:` },
+  '/etc/environment': { type:'file', owner:'root', group:'root', perm:'644', content:`PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nLANG="en_US.UTF-8"` },
+  '/home': { type:'dir', owner:'root', group:'root', perm:'755', children:['ubuntu','deploy'] },
+  '/home/ubuntu': { type:'dir', owner:'ubuntu', group:'ubuntu', perm:'755', children:['.bashrc','.profile','.ssh','projects','backups','scripts'] },
+  '/home/ubuntu/.bashrc': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'644', content:`# ~/.bashrc\nexport PS1='\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ '\nalias ll='ls -alF'\nalias la='ls -A'\nalias l='ls -CF'\nalias update='sudo apt update && sudo apt upgrade'\nalias deploy='cd /var/www/html/mylaravel && git pull && composer install --no-dev && php artisan migrate --force && php artisan optimize'` },
+  '/home/ubuntu/.ssh': { type:'dir', owner:'ubuntu', group:'ubuntu', perm:'700', children:['authorized_keys','known_hosts'] },
+  '/home/ubuntu/.ssh/authorized_keys': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'600', content:`ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB... developer@laptop` },
+  '/home/ubuntu/projects': { type:'dir', owner:'ubuntu', group:'ubuntu', perm:'755', children:[] },
+  '/home/ubuntu/backups': { type:'dir', owner:'ubuntu', group:'ubuntu', perm:'755', children:['db_backup_20240115.sql.gz','project_backup_20240115.tar.gz'] },
+  '/home/ubuntu/backups/db_backup_20240115.sql.gz': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'644', size:'2.3M' },
+  '/home/ubuntu/backups/project_backup_20240115.tar.gz': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'644', size:'45M' },
+  '/home/ubuntu/scripts': { type:'dir', owner:'ubuntu', group:'ubuntu', perm:'755', children:['deploy.sh','backup.sh','monitor.sh'] },
+  '/home/ubuntu/scripts/deploy.sh': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'755', content:`#!/bin/bash\necho "Starting deployment..."\ncd /var/www/html/mylaravel\ngit pull origin main\ncomposer install --no-dev --optimize-autoloader\nphp artisan migrate --force\nphp artisan optimize:clear\nphp artisan config:cache\nphp artisan route:cache\nchmod -R 775 storage/ bootstrap/cache/\nsudo systemctl reload nginx\necho "Deployment complete!"` },
+  '/home/ubuntu/scripts/backup.sh': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'755', content:`#!/bin/bash\nBACKUP_DIR=/home/ubuntu/backups\nDATE=$(date +%Y%m%d_%H%M)\ntar -czf $BACKUP_DIR/project_$DATE.tar.gz --exclude=vendor /var/www/html/mylaravel/\nmysqldump -u root -p mylaraveldb > $BACKUP_DIR/db_$DATE.sql\ngzip $BACKUP_DIR/db_$DATE.sql\necho "Backup saved to $BACKUP_DIR"` },
+  '/home/ubuntu/scripts/monitor.sh': { type:'file', owner:'ubuntu', group:'ubuntu', perm:'755', content:`#!/bin/bash\necho "=== System Monitor ==="\necho "CPU: $(top -bn1 | grep 'Cpu(s)' | awk '{print $2}')%"\necho "MEM: $(free -m | awk '/Mem/{printf "%.0f%%", $3/$2*100}')"\necho "DISK: $(df -h / | awk '/\//{print $5}')"\necho "NGINX: $(systemctl is-active nginx)"\necho "MYSQL: $(systemctl is-active mysql)"` },
+  '/home/deploy': { type:'dir', owner:'deploy', group:'deploy', perm:'755', children:['.ssh'] },
+  '/home/deploy/.ssh': { type:'dir', owner:'deploy', group:'deploy', perm:'700', children:['authorized_keys'] },
+  '/var': { type:'dir', owner:'root', group:'root', perm:'755', children:['www','log','run','lib','cache'] },
+  '/var/www': { type:'dir', owner:'root', group:'root', perm:'755', children:['html'] },
+  '/var/www/html': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['mylaravel','index.html'] },
+  '/var/www/html/index.html': { type:'file', owner:'www-data', group:'www-data', perm:'644', content:`<!DOCTYPE html><html><body><h1>Ubuntu Default Page</h1></body></html>` },
+  '/var/www/html/mylaravel': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['app','bootstrap','config','database','public','resources','routes','storage','vendor','.env','artisan','composer.json'] },
+  '/var/www/html/mylaravel/.env': { type:'file', owner:'www-data', group:'www-data', perm:'640', content:`APP_NAME=MyLaravelApp\nAPP_ENV=production\nAPP_KEY=base64:xK8mN2pQ7rT4wY9zA1bC3dE5fG6hJ0kL\nAPP_DEBUG=false\nAPP_URL=https://mysite.com\n\nDB_CONNECTION=mysql\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=mylaraveldb\nDB_USERNAME=laraveluser\nDB_PASSWORD=SecurePass@2024\n\nCACHE_DRIVER=file\nQUEUE_CONNECTION=database\nSESSION_DRIVER=file\n\nMAIL_MAILER=smtp\nMAIL_HOST=smtp.gmail.com\nMAIL_PORT=587\nMAIL_USERNAME=admin@mysite.com` },
+  '/var/www/html/mylaravel/artisan': { type:'file', owner:'www-data', group:'www-data', perm:'755' },
+  '/var/www/html/mylaravel/composer.json': { type:'file', owner:'www-data', group:'www-data', perm:'644', content:`{\n  "name": "myapp/laravel",\n  "require": {\n    "php": "^8.1",\n    "laravel/framework": "^10.0",\n    "laravel/sanctum": "^3.2"\n  },\n  "require-dev": {\n    "phpunit/phpunit": "^10.0"\n  }\n}` },
+  '/var/www/html/mylaravel/public': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['index.php','.htaccess','css','js','storage'] },
+  '/var/www/html/mylaravel/storage': { type:'dir', owner:'www-data', group:'www-data', perm:'775', children:['app','framework','logs'] },
+  '/var/www/html/mylaravel/storage/logs': { type:'dir', owner:'www-data', group:'www-data', perm:'775', children:['laravel.log'] },
+  '/var/www/html/mylaravel/storage/logs/laravel.log': { type:'file', owner:'www-data', group:'www-data', perm:'664', content:`[2024-01-15 09:00:01] production.INFO: Application started\n[2024-01-15 09:15:23] production.INFO: User login: user@example.com\n[2024-01-15 10:22:45] production.WARNING: Queue job delayed: SendEmailJob\n[2024-01-15 11:30:12] production.ERROR: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'mylaraveldb.cache' doesn't exist\n[2024-01-15 12:00:00] production.INFO: Scheduled task: App\\Console\\Commands\\CleanOldFiles ran successfully\n[2024-01-15 14:45:33] production.ERROR: Failed to open stream: Permission denied - /var/www/html/mylaravel/storage/app/uploads\n[2024-01-15 15:00:01] production.INFO: Queue worker started (PID: 4521)\n[2024-01-15 16:22:10] production.INFO: Mail sent to user@example.com` },
+  '/var/www/html/mylaravel/bootstrap': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['cache','app.php'] },
+  '/var/www/html/mylaravel/bootstrap/cache': { type:'dir', owner:'www-data', group:'www-data', perm:'775', children:['.gitignore'] },
+  '/var/www/html/mylaravel/config': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['app.php','database.php','cache.php','queue.php','mail.php'] },
+  '/var/www/html/mylaravel/routes': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['web.php','api.php'] },
+  '/var/www/html/mylaravel/app': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['Http','Models','Console','Providers'] },
+  '/var/www/html/mylaravel/vendor': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['autoload.php','laravel','composer'] },
+  '/var/www/html/mylaravel/database': { type:'dir', owner:'www-data', group:'www-data', perm:'755', children:['migrations','seeders','factories'] },
+  '/var/log': { type:'dir', owner:'root', group:'root', perm:'755', children:['nginx','apache2','php8.2-fpm.log','mysql','syslog','auth.log','dpkg.log'] },
+  '/var/log/nginx': { type:'dir', owner:'root', group:'adm', perm:'755', children:['access.log','error.log'] },
+  '/var/log/nginx/access.log': { type:'file', owner:'root', group:'adm', perm:'640', content:`192.168.1.1 - - [15/Jan/2024:09:00:01 +0530] "GET / HTTP/1.1" 200 1234\n192.168.1.2 - - [15/Jan/2024:09:15:23 +0530] "POST /api/login HTTP/1.1" 200 456\n192.168.1.3 - - [15/Jan/2024:10:22:45 +0530] "GET /admin HTTP/1.1" 403 123\n192.168.1.1 - - [15/Jan/2024:11:30:12 +0530] "GET /storage/uploads/secret.pdf HTTP/1.1" 404 0\n192.168.1.5 - - [15/Jan/2024:14:45:33 +0530] "POST /upload HTTP/1.1" 500 234` },
+  '/var/log/nginx/error.log': { type:'file', owner:'root', group:'adm', perm:'640', content:`2024/01/15 09:00:00 [notice] 1234#1234: nginx/1.18.0 started\n2024/01/15 10:22:45 [error] 1235#1235: *45 connect() failed (111: Connection refused) while connecting to upstream\n2024/01/15 14:45:33 [error] 1235#1235: *67 open() "/var/www/html/mylaravel/public/favicon.ico" failed (13: Permission denied)` },
+  '/var/log/php8.2-fpm.log': { type:'file', owner:'root', group:'root', perm:'644', content:`[15-Jan-2024 09:00:00] NOTICE: fpm is running, pid 1500\n[15-Jan-2024 09:00:00] NOTICE: ready to handle connections\n[15-Jan-2024 14:45:33] WARNING: [pool www] child 1501 said into stderr: "PHP Fatal error: Out of memory (allocated 134217728) in /var/www/html/mylaravel/vendor/heavy-package/src/Parser.php on line 234"` },
+  '/var/log/auth.log': { type:'file', owner:'root', group:'adm', perm:'640', content:`Jan 15 09:00:01 prod-server-01 sshd[1200]: Accepted publickey for ubuntu from 192.168.1.100 port 54321\nJan 15 09:30:12 prod-server-01 sudo: ubuntu : TTY=pts/0 ; PWD=/var/www/html/mylaravel ; USER=root ; COMMAND=/bin/systemctl reload nginx\nJan 15 10:00:00 prod-server-01 sshd[1210]: Failed password for root from 45.32.11.22 port 12345\nJan 15 10:00:01 prod-server-01 sshd[1210]: Failed password for root from 45.32.11.22 port 12346\nJan 15 10:00:02 prod-server-01 sshd[1210]: Failed password for root from 45.32.11.22 port 12347` },
+  '/var/log/syslog': { type:'file', owner:'root', group:'root', perm:'644', content:`Jan 15 09:00:00 prod-server-01 kernel: Linux version 5.15.0-91-generic\nJan 15 09:00:01 prod-server-01 systemd[1]: Started Nginx HTTP Server\nJan 15 09:00:01 prod-server-01 systemd[1]: Started MySQL Database Server\nJan 15 09:05:00 prod-server-01 cron[1234]: (ubuntu) CMD (cd /var/www/html/mylaravel && php artisan schedule:run)\nJan 15 12:00:00 prod-server-01 cron[1234]: (ubuntu) CMD (cd /var/www/html/mylaravel && php artisan schedule:run)` },
+  '/tmp': { type:'dir', owner:'root', group:'root', perm:'1777', children:['upload_temp','php_session'] },
+  '/usr': { type:'dir', owner:'root', group:'root', perm:'755', children:['bin','sbin','local','share'] },
+  '/usr/bin': { type:'dir', owner:'root', group:'root', perm:'755' },
+  '/usr/local': { type:'dir', owner:'root', group:'root', perm:'755', children:['bin'] },
+  '/usr/local/bin': { type:'dir', owner:'root', group:'root', perm:'755', children:['composer','php'] },
+  '/proc': { type:'dir', owner:'root', group:'root', perm:'555' },
+  '/root': { type:'dir', owner:'root', group:'root', perm:'700' },
+};
+
+// ===================== SERVICES =====================
+const SERVICES = {
+  nginx: { status:'running', pid:1234, memory:'12.3MB', cpu:'0.2%', port:80 },
+  mysql: { status:'running', pid:1301, memory:'234.5MB', cpu:'1.1%', port:3306 },
+  'php8.2-fpm': { status:'running', pid:1500, memory:'45.2MB', cpu:'0.8%', port:null },
+  ssh: { status:'running', pid:1200, memory:'5.1MB', cpu:'0.0%', port:22 },
+  cron: { status:'running', pid:1100, memory:'2.1MB', cpu:'0.0%', port:null },
+  supervisor: { status:'running', pid:1150, memory:'8.2MB', cpu:'0.1%', port:null },
+  ufw: { status:'running', pid:null, memory:'-', cpu:'-', port:null },
+  redis: { status:'stopped', pid:null, memory:'-', cpu:'-', port:6379 },
+  'apache2': { status:'stopped', pid:null, memory:'-', cpu:'-', port:80 },
+  postfix: { status:'inactive', pid:null, memory:'-', cpu:'-', port:null },
+};
+
+// ===================== USERS =====================
+const USERS = {
+  root:     { uid:0,    gid:0,    home:'/root',          shell:'/bin/bash',         groups:['root'] },
+  ubuntu:   { uid:1000, gid:1000, home:'/home/ubuntu',   shell:'/bin/bash',         groups:['ubuntu','sudo','www-data','docker'] },
+  deploy:   { uid:1001, gid:1001, home:'/home/deploy',   shell:'/bin/bash',         groups:['deploy','www-data'] },
+  'www-data':{ uid:33,  gid:33,   home:'/var/www',       shell:'/usr/sbin/nologin', groups:['www-data'] },
+  mysql:    { uid:111,  gid:114,  home:'/var/lib/mysql',  shell:'/bin/false',        groups:['mysql'] },
+};
+
+// ===================== PROCESSES =====================
+const PROCESSES_BASE = [
+  { pid:1,    ppid:0,   user:'root',     cpu:'0.0', mem:'0.3', vsz:'168000', rss:'13000',  cmd:'systemd --system --deserialize 31' },
+  { pid:1100, ppid:1,   user:'root',     cpu:'0.0', mem:'0.1', vsz:'25000',  rss:'4000',   cmd:'/usr/sbin/cron -f' },
+  { pid:1150, ppid:1,   user:'root',     cpu:'0.0', mem:'0.3', vsz:'30000',  rss:'8000',   cmd:'/usr/bin/supervisord' },
+  { pid:1200, ppid:1,   user:'root',     cpu:'0.0', mem:'0.2', vsz:'72000',  rss:'9000',   cmd:'sshd: /usr/sbin/sshd -D' },
+  { pid:1201, ppid:1200,user:'ubuntu',   cpu:'0.0', mem:'0.2', vsz:'72000',  rss:'8000',   cmd:'sshd: ubuntu@pts/0' },
+  { pid:1202, ppid:1201,user:'ubuntu',   cpu:'0.0', mem:'0.1', vsz:'10000',  rss:'4000',   cmd:'-bash' },
+  { pid:1234, ppid:1,   user:'root',     cpu:'0.1', mem:'0.5', vsz:'55000',  rss:'12000',  cmd:'nginx: master process /usr/sbin/nginx' },
+  { pid:1235, ppid:1234,user:'www-data', cpu:'0.1', mem:'0.8', vsz:'56000',  rss:'16000',  cmd:'nginx: worker process' },
+  { pid:1236, ppid:1234,user:'www-data', cpu:'0.1', mem:'0.7', vsz:'56000',  rss:'14000',  cmd:'nginx: worker process' },
+  { pid:1301, ppid:1,   user:'mysql',    cpu:'1.1', mem:'9.2', vsz:'1200000','rss':234000, cmd:'/usr/sbin/mysqld --daemonize' },
+  { pid:1500, ppid:1,   user:'root',     cpu:'0.0', mem:'0.5', vsz:'200000', rss:'45000',  cmd:'php-fpm: master process' },
+  { pid:1501, ppid:1500,user:'www-data', cpu:'0.4', mem:'1.8', vsz:'210000', rss:'56000',  cmd:'php-fpm: pool www' },
+  { pid:1502, ppid:1500,user:'www-data', cpu:'0.3', mem:'1.6', vsz:'208000', rss:'48000',  cmd:'php-fpm: pool www' },
+  { pid:4521, ppid:1150,user:'ubuntu',   cpu:'0.2', mem:'2.1', vsz:'215000', rss:'62000',  cmd:'php artisan queue:work --sleep=3 --tries=3' },
+  { pid:5000, ppid:1202,user:'ubuntu',   cpu:'0.0', mem:'0.1', vsz:'10000',  rss:'3000',   cmd:'bash' },
+];
+let processes = JSON.parse(JSON.stringify(PROCESSES_BASE));
+
+// ===================== NETWORK =====================
+const NETWORK = {
+  interfaces: {
+    eth0: { ip:'10.0.0.5', mask:'255.255.255.0', mac:'02:42:0a:00:00:05', rx:'1.2GB', tx:'456MB', status:'UP' },
+    lo:   { ip:'127.0.0.1', mask:'255.0.0.0',    mac:'00:00:00:00:00:00', rx:'234MB', tx:'234MB', status:'UP' },
+  },
+  ports: { 22:'sshd', 80:'nginx', 3306:'mysqld', 9000:'php-fpm' },
+  routes: [
+    { dest:'0.0.0.0/0',       gw:'10.0.0.1',  iface:'eth0' },
+    { dest:'10.0.0.0/24',     gw:'0.0.0.0',   iface:'eth0' },
+    { dest:'127.0.0.0/8',     gw:'0.0.0.0',   iface:'lo' },
+  ],
+  firewall: {
+    status:'active',
+    rules: [
+      { num:'1', action:'ALLOW IN', from:'Anywhere', to:'22/tcp' },
+      { num:'2', action:'ALLOW IN', from:'Anywhere', to:'80/tcp' },
+      { num:'3', action:'ALLOW IN', from:'Anywhere', to:'443/tcp' },
+      { num:'4', action:'DENY IN',  from:'Anywhere', to:'3306/tcp' },
+    ]
+  }
+};
+
+// ===================== MYSQL STATE =====================
+const MYSQL_STATE = {
+  active: false,
+  selectedDb: null,
+  databases: {
+    information_schema: { tables:['TABLES','COLUMNS','SCHEMATA','USER_PRIVILEGES'] },
+    mylaraveldb: {
+      tables: {
+        users:       { cols:'id,name,email,password,created_at', rows:1247 },
+        jobs:        { cols:'id,queue,payload,attempts,created_at', rows:23 },
+        migrations:  { cols:'id,migration,batch', rows:34 },
+        cache:       { cols:'key,value,expiration', rows:892 },
+        sessions:    { cols:'id,user_id,ip_address,payload,last_activity', rows:145 },
+        products:    { cols:'id,name,price,stock,created_at', rows:456 },
+        orders:      { cols:'id,user_id,total,status,created_at', rows:3821 },
+        categories:  { cols:'id,name,slug,parent_id', rows:28 },
+      }
+    },
+    mysql: { tables:['user','db','tables_priv','columns_priv'] },
+  }
+};
+
+// ===================== CRONTAB =====================
+let crontab = `* * * * * cd /var/www/html/mylaravel && php artisan schedule:run >> /dev/null 2>&1\n0 2 * * * /home/ubuntu/scripts/backup.sh >> /home/ubuntu/backups/backup.log 2>&1\n0 * * * * /home/ubuntu/scripts/monitor.sh >> /var/log/monitor.log 2>&1`;
+
+// ===================== HISTORY & AUTOCOMPLETE =====================
+let cmdHistory = [];
+let histIndex = -1;
+let acList = [], acIdx = -1;
+
+// all known commands for autocomplete
+const ALL_CMDS = ['ls','cd','pwd','mkdir','touch','cp','mv','rm','cat','less','head','tail','grep','find','echo','nano','vim','chmod','chown','chgrp','su','sudo','whoami','id','who','w','last','top','htop','ps','kill','pkill','killall','df','du','free','uname','uptime','date','history','clear','exit','ssh','scp','rsync','wget','curl','tar','zip','unzip','gzip','gunzip','apt','apt-get','dpkg','systemctl','service','journalctl','crontab','cron','php','composer','git','mysql','mysqldump','nginx','apache2ctl','ufw','ip','ifconfig','netstat','ss','ping','traceroute','nmap','iptables','useradd','userdel','usermod','groupadd','passwd','visudo','env','export','source','alias','which','whereis','locate','man','--help','wc','sort','uniq','awk','sed','cut','tr','diff','patch','ln','readlink','stat','file','lsof','strace','htpasswd','certbot','supervisor','supervisorctl'];
+
+// ===================== TERMINAL OUTPUT =====================
+function out(text, cls='') {
+  const t = document.getElementById('terminal');
+  const d = document.createElement('div');
+  d.className = 'line' + (cls ? ' output '+cls : '');
+  d.innerHTML = text;
+  t.appendChild(d);
+  t.scrollTop = t.scrollHeight;
+}
+
+function prompt_line(cmd='') {
+  const t = document.getElementById('terminal');
+  const d = document.createElement('div');
+  d.className = 'line prompt-line';
+  const path = STATE.cwd === '/home/ubuntu' ? '~' : STATE.cwd === STATE.env.HOME ? '~' : STATE.cwd;
+  d.innerHTML = `<span class="ps1-user">${STATE.user}</span><span class="ps1-at">@</span><span class="ps1-host">${STATE.hostname}</span><span class="ps1-sep">:</span><span class="ps1-path">${path}</span><span class="ps1-dollar"> ${STATE.user==='root'?'#':'$'}</span> <span style="color:#e6edf3">${escHtml(cmd)}</span>`;
+  t.appendChild(d);
+  t.scrollTop = t.scrollHeight;
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ===================== PATH UTILS =====================
+function resolvePath(p) {
+  if (!p || p === '~') return STATE.env.HOME;
+  if (p.startsWith('~/')) return STATE.env.HOME + '/' + p.slice(2);
+  if (!p.startsWith('/')) p = STATE.cwd + '/' + p;
+  const parts = p.split('/').filter(Boolean);
+  const res = [];
+  for (const pt of parts) {
+    if (pt === '.') continue;
+    else if (pt === '..') res.pop();
+    else res.push(pt);
+  }
+  return '/' + res.join('/');
+}
+
+function getNode(p) {
+  const rp = resolvePath(p);
+  let node = FS[rp];
+  if (node && node.type === 'symlink') node = FS[node.target] || node;
+  return node ? { ...node, path: rp } : null;
+}
+
+function listDir(p) {
+  const rp = resolvePath(p);
+  const node = FS[rp];
+  if (!node) return null;
+  if (node.type !== 'dir') return null;
+  const children = node.children || [];
+  return children.map(c => {
+    const cp = rp === '/' ? '/' + c : rp + '/' + c;
+    return FS[cp] || { type:'file', owner:'root', group:'root', perm:'644', name:c, path:cp };
+  });
+}
+
+function permStr(perm, type) {
+  const p = String(perm).padStart(3,'0');
+  const bits = p.split('').map(n=>parseInt(n));
+  const sym = (b) => (b&4?'r':'-')+(b&2?'w':'-')+(b&1?'x':'-');
+  const t = type==='dir'?'d':type==='symlink'?'l':'-';
+  return t + sym(bits[0]) + sym(bits[1]) + sym(bits[2]);
+}
+
+// ===================== COMMAND PARSER =====================
+function parseCmd(input) {
+  // Handle variable expansion
+  input = input.replace(/\$([A-Z_][A-Z0-9_]*)/gi, (m, name) => STATE.env[name] || STATE.vars[name] || '');
+  
+  // Handle pipes (simplified)
+  if (input.includes(' | ')) {
+    const parts = input.split(' | ');
+    return { pipe: parts.map(p => tokenize(p.trim())) };
+  }
+  
+  // Handle output redirection (simplified)
+  let redirect = null;
+  if (input.includes(' >> ')) {
+    const [cmd, file] = input.split(' >> ');
+    redirect = { type: 'append', file: file.trim() };
+    input = cmd;
+  } else if (input.match(/ >\s*\/dev\/null/)) {
+    redirect = { type:'null' };
+    input = input.replace(/ >\s*\/dev\/null.*/, '');
+  } else if (input.includes(' > ')) {
+    const [cmd, file] = input.split(' > ');
+    redirect = { type:'overwrite', file: file.trim()};
+    input = cmd;
+  }
+  
+  const tok = tokenize(input.trim());
+  tok.redirect = redirect;
+  return tok;
+}
+
+function tokenize(input) {
+  const args = [];
+  let cur = '';
+  let inQ = false, inDQ = false;
+  for (let i=0; i<input.length; i++) {
+    const c = input[i];
+    if (c === "'" && !inDQ) { inQ=!inQ; continue; }
+    if (c === '"' && !inQ) { inDQ=!inDQ; continue; }
+    if (c === ' ' && !inQ && !inDQ) { if(cur) args.push(cur); cur=''; continue; }
+    cur += c;
+  }
+  if (cur) args.push(cur);
+  return args;
+}
+
+// ===================== COMMANDS =====================
+function runCmd(input) {
+  input = input.trim();
+  if (!input) return;
+
+  // Add to history
+  if (cmdHistory[cmdHistory.length-1] !== input) cmdHistory.push(input);
+  histIndex = cmdHistory.length;
+
+  // If mysql active
+  if (MYSQL_STATE.active) { runMysql(input); return; }
+
+  const parsed = parseCmd(input);
+  
+  if (parsed.pipe) {
+    runPipe(parsed.pipe, input);
+    return;
+  }
+  
+  const args = parsed;
+  const cmd = args[0];
+  if (!cmd) return;
+
+  const flags = args.filter(a => a.startsWith('-'));
+  const positional = args.slice(1).filter(a => !a.startsWith('-'));
+
+  switch(cmd) {
+    // --- NAVIGATION ---
+    case 'pwd': cmd_pwd(); break;
+    case 'ls': cmd_ls(positional, flags, parsed.redirect); break;
+    case 'cd': cmd_cd(positional[0]); break;
+    case 'tree': cmd_tree(positional[0]); break;
+
+    // --- FILE OPS ---
+    case 'mkdir': cmd_mkdir(positional, flags); break;
+    case 'touch': cmd_touch(positional); break;
+    case 'cp': cmd_cp(positional, flags); break;
+    case 'mv': cmd_mv(positional); break;
+    case 'rm': cmd_rm(positional, flags); break;
+    case 'ln': cmd_ln(positional, flags); break;
+
+    // --- FILE VIEWING ---
+    case 'cat': cmd_cat(positional, parsed.redirect); break;
+    case 'less': cmd_less(positional[0]); break;
+    case 'head': cmd_head(positional, flags); break;
+    case 'tail': cmd_tail(positional, flags); break;
+    case 'grep': cmd_grep(args.slice(1), flags); break;
+    case 'wc': cmd_wc(positional, flags); break;
+    case 'find': cmd_find(args.slice(1)); break;
+    case 'stat': cmd_stat(positional[0]); break;
+    case 'file': cmd_file(positional[0]); break;
+    case 'diff': cmd_diff(positional); break;
+
+    // --- FILE EDITING ---
+    case 'nano': case 'vim': case 'vi': cmd_editor(cmd, positional[0]); break;
+    case 'echo': cmd_echo(args.slice(1), parsed.redirect); break;
+
+    // --- PERMISSIONS ---
+    case 'chmod': cmd_chmod(positional, flags); break;
+    case 'chown': cmd_chown(positional, flags); break;
+    case 'chgrp': cmd_chgrp(positional, flags); break;
+    case 'umask': out(`0022`); break;
+
+    // --- USER MANAGEMENT ---
+    case 'whoami': out(STATE.user); break;
+    case 'id': cmd_id(positional[0]); break;
+    case 'who': cmd_who(); break;
+    case 'w': cmd_w(); break;
+    case 'last': cmd_last(); break;
+    case 'su': cmd_su(positional, flags, args); break;
+    case 'sudo': cmd_sudo(args.slice(1)); break;
+    case 'useradd': cmd_useradd(positional, flags, args); break;
+    case 'userdel': cmd_userdel(positional, flags); break;
+    case 'usermod': cmd_usermod(args.slice(1)); break;
+    case 'groupadd': cmd_groupadd(positional); break;
+    case 'passwd': cmd_passwd(positional); break;
+    case 'groups': cmd_groups(positional[0]); break;
+
+    // --- PROCESS MANAGEMENT ---
+    case 'ps': cmd_ps(flags); break;
+    case 'top': cmd_top(); break;
+    case 'htop': cmd_htop(); break;
+    case 'kill': cmd_kill(positional, flags); break;
+    case 'pkill': cmd_pkill(positional); break;
+    case 'killall': cmd_pkill(positional); break;
+    case 'jobs': out(`No active jobs`); break;
+    case 'nohup': out(`nohup: running command in background`); break;
+
+    // --- SYSTEM INFO ---
+    case 'uname': cmd_uname(flags); break;
+    case 'uptime': cmd_uptime(); break;
+    case 'date': cmd_date(); break;
+    case 'hostname': out(STATE.hostname); break;
+    case 'df': cmd_df(flags); break;
+    case 'du': cmd_du(positional, flags); break;
+    case 'free': cmd_free(flags); break;
+    case 'lsof': cmd_lsof(flags, args); break;
+
+    // --- NETWORK ---
+    case 'ip': cmd_ip(args.slice(1)); break;
+    case 'ifconfig': cmd_ifconfig(); break;
+    case 'netstat': cmd_netstat(flags); break;
+    case 'ss': cmd_ss(flags); break;
+    case 'ping': cmd_ping(positional[0], flags); break;
+    case 'curl': cmd_curl(args.slice(1)); break;
+    case 'wget': cmd_wget(positional[0]); break;
+    case 'nmap': cmd_nmap(args.slice(1)); break;
+
+    // --- FIREWALL ---
+    case 'ufw': cmd_ufw(args.slice(1)); break;
+    case 'iptables': cmd_iptables(args.slice(1)); break;
+
+    // --- SERVICES ---
+    case 'systemctl': cmd_systemctl(args.slice(1)); break;
+    case 'service': cmd_service(args.slice(1)); break;
+    case 'journalctl': cmd_journalctl(args.slice(1)); break;
+
+    // --- CRON ---
+    case 'crontab': cmd_crontab(flags); break;
+
+    // --- PACKAGE MANAGEMENT ---
+    case 'apt': case 'apt-get': cmd_apt(args.slice(1)); break;
+    case 'dpkg': cmd_dpkg(args.slice(1)); break;
+    case 'which': cmd_which(positional[0]); break;
+    case 'whereis': out(`${positional[0]}: /usr/bin/${positional[0]} /usr/share/man/man1/${positional[0]}.1.gz`); break;
+
+    // --- PHP / LARAVEL ---
+    case 'php': cmd_php(args.slice(1)); break;
+    case 'composer': cmd_composer(args.slice(1)); break;
+
+    // --- GIT ---
+    case 'git': cmd_git(args.slice(1)); break;
+
+    // --- DATABASE ---
+    case 'mysql': cmd_mysql(args.slice(1)); break;
+    case 'mysqldump': cmd_mysqldump(args.slice(1)); break;
+    case 'mysqlcheck': out(`mylaraveldb.users                           OK\nmylaraveldb.orders                          OK\nmylaraveldb.products                        OK`); break;
+
+    // --- ARCHIVE ---
+    case 'tar': cmd_tar(args.slice(1)); break;
+    case 'zip': cmd_zip(positional, flags); break;
+    case 'unzip': cmd_unzip(positional, flags); break;
+    case 'gzip': out(`${positional[0]}.gz created`); break;
+    case 'gunzip': out(`${positional[0] && positional[0].replace('.gz','')} extracted`); break;
+
+    // --- TRANSFER ---
+    case 'scp': cmd_scp(args.slice(1)); break;
+    case 'rsync': cmd_rsync(args.slice(1)); break;
+    case 'ssh': cmd_ssh(args.slice(1)); break;
+
+    // --- ENVIRONMENT ---
+    case 'env': case 'printenv': cmd_env(); break;
+    case 'export': cmd_export(args.slice(1)); break;
+    case 'source': case '.': out(`${positional[0]}: sourced`); break;
+    case 'alias': cmd_alias(args.slice(1)); break;
+    case 'set': cmd_env(); break;
+
+    // --- MISC ---
+    case 'clear': document.getElementById('terminal').innerHTML=''; break;
+    case 'history': cmd_history(); break;
+    case 'man': cmd_man(positional[0]); break;
+    case 'help': cmd_help(); break;
+    case 'exit': out(`Logout\nConnection to ${STATE.hostname} closed.`, 'warn'); STATE.user='ubuntu'; STATE.cwd='/home/ubuntu'; break;
+    case 'logout': out(`Logged out as root. Returned to ubuntu.`, 'success'); STATE.user='ubuntu'; STATE.cwd='/home/ubuntu'; STATE.env.HOME='/home/ubuntu'; break;
+    case 'reboot': out(`Broadcast message from ubuntu@prod-server-01\n\nThe system is going down for reboot NOW!\n\n[SIMULATION] Server restart simulated. Services restarting...`, 'warn'); setTimeout(()=>{ out(`System back online. All services started.`, 'success'); }, 2000); break;
+    case 'shutdown': out(`[SIMULATION] Shutdown command noted. In real server, this would power off the machine!`, 'warn'); break;
+    case 'sleep': out(`[sleeping ${positional[0]}s...]`, 'muted'); break;
+    case 'test': case '[': break;
+    case 'true': break;
+    case 'false': break;
+    case 'wc': cmd_wc(positional, flags); break;
+    case 'sort': out(`[sorted output]`); break;
+    case 'uniq': out(`[unique lines]`); break;
+    case 'awk': out(`[awk processed output]`); break;
+    case 'sed': out(`[sed processed output]`); break;
+    case 'certbot': cmd_certbot(args.slice(1)); break;
+    case 'supervisorctl': cmd_supervisorctl(args.slice(1)); break;
+    case 'supervisord': out(`supervisord started`); break;
+    case 'htpasswd': out(`Updating password for user admin`); break;
+    case 'openssl': out(`Generating RSA private key, 2048 bit long modulus\n......+++\nwriting RSA key`); break;
+    case 'ssh-keygen': out(`Generating public/private rsa key pair.\nYour identification has been saved in /home/${STATE.user}/.ssh/id_rsa\nYour public key has been saved in /home/${STATE.user}/.ssh/id_rsa.pub`); break;
+    case 'lscpu': cmd_lscpu(); break;
+    case 'nproc': out(`2`); break;
+    case 'tee': out(`[output piped to file]`); break;
+    case 'xargs': out(`[xargs processed]`); break;
+    case 'basename': out(positional[0] ? positional[0].split('/').pop() : ''); break;
+    case 'dirname': out(positional[0] ? positional[0].split('/').slice(0,-1).join('/') || '/' : '.'); break;
+    case 'readlink': out(positional[0] ? (FS[resolvePath(positional[0])]?.target || positional[0]) : ''); break;
+    case 'watch': out(`[watch] Running: ${args.slice(1).join(' ')}\nPress Ctrl+C to stop.`); break;
+    case 'screen': case 'tmux': out(`[${cmd}] session started (simulation)`); break;
+    case 'bc': out(`[calculator mode - type expression]`); break;
+    case 'time': out(`real\t0m0.123s\nuser\t0m0.100s\nsys\t0m0.022s`); break;
+    default:
+      if (cmd.startsWith('./')) {
+        cmd_runscript(cmd, args.slice(1));
+      } else if (cmd.includes('=') && !cmd.startsWith('-')) {
+        cmd_assign(cmd);
+      } else {
+        out(`bash: ${escHtml(cmd)}: command not found`, 'error');
+        if (cmd.includes('artisan')) out(`Hint: php artisan ... (artisan ke saath 'php' lagao)`, 'warn');
+      }
+  }
+  updatePromptDisplay();
+  updateSidePanels();
+}
+
+// ===================== PIPE SUPPORT =====================
+function runPipe(parts, original) {
+  // Basic: first command output, then filter through grep/tail/head/wc
+  let output = '';
+  // Execute first command and capture
+  const first = parts[0];
+  output = captureOutput(first);
+  
+  for (let i=1;i<parts.length;i++) {
+    const args = parts[i];
+    const cmd = args[0];
+    const a = args.slice(1);
+    if (cmd === 'grep') {
+      const pattern = a.find(x=>!x.startsWith('-')) || '';
+      const ignoreCase = a.includes('-i');
+      const showNum = a.includes('-n');
+      const lines = output.split('\n').filter(l => ignoreCase ? l.toLowerCase().includes(pattern.toLowerCase()) : l.includes(pattern));
+      output = showNum ? lines.map((l,i)=>`${i+1}:${l}`).join('\n') : lines.join('\n');
+    } else if (cmd === 'tail') {
+      const n = parseInt((a.find(x=>x.startsWith('-'))?.replace('-',''))||10);
+      output = output.split('\n').slice(-Math.abs(n)).join('\n');
+    } else if (cmd === 'head') {
+      const n = parseInt((a.find(x=>x.startsWith('-'))?.replace('-',''))||10);
+      output = output.split('\n').slice(0,Math.abs(n)).join('\n');
+    } else if (cmd === 'wc') {
+      const lines = output.split('\n').length;
+      const words = output.split(/\s+/).filter(Boolean).length;
+      const chars = output.length;
+      if (a.includes('-l')) output = `${lines}`;
+      else if (a.includes('-w')) output = `${words}`;
+      else if (a.includes('-c')) output = `${chars}`;
+      else output = `    ${lines}    ${words}   ${chars}`;
+    } else if (cmd === 'sort') {
+      const lines = output.split('\n');
+      output = lines.sort().join('\n');
+    } else if (cmd === 'uniq') {
+      const lines = output.split('\n');
+      output = lines.filter((l,i)=>l!==lines[i-1]).join('\n');
+    } else if (cmd === 'awk') {
+      output = `[awk processed: ${a.join(' ')}]`;
+    } else if (cmd === 'sed') {
+      output = `[sed processed: ${a.join(' ')}]`;
+    }
+  }
+  if (output) out(escHtml(output));
+}
+
+function captureOutput(args) {
+  const cmd = args[0];
+  const flags = args.filter(a=>a.startsWith('-'));
+  const pos = args.slice(1).filter(a=>!a.startsWith('-'));
+  
+  if (cmd === 'cat') {
+    const n = getNode(pos[0]);
+    if (n && n.content) return n.content;
+    return '';
+  }
+  if (cmd === 'ls') {
+    const target = pos[0] || STATE.cwd;
+    const children = listDir(target);
+    if (!children) return '';
+    return children.map(c => c.path ? c.path.split('/').pop() : c).join('\n');
+  }
+  if (cmd === 'echo') {
+    return args.slice(1).join(' ');
+  }
+  if (cmd === 'ps') {
+    return processes.map(p=>`${p.pid} ${p.user.padEnd(10)} ${p.cmd}`).join('\n');
+  }
+  if (cmd === 'tail') {
+    const n = getNode(pos[0]);
+    if (n?.content) {
+      const lines = n.content.split('\n');
+      const count = parseInt(flags.find(f=>f.match(/^-\d+/))?.replace('-','')||10);
+      return lines.slice(-count).join('\n');
+    }
+    return '';
+  }
+  if (cmd === 'grep') {
+    return `[grep results for: ${pos.join(' ')}]`;
+  }
+  return `[${cmd} output]`;
+}
+
+// ===================== INDIVIDUAL COMMANDS =====================
+
+function cmd_pwd() { out(STATE.cwd); }
+
+function cmd_ls(pos, flags, redirect) {
+  const target = pos[0] || STATE.cwd;
+  const rp = resolvePath(target);
+  const node = FS[rp];
+  
+  if (!node) { out(`ls: cannot access '${target}': No such file or directory`, 'error'); return; }
+  
+  if (node.type === 'file') {
+    const name = rp.split('/').pop();
+    if (flags.some(f=>f.includes('l'))) {
+      const size = node.size || `${Math.floor(Math.random()*10000)+100}`;
+      out(`-${permStr(node.perm||'644','file').slice(1)} 1 ${node.owner} ${node.group} ${size.padStart(6)} Jan 15 10:00 ${escHtml(name)}`);
+    } else {
+      out(name);
+    }
+    return;
+  }
+  
+  const children = node.children || [];
+  const showHidden = flags.some(f=>f.includes('a'));
+  const longFmt = flags.some(f=>f.includes('l'));
+  const hrSizes = flags.some(f=>f.includes('h'));
+  const sortTime = flags.some(f=>f.includes('t'));
+  
+  let items = children.map(c => {
+    const cp = rp==='/'?'/'+c:rp+'/'+c;
+    const cn = FS[cp] || { type:'file', owner:'root', group:'root', perm:'644' };
+    return { name:c, ...cn, path:cp };
+  });
+  
+  if (!showHidden) items = items.filter(i => !i.name.startsWith('.'));
+  if (showHidden && !items.find(i=>i.name==='.')) {
+    items = [{name:'.',type:'dir',perm:'755',...node},{name:'..',type:'dir',perm:'755'},...items];
+  }
+  
+  if (!items.length && !showHidden) {
+    if (children.filter(c=>!c.startsWith('.')).length === 0) out('');
+    return;
+  }
+  
+  if (longFmt) {
+    if (showHidden) out(`total ${children.length*4}`);
+    items.forEach(item => {
+      const p = item.type==='dir'?'d':item.type==='symlink'?'l':'-';
+      const ps = p + permStr(item.perm||'644',item.type).slice(1);
+      const size = item.size || (item.type==='dir'?'4096':String(Math.floor(Math.random()*50000)+1000));
+      const name = item.type==='dir' ? `<span style="color:#58a6ff">${item.name}</span>` : item.type==='symlink'?`<span style="color:#39c5cf">${item.name}</span>`:item.type==='file'&&(item.perm||'').endsWith('5')?`<span style="color:#3fb950">${item.name}</span>`:item.name;
+      const target = item.type==='symlink'&&item.target?` -> ${item.target}`:'';
+      out(`${ps} 1 ${(item.owner||'root').padEnd(8)} ${(item.group||'root').padEnd(8)} ${String(size).padStart(6)} Jan 15 10:00 ${name}${target}`);
+    });
+  } else {
+    const colored = items.map(item => {
+      if (item.type==='dir') return `<span style="color:#58a6ff">${item.name}</span>`;
+      if (item.type==='symlink') return `<span style="color:#39c5cf">${item.name}</span>`;
+      if (item.perm && item.perm.slice(-1)==='5') return `<span style="color:#3fb950">${item.name}</span>`;
+      return item.name;
+    });
+    const cols = Math.floor(80/20);
+    let rows = [];
+    for(let i=0;i<colored.length;i+=cols) rows.push(colored.slice(i,i+cols).join('  '));
+    rows.forEach(r=>out(r));
+  }
+}
+
+function cmd_cd(target) {
+  if (!target || target === '~') { STATE.cwd = STATE.env.HOME; return; }
+  const rp = resolvePath(target);
+  const node = FS[rp];
+  if (!node) { out(`bash: cd: ${target}: No such file or directory`, 'error'); return; }
+  if (node.type !== 'dir') { out(`bash: cd: ${target}: Not a directory`, 'error'); return; }
+  STATE.cwd = rp;
+}
+
+function cmd_tree(target) {
+  const rp = resolvePath(target || STATE.cwd);
+  function drawTree(path, prefix='') {
+    const node = FS[path];
+    if (!node || node.type !== 'dir') return;
+    const children = node.children || [];
+    children.forEach((c, i) => {
+      const cp = path==='/'?'/'+c:path+'/'+c;
+      const cn = FS[cp];
+      const last = i === children.length-1;
+      const branch = last ? '└── ' : '├── ';
+      const coloredName = cn?.type==='dir' ? `<span style="color:#58a6ff">${c}</span>` : c;
+      out(`${prefix}${branch}${coloredName}`);
+      if (cn?.type==='dir') drawTree(cp, prefix + (last ? '    ' : '│   '));
+    });
+  }
+  const name = rp.split('/').pop() || '/';
+  out(`<span style="color:#58a6ff">${name}</span>`);
+  drawTree(rp);
+}
+
+function cmd_mkdir(pos, flags) {
+  if (!pos.length) { out(`mkdir: missing operand`, 'error'); return; }
+  pos.forEach(p => {
+    const rp = resolvePath(p);
+    if (FS[rp]) { out(`mkdir: cannot create directory '${p}': File exists`, 'error'); return; }
+    const parent = rp.split('/').slice(0,-1).join('/') || '/';
+    if (!FS[parent] && !flags.includes('-p')) { out(`mkdir: cannot create directory '${p}': No such file or directory`, 'error'); return; }
+    FS[rp] = { type:'dir', owner:STATE.user, group:STATE.user, perm:'755', children:[] };
+    if (FS[parent]) {
+      const name = rp.split('/').pop();
+      if (!FS[parent].children) FS[parent].children = [];
+      if (!FS[parent].children.includes(name)) FS[parent].children.push(name);
+    }
+  });
+}
+
+function cmd_touch(pos) {
+  if (!pos.length) { out(`touch: missing file operand`, 'error'); return; }
+  pos.forEach(p => {
+    const rp = resolvePath(p);
+    if (!FS[rp]) {
+      const parent = rp.split('/').slice(0,-1).join('/') || '/';
+      const name = rp.split('/').pop();
+      FS[rp] = { type:'file', owner:STATE.user, group:STATE.user, perm:'644', content:'' };
+      if (FS[parent]) { if(!FS[parent].children)FS[parent].children=[]; FS[parent].children.push(name); }
+    }
+  });
+}
+
+function cmd_cp(pos, flags) {
+  if (pos.length < 2) { out(`cp: missing destination file operand`, 'error'); return; }
+  const src = resolvePath(pos[0]), dst = resolvePath(pos[1]);
+  const sn = FS[src];
+  if (!sn) { out(`cp: cannot stat '${pos[0]}': No such file or directory`, 'error'); return; }
+  FS[dst] = { ...JSON.parse(JSON.stringify(sn)), owner:STATE.user };
+  const dParent = dst.split('/').slice(0,-1).join('/') || '/';
+  if (FS[dParent]) {
+    const name = dst.split('/').pop();
+    if(!FS[dParent].children)FS[dParent].children=[];
+    if(!FS[dParent].children.includes(name)) FS[dParent].children.push(name);
+  }
+}
+
+function cmd_mv(pos) {
+  if (pos.length < 2) { out(`mv: missing destination`, 'error'); return; }
+  const src = resolvePath(pos[0]), dst = resolvePath(pos[1]);
+  if (!FS[src]) { out(`mv: cannot stat '${pos[0]}': No such file or directory`, 'error'); return; }
+  FS[dst] = FS[src];
+  delete FS[src];
+  const sParent = src.split('/').slice(0,-1).join('/') || '/';
+  const sName = src.split('/').pop();
+  if (FS[sParent]?.children) FS[sParent].children = FS[sParent].children.filter(c=>c!==sName);
+  const dParent = dst.split('/').slice(0,-1).join('/') || '/';
+  const dName = dst.split('/').pop();
+  if (FS[dParent]) { if(!FS[dParent].children)FS[dParent].children=[]; if(!FS[dParent].children.includes(dName))FS[dParent].children.push(dName); }
+}
+
+function cmd_rm(pos, flags) {
+  if (!pos.length) { out(`rm: missing operand`, 'error'); return; }
+  const force = flags.some(f=>f.includes('f'));
+  const recursive = flags.some(f=>f.includes('r'));
+  pos.forEach(p => {
+    const rp = resolvePath(p);
+    const node = FS[rp];
+    if (!node) { if(!force) out(`rm: cannot remove '${p}': No such file or directory`, 'error'); return; }
+    if (node.type==='dir' && !recursive) { out(`rm: cannot remove '${p}': Is a directory`, 'error'); return; }
+    delete FS[rp];
+    const parent = rp.split('/').slice(0,-1).join('/') || '/';
+    const name = rp.split('/').pop();
+    if (FS[parent]?.children) FS[parent].children = FS[parent].children.filter(c=>c!==name);
+  });
+}
+
+function cmd_ln(pos, flags) {
+  if (pos.length < 2) { out(`ln: missing destination`, 'error'); return; }
+  const soft = flags.includes('-s');
+  const src = resolvePath(pos[0]), dst = resolvePath(pos[1]);
+  if (soft) {
+    FS[dst] = { type:'symlink', target:src, owner:STATE.user, group:STATE.user, perm:'777' };
+    const p = dst.split('/').slice(0,-1).join('/')||'/';
+    const n = dst.split('/').pop();
+    if(FS[p]){if(!FS[p].children)FS[p].children=[];FS[p].children.push(n);}
+    out(`'${pos[1]}' -> '${pos[0]}'`);
+  } else {
+    out(`Hard link created`);
+  }
+}
+
+function cmd_cat(pos, redirect) {
+  if (!pos.length) { out(`cat: (reading from stdin - not supported in simulator)`, 'muted'); return; }
+  let allContent = '';
+  pos.forEach(p => {
+    const rp = resolvePath(p);
+    const node = FS[rp];
+    if (!node) { out(`cat: ${p}: No such file or directory`, 'error'); return; }
+    if (node.type === 'dir') { out(`cat: ${p}: Is a directory`, 'error'); return; }
+    const content = node.content || '';
+    if (redirect?.type === 'null') return;
+    if (redirect?.type === 'overwrite' || redirect?.type === 'append') {
+      const drp = resolvePath(redirect.file);
+      if (!FS[drp]) FS[drp] = { type:'file', owner:STATE.user, group:STATE.user, perm:'644', content:'' };
+      FS[drp].content = redirect.type==='append' ? (FS[drp].content||'') + content : content;
+    } else {
+      allContent += content + '\n';
+    }
+  });
+  if (allContent && !redirect) out(escHtml(allContent.trimEnd()));
+}
+
+function cmd_less(p) {
+  if (!p) { out(`less: missing filename`, 'error'); return; }
+  const node = getNode(p);
+  if (!node) { out(`less: ${p}: No such file or directory`, 'error'); return; }
+  if (node.type==='dir') { out(`less: ${p}: Is a directory`, 'error'); return; }
+  const content = node.content || '(empty file)';
+  out(`<span style="color:#4a5568">--- ${escHtml(p)} (q=quit, press Enter to scroll) ---</span>`);
+  out(escHtml(content));
+  out(`<span style="color:#4a5568">--- (END) ---</span>`);
+}
+
+function cmd_head(pos, flags) {
+  const n = parseInt(flags.find(f=>f.match(/^-\d+/))?.slice(1) || flags.find(f=>f==='-n') ? '10' : '10');
+  const count = flags.includes('-n') ? parseInt(flags[flags.indexOf('-n')+1]||'10') : (parseInt(flags.find(f=>f.match(/^-\d+/))?.slice(1))||10);
+  const file = pos[0];
+  if (!file) { out(`head: missing file`, 'error'); return; }
+  const node = getNode(file);
+  if (!node) { out(`head: ${file}: No such file or directory`, 'error'); return; }
+  const lines = (node.content||'').split('\n').slice(0, count);
+  out(escHtml(lines.join('\n')));
+}
+
+function cmd_tail(pos, flags) {
+  const follow = flags.includes('-f');
+  const countFlag = flags.find(f=>f.match(/^-\d+/));
+  const nFlag = flags.indexOf('-n');
+  const count = nFlag>=0 ? parseInt(flags[nFlag+1]||'10') : (parseInt(countFlag?.slice(1))||10);
+  const file = pos[0];
+  if (!file) { out(`tail: missing file`, 'error'); return; }
+  const node = getNode(file);
+  if (!node) { out(`tail: ${file}: No such file or directory`, 'error'); return; }
+  const lines = (node.content||'').split('\n').slice(-Math.abs(count));
+  out(escHtml(lines.join('\n')));
+  if (follow) out(`<span style="color:#4a5568">[Following ${file}... (in real server new logs appear here. Ctrl+C to stop)]</span>`);
+}
+
+function cmd_grep(args, flags) {
+  const ignoreCase = flags.includes('-i') || args.includes('-i');
+  const showNum = flags.includes('-n') || args.includes('-n');
+  const recursive = flags.includes('-r') || args.includes('-r');
+  const invert = flags.includes('-v') || args.includes('-v');
+  const cleanArgs = args.filter(a=>!a.startsWith('-'));
+  const pattern = cleanArgs[0];
+  const files = cleanArgs.slice(1);
+  
+  if (!pattern) { out(`grep: missing pattern`, 'error'); return; }
+  
+  const search = (content, fname) => {
+    const lines = content.split('\n');
+    lines.forEach((line, i) => {
+      const match = ignoreCase ? line.toLowerCase().includes(pattern.toLowerCase()) : line.includes(pattern);
+      if ((match && !invert) || (!match && invert)) {
+        const prefix = files.length > 1 ? `<span style="color:#bc8cff">${fname}:</span>` : '';
+        const numPrefix = showNum ? `<span style="color:#d29922">${i+1}:</span>` : '';
+        const highlighted = line.replace(new RegExp(pattern, ignoreCase?'gi':'g'), m=>`<span style="background:#2c2000;color:#d29922">${escHtml(m)}</span>`);
+        out(`${prefix}${numPrefix}${highlighted}`);
+      }
+    });
+  };
+  
+  if (!files.length) {
+    out(`grep: (reading from stdin - provide a filename)`, 'warn');
+    return;
+  }
+  
+  files.forEach(f => {
+    const rp = resolvePath(f);
+    if (recursive && FS[rp]?.type==='dir') {
+      Object.entries(FS).filter(([k]) => k.startsWith(rp)).forEach(([k,v]) => {
+        if (v.type==='file' && v.content) search(v.content, k);
+      });
+    } else {
+      const node = FS[rp];
+      if (!node) { out(`grep: ${f}: No such file or directory`, 'error'); return; }
+      if (node.type==='dir') { out(`grep: ${f}: Is a directory`, 'error'); return; }
+      search(node.content||'', f);
+    }
+  });
+}
+
+function cmd_wc(pos, flags) {
+  if (!pos[0]) { out(`wc: missing file`, 'error'); return; }
+  const node = getNode(pos[0]);
+  if (!node) { out(`wc: ${pos[0]}: No such file or directory`, 'error'); return; }
+  const content = node.content || '';
+  const lines = content.split('\n').length;
+  const words = content.split(/\s+/).filter(Boolean).length;
+  const chars = content.length;
+  if (flags.includes('-l')) out(`${lines} ${pos[0]}`);
+  else if (flags.includes('-w')) out(`${words} ${pos[0]}`);
+  else if (flags.includes('-c')) out(`${chars} ${pos[0]}`);
+  else out(`    ${lines}    ${words}    ${chars} ${pos[0]}`);
+}
+
+function cmd_find(args) {
+  const startArgs = args.filter(a=>!a.startsWith('-'));
+  const start = resolvePath(startArgs[0] || STATE.cwd);
+  const nameIdx = args.indexOf('-name');
+  const typeIdx = args.indexOf('-type');
+  const name = nameIdx >= 0 ? args[nameIdx+1] : null;
+  const type = typeIdx >= 0 ? args[typeIdx+1] : null;
+  
+  const pattern = name ? name.replace('*','') : null;
+  
+  Object.keys(FS).filter(k => {
+    if (!k.startsWith(start)) return false;
+    const node = FS[k];
+    if (type === 'f' && node.type !== 'file') return false;
+    if (type === 'd' && node.type !== 'dir') return false;
+    if (pattern && !k.split('/').pop().includes(pattern)) return false;
+    return true;
+  }).forEach(k => out(k));
+}
+
+function cmd_stat(p) {
+  if (!p) { out(`stat: missing operand`, 'error'); return; }
+  const rp = resolvePath(p);
+  const node = FS[rp];
+  if (!node) { out(`stat: cannot stat '${p}': No such file or directory`, 'error'); return; }
+  out(`  File: ${rp}
+  Type: ${node.type==='dir'?'directory':'regular file'}
+  Mode: 0${node.perm||'644'} (${permStr(node.perm||'644', node.type)})
+  Owner: ${node.owner||'root'}   Group: ${node.group||'root'}
+  Size: ${node.size||String(Math.floor(Math.random()*10000)+100)} bytes
+Modify: 2024-01-15 10:00:00.000000000 +0530`);
+}
+
+function cmd_file(p) {
+  if (!p) { out(`file: missing operand`, 'error'); return; }
+  const node = getNode(p);
+  if (!node) { out(`${p}: cannot open (No such file or directory)`, 'error'); return; }
+  if (node.type==='dir') out(`${p}: directory`);
+  else if (node.type==='symlink') out(`${p}: symbolic link`);
+  else {
+    const ext = p.split('.').pop();
+    const types = { php:'PHP script', sh:'Bourne-Again shell script', conf:'ASCII text', log:'ASCII text', sql:'ASCII text', json:'JSON data', gz:'gzip compressed data', tar:'POSIX tar archive', zip:'Zip archive data', env:'ASCII text', md:'ASCII text' };
+    out(`${p}: ${types[ext]||'ASCII text'}`);
+  }
+}
+
+function cmd_diff(pos) {
+  if (pos.length<2) { out(`diff: missing file operand`, 'error'); return; }
+  out(`--- ${pos[0]}\n+++ ${pos[1]}\n@@ -1,3 +1,4 @@\n+# Added configuration\n APP_ENV=production\n APP_DEBUG=false\n APP_URL=https://mysite.com`, 'info');
+}
+
+function cmd_echo(args, redirect) {
+  const noNewline = args[0] === '-n';
+  const text = (noNewline ? args.slice(1) : args).join(' ');
+  if (redirect?.type === 'overwrite') {
+    const rp = resolvePath(redirect.file);
+    FS[rp] = FS[rp] || { type:'file', owner:STATE.user, group:STATE.user, perm:'644', content:'' };
+    FS[rp].content = text;
+  } else if (redirect?.type === 'append') {
+    const rp = resolvePath(redirect.file);
+    if (!FS[rp]) FS[rp] = { type:'file', owner:STATE.user, group:STATE.user, perm:'644', content:'' };
+    FS[rp].content = (FS[rp].content||'') + '\n' + text;
+  } else {
+    out(escHtml(text));
+  }
+}
+
+function cmd_editor(editor, p) {
+  if (!p) { out(`${editor}: No filename given`, 'warn'); return; }
+  const rp = resolvePath(p);
+  const node = FS[rp];
+  const content = node?.content || '';
+  
+  out(`<span style="color:#4a5568">╔══ ${editor.toUpperCase()} — ${rp} ══════════════════════════╗</span>`);
+  out(`<span style="color:#e6edf3">${escHtml(content.slice(0,600))}${content.length>600?'...(truncated)':''}</span>`);
+  out(`<span style="color:#4a5568">╚═══════════════════════════════════════════════════╝</span>`);
+  if (editor==='nano') out(`<span style="color:#4a5568">^G Help  ^X Exit  ^O Save  ^W Search  ^K Cut  ^U Paste</span>`, 'muted');
+  else out(`<span style="color:#4a5568">-- INSERT mode. Esc then :wq to save, :q! to quit --</span>`, 'muted');
+  
+  out(`<span style="color:#d29922">[SIMULATOR] To edit, use: echo "content" > ${p}</span>`, 'warn');
+  
+  // If file doesn't exist, create it
+  if (!node) {
+    FS[rp] = { type:'file', owner:STATE.user, group:STATE.user, perm:'644', content:'' };
+    const parent = rp.split('/').slice(0,-1).join('/')||'/';
+    const name = rp.split('/').pop();
+    if(FS[parent]){if(!FS[parent].children)FS[parent].children=[];FS[parent].children.push(name);}
+  }
+}
+
+function cmd_chmod(pos, flags) {
+  const recursive = flags.includes('-R') || flags.includes('-r');
+  if (pos.length < 2) { out(`chmod: missing operand`, 'error'); return; }
+  const mode = pos[0];
+  const targets = pos.slice(1);
+  
+  const applyChmod = (rp) => {
+    if (!FS[rp]) { out(`chmod: cannot access '${rp}': No such file or directory`, 'error'); return; }
+    let newPerm;
+    if (/^[0-7]{3,4}$/.test(mode)) {
+      newPerm = mode.slice(-3);
+    } else {
+      // Symbolic mode
+      newPerm = FS[rp].perm || '644';
+      const curr = newPerm.split('').map(Number);
+      // simple parse
+      if (mode.includes('+x')) { curr[0]|=1; curr[1]|=1; curr[2]|=1; }
+      if (mode.includes('-x')) { curr[0]&=~1; curr[1]&=~1; curr[2]&=~1; }
+      if (mode.includes('+w')) { curr[0]|=2; curr[1]|=2; }
+      if (mode.includes('-w')) { curr[1]&=~2; curr[2]&=~2; }
+      newPerm = curr.join('');
+    }
+    FS[rp].perm = newPerm;
+    if (recursive && FS[rp].type==='dir') {
+      Object.keys(FS).filter(k=>k.startsWith(rp+'/')).forEach(k => { FS[k].perm = newPerm; });
+    }
+  };
+  targets.forEach(t => applyChmod(resolvePath(t)));
+  out(`chmod: permissions updated to ${mode}`, 'success');
+}
+
+function cmd_chown(pos, flags) {
+  const recursive = flags.includes('-R');
+  if (pos.length < 2) { out(`chown: missing operand`, 'error'); return; }
+  if (STATE.user !== 'root') { out(`chown: changing ownership of '${pos[1]}': Operation not permitted\nHint: use sudo chown ...`, 'error'); return; }
+  const [owner, group] = pos[0].split(':');
+  const targets = pos.slice(1);
+  targets.forEach(t => {
+    const rp = resolvePath(t);
+    if (!FS[rp]) { out(`chown: cannot access '${t}': No such file or directory`, 'error'); return; }
+    FS[rp].owner = owner;
+    if (group) FS[rp].group = group;
+    if (recursive) Object.keys(FS).filter(k=>k.startsWith(rp+'/')).forEach(k=>{FS[k].owner=owner;if(group)FS[k].group=group;});
+  });
+  out(`chown: ownership changed to ${pos[0]}`, 'success');
+}
+
+function cmd_chgrp(pos, flags) {
+  if (pos.length < 2) { out(`chgrp: missing operand`, 'error'); return; }
+  const recursive = flags.includes('-R');
+  const group = pos[0];
+  pos.slice(1).forEach(t => {
+    const rp = resolvePath(t);
+    if (!FS[rp]) { out(`chgrp: cannot access '${t}': No such file or directory`, 'error'); return; }
+    FS[rp].group = group;
+    if (recursive) Object.keys(FS).filter(k=>k.startsWith(rp+'/')).forEach(k=>{FS[k].group=group;});
+  });
+  out(`chgrp: group changed to ${group}`, 'success');
+}
+
+function cmd_id(user) {
+  const u = user || STATE.user;
+  const ud = USERS[u];
+  if (!ud) { out(`id: '${u}': no such user`, 'error'); return; }
+  out(`uid=${ud.uid}(${u}) gid=${ud.gid}(${u}) groups=${ud.groups.map((g,i)=>USERS[g]?`${USERS[g].gid||i}(${g})`:g).join(',')}`);
+}
+
+function cmd_who() {
+  out(`ubuntu   pts/0        2024-01-15 09:00 (192.168.1.100)\n${STATE.user !== 'ubuntu' ? STATE.user+'   pts/1        2024-01-15 09:30 (:0)' : ''}`);
+}
+
+function cmd_w() {
+  out(` 10:30:00 up 1 day,  1:30,  2 users,  load average: 0.15, 0.22, 0.18
+USER     TTY      FROM             LOGIN@   IDLE JCPU   PCPU WHAT
+ubuntu   pts/0    192.168.1.100    09:00   1.00s  0.05s  0.01s -bash
+${STATE.user!=='ubuntu'?STATE.user+'   pts/1    :0               09:30   0.00s  0.02s  0.00s -bash':''}`);
+}
+
+function cmd_last() {
+  out(`ubuntu   pts/0        192.168.1.100    Mon Jan 15 09:00   still logged in
+ubuntu   pts/0        192.168.1.100    Sun Jan 14 22:00 - 23:30  (01:30)
+deploy   pts/1        192.168.1.50     Sun Jan 14 18:00 - 18:45  (00:45)
+reboot   system boot  5.15.0-91-generic Mon Jan 15 08:59
+
+wtmp begins Sat Jan 13 00:00:00 2024`);
+}
+
+function cmd_su(pos, flags, args) {
+  const targetUser = pos[0] || 'root';
+  if (!USERS[targetUser]) { out(`su: user ${targetUser} does not exist`, 'error'); return; }
+  if (flags.includes('-c')) { out(`[Running as ${targetUser}]: executed`,'success'); return; }
+  if (targetUser === 'root' && STATE.user !== 'root') {
+    out(`Password: `, '');
+    out(`[SIMULATOR: root ka password 'root123' hai]`, 'muted');
+    STATE.user = 'root';
+    STATE.env.HOME = '/root';
+    STATE.cwd = '/root';
+    out(`root@${STATE.hostname}:~#`, 'success');
+  } else {
+    STATE.user = targetUser;
+    STATE.env.HOME = USERS[targetUser].home;
+    STATE.cwd = USERS[targetUser].home;
+    out(`Switched to user: ${targetUser}`, 'success');
+  }
+}
+
+function cmd_sudo(args) {
+  if (!args.length) { out(`usage: sudo command`, 'error'); return; }
+  if (!USERS[STATE.user]?.groups?.includes('sudo') && STATE.user !== 'root') {
+    out(`${STATE.user} is not in the sudoers file. This incident will be reported.`, 'error');
+    return;
+  }
+  const prevUser = STATE.user;
+  STATE.user = 'root';
+  runCmd(args.join(' '));
+  STATE.user = prevUser;
+}
+
+function cmd_useradd(pos, flags, args) {
+  if (STATE.user !== 'root') { out(`useradd: Permission denied (use sudo)`, 'error'); return; }
+  const uname = pos[pos.length-1];
+  if (!uname) { out(`useradd: missing username`, 'error'); return; }
+  if (USERS[uname]) { out(`useradd: user '${uname}' already exists`, 'error'); return; }
+  const mFlag = flags.includes('-m');
+  const gFlag = args.indexOf('-G');
+  const gval = gFlag>=0 ? args[gFlag+1] : null;
+  const sFlag = args.indexOf('-s');
+  const shell = sFlag>=0 ? args[sFlag+1] : '/bin/bash';
+  const newUid = Object.values(USERS).reduce((m,u)=>Math.max(m,u.uid),0)+1;
+  USERS[uname] = { uid:newUid, gid:newUid, home:`/home/${uname}`, shell, groups:[uname,...(gval?gval.split(','):[])].filter(Boolean) };
+  if (mFlag) {
+    FS[`/home/${uname}`] = { type:'dir', owner:uname, group:uname, perm:'755', children:[] };
+    if (!FS['/home'].children) FS['/home'].children = [];
+    FS['/home'].children.push(uname);
+  }
+  out(`User '${uname}' created successfully (uid=${newUid})`, 'success');
+}
+
+function cmd_userdel(pos, flags) {
+  if (STATE.user !== 'root') { out(`userdel: Permission denied (use sudo)`, 'error'); return; }
+  const uname = pos[0];
+  if (!uname) { out(`userdel: missing username`, 'error'); return; }
+  if (!USERS[uname]) { out(`userdel: user '${uname}' does not exist`, 'error'); return; }
+  if (uname === 'root' || uname === 'ubuntu') { out(`userdel: cannot delete system user '${uname}'`, 'error'); return; }
+  delete USERS[uname];
+  if (flags.includes('-r')) {
+    delete FS[`/home/${uname}`];
+    if (FS['/home']?.children) FS['/home'].children = FS['/home'].children.filter(c=>c!==uname);
+    out(`User '${uname}' and home directory deleted`, 'success');
+  } else {
+    out(`User '${uname}' deleted (home directory preserved)`, 'success');
+  }
+}
+
+function cmd_usermod(args) {
+  if (STATE.user !== 'root') { out(`usermod: Permission denied (use sudo)`, 'error'); return; }
+  const aGIdx = args.indexOf('-aG');
+  const GIdx = args.indexOf('-G');
+  const LIdx = args.indexOf('-L');
+  const sIdx = args.indexOf('-s');
+  const uname = args[args.length-1];
+  if (!uname || !USERS[uname]) { out(`usermod: user '${uname}' does not exist`, 'error'); return; }
+  if (aGIdx >= 0) {
+    const grps = args[aGIdx+1]?.split(',') || [];
+    grps.forEach(g => { if(!USERS[uname].groups.includes(g)) USERS[uname].groups.push(g); });
+    out(`User '${uname}' added to groups: ${grps.join(', ')}`, 'success');
+  }
+  if (GIdx >= 0 && aGIdx < 0) {
+    USERS[uname].groups = [uname, ...((args[GIdx+1]||'').split(','))].filter(Boolean);
+    out(`User '${uname}' groups set to: ${USERS[uname].groups.join(', ')}`, 'success');
+  }
+  if (LIdx >= 0) { out(`User '${uname}' account locked`, 'warn'); }
+  if (sIdx >= 0) { USERS[uname].shell = args[sIdx+1]; out(`User '${uname}' shell changed to ${args[sIdx+1]}`, 'success'); }
+}
+
+function cmd_groupadd(pos) {
+  if (STATE.user !== 'root') { out(`groupadd: Permission denied`, 'error'); return; }
+  const gname = pos[0];
+  if (!gname) { out(`groupadd: missing group name`, 'error'); return; }
+  out(`Group '${gname}' created`, 'success');
+}
+
+function cmd_passwd(pos) {
+  const u = pos[0] || STATE.user;
+  out(`New password: \nRetype new password: \npasswd: password updated successfully for ${u}`, 'success');
+}
+
+function cmd_groups(user) {
+  const u = user || STATE.user;
+  const ud = USERS[u];
+  if (!ud) { out(`groups: '${u}': no such user`, 'error'); return; }
+  out(`${u} : ${ud.groups.join(' ')}`);
+}
+
+function cmd_ps(flags) {
+  const aux = flags.some(f=>f.includes('a')||f.includes('u')||f.includes('x'));
+  const ef = flags.some(f=>f.includes('e')||f.includes('f'));
+  const all = flags.includes('-e');
+  
+  if (aux || ef || all || !flags.length) {
+    out(`USER        PID %CPU %MEM    VSZ   RSS TTY      STAT COMMAND`);
+    processes.forEach(p => {
+      const show = aux ? true : (STATE.user==='root'?true:p.user===STATE.user);
+      if (show) out(`${p.user.padEnd(8)}  ${String(p.pid).padEnd(5)} ${p.cpu.padStart(4)} ${p.mem.padStart(4)} ${String(p.vsz).padStart(6)} ${String(p.rss).padStart(5)} pts/0    S    ${p.cmd}`);
+    });
+  } else {
+    out(`  PID TTY          TIME CMD`);
+    processes.filter(p=>p.user===STATE.user).forEach(p => {
+      out(`${String(p.pid).padStart(5)} pts/0    00:00:00 ${p.cmd.split(' ')[0].split('/').pop()}`);
+    });
+  }
+}
+
+function cmd_top() {
+  const now = new Date();
+  out(`top - ${now.toTimeString().slice(0,8)} up 1 day,  1:30,  2 users,  load average: 0.15, 0.22, 0.18
+Tasks: ${processes.length} total,   1 running,  ${processes.length-1} sleeping
+%Cpu(s):  2.3 us,  0.5 sy,  0.0 ni, 97.0 id,  0.2 wa
+MiB Mem :   2048.0 total,    820.3 free,   1100.2 used,    127.5 buff/cache
+MiB Swap:    512.0 total,    512.0 free,      0.0 used.    800.4 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND`);
+  processes.slice(0,12).forEach(p => {
+    out(`${String(p.pid).padStart(5)} ${p.user.padEnd(9)} 20   0 ${String(p.vsz).padStart(7)} ${String(p.rss).padStart(6)}  ${String(Math.floor(Math.random()*5000+1000)).padStart(5)} S  ${p.cpu.padStart(4)}  ${p.mem.padStart(4)}   0:00.${Math.floor(Math.random()*99)} ${p.cmd.slice(0,35)}`);
+  });
+  out(`\n[SIMULATOR: 'q' dabao bahar nikalne ke liye — yahan real-time nahi dikhega]`, 'muted');
+}
+
+function cmd_htop() {
+  out(`<span style="color:#0a0e14;background:#58a6ff">  CPU[|||          2.3%]</span>  <span style="color:#0a0e14;background:#3fb950">  Mem[||||||||||  1.1G/2.0G]</span>
+<span style="color:#0a0e14;background:#d29922">  Swp[           0K/512M]</span>  Tasks: ${processes.length}, Load avg: 0.15 0.22 0.18
+
+  PID USER     PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command`);
+  processes.slice(0,10).forEach(p => {
+    out(`${String(p.pid).padStart(5)} <span style="color:#58a6ff">${p.user.padEnd(8)}</span>  20   0 ${String(p.vsz).padStart(6)} ${String(p.rss).padStart(5)}   0  S ${p.cpu.padStart(4)} ${p.mem.padStart(4)} 0:00.00 ${p.cmd.slice(0,30)}`);
+  });
+  out(`\nF1Help  F2Setup  F3Search  F4Filter  F5Tree  F9Kill  F10Quit\n[SIMULATOR: htop interaction simulated]`, 'muted');
+}
+
+function cmd_kill(pos, flags) {
+  const signal = flags.find(f=>f.match(/^-\d+/))?.slice(1) || '15';
+  const pid = parseInt(pos[0]);
+  if (isNaN(pid)) { out(`kill: invalid pid: ${pos[0]}`, 'error'); return; }
+  const proc = processes.find(p=>p.pid===pid);
+  if (!proc) { out(`kill: (${pid}) - No such process`, 'error'); return; }
+  if (proc.user !== STATE.user && STATE.user !== 'root') {
+    out(`kill: (${pid}) - Operation not permitted`, 'error'); return;
+  }
+  processes = processes.filter(p=>p.pid!==pid);
+  out(`Process ${pid} (${proc.cmd.split(' ')[0].split('/').pop()}) terminated with signal ${signal}`, 'success');
+}
+
+function cmd_pkill(pos) {
+  const name = pos[0];
+  if (!name) { out(`pkill: missing pattern`, 'error'); return; }
+  const killed = processes.filter(p => p.cmd.includes(name) && (p.user===STATE.user||STATE.user==='root'));
+  if (!killed.length) { out(`pkill: no process found for '${name}'`, 'warn'); return; }
+  processes = processes.filter(p => !killed.find(k=>k.pid===p.pid));
+  out(`Killed ${killed.length} process(es) matching '${name}'`, 'success');
+}
+
+function cmd_uname(flags) {
+  const all = flags.includes('-a');
+  const kernel = flags.includes('-r') || flags.includes('-s');
+  if (all) out(`Linux prod-server-01 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:29:11 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux`);
+  else if (flags.includes('-r')) out(`5.15.0-91-generic`);
+  else out(`Linux`);
+}
+
+function cmd_uptime() {
+  const elapsed = Math.floor((Date.now() - STATE.startTime) / 1000);
+  const h = Math.floor(elapsed/3600);
+  const m = Math.floor((elapsed%3600)/60);
+  const s = elapsed%60;
+  const now = new Date();
+  out(` ${now.toTimeString().slice(0,8)} up 1 day, ${h}:${String(m).padStart(2,'0')},  2 users,  load average: 0.15, 0.22, 0.18`);
+}
+
+function cmd_date() {
+  out(new Date().toString());
+}
+
+function cmd_df(flags) {
+  const human = flags.includes('-h');
+  out(`Filesystem      ${human?'Size':'1K-blocks'}  ${human?'Used':'Used'}  ${human?'Avail':'Available'} Use% Mounted on
+/dev/sda1        ${human?'50G':'52428800'}   ${human?'34G':'35651584'}  ${human?'14G':'14680064'}  70% /
+tmpfs            ${human?'1.0G':'1048576'}      ${human?'0':'0'}  ${human?'1.0G':'1048576'}   0% /dev/shm
+/dev/sda2        ${human?'10G':'10485760'}  ${human?'2.5G':'2621440'}  ${human?'7.0G':'7340032'}  27% /boot`);
+}
+
+function cmd_du(pos, flags) {
+  const human = flags.includes('-h');
+  const summary = flags.includes('-s');
+  const target = pos[0] || STATE.cwd;
+  const rp = resolvePath(target);
+  
+  if (summary) {
+    out(`${human?'234M':'239616'}\t${rp}`);
+    return;
+  }
+  
+  const sizes = {
+    '/var/www/html/mylaravel': human?'45M':'46080',
+    '/var/www/html/mylaravel/vendor': human?'25M':'25600',
+    '/var/www/html/mylaravel/storage': human?'12M':'12288',
+    '/var/log': human?'234M':'239616',
+    '/home/ubuntu': human?'1.2G':'1258291',
+    '/tmp': human?'4.0K':'4',
+    '/etc': human?'8.5M':'8704',
+  };
+  
+  const node = FS[rp];
+  if (!node) { out(`du: cannot access '${target}': No such file or directory`, 'error'); return; }
+  if (node.type === 'dir') {
+    const children = node.children || [];
+    children.forEach(c => {
+      const cp = rp==='/'?'/'+c:rp+'/'+c;
+      const size = sizes[cp] || (human?`${Math.floor(Math.random()*500)+1}K`:`${Math.floor(Math.random()*500)+1}`);
+      out(`${size}\t${cp}`);
+    });
+    const total = sizes[rp] || (human?'500K':'500');
+    out(`${total}\t${rp}`);
+  } else {
+    const size = human?`${Math.floor(Math.random()*100)+1}K`:`${Math.floor(Math.random()*100)+1}`;
+    out(`${size}\t${rp}`);
+  }
+}
+
+function cmd_free(flags) {
+  const human = flags.includes('-m') || flags.includes('-h');
+  out(`              total        used        free      shared  buff/cache   available
+Mem:          ${human?'2048':'2097152'}     ${human?'1100':'1126400'}      ${human?'820':'839680'}       ${human?'50':'51200'}      ${human?'127':'130048'}      ${human?'800':'819200'}
+Swap:          ${human?'512':'524288'}          ${human?'0':'0'}      ${human?'512':'524288'}`);
+}
+
+function cmd_lsof(flags, args) {
+  const pIdx = args.indexOf('-p');
+  const pid = pIdx >= 0 ? args[pIdx+1] : null;
+  out(`COMMAND   PID     USER   FD   TYPE DEVICE SIZE/OFF NODE NAME`);
+  if (pid) {
+    const proc = processes.find(p=>p.pid===parseInt(pid));
+    if (!proc) { out(`lsof: process ${pid} not found`, 'error'); return; }
+    out(`${proc.cmd.split(' ')[0].split('/').pop().padEnd(9)} ${pid} ${proc.user.padEnd(8)} txt    REG  252,1   123456 /usr/bin/${proc.cmd.split(' ')[0].split('/').pop()}`);
+  } else {
+    processes.slice(0,5).forEach(p => {
+      out(`${p.cmd.split(' ')[0].split('/').pop().slice(0,9).padEnd(9)} ${p.pid} ${p.user.padEnd(8)} txt    REG  252,1   ${Math.floor(Math.random()*999999)} /usr/bin/${p.cmd.split(' ')[0].split('/').pop()}`);
+    });
+  }
+}
+
+function cmd_lscpu() {
+  out(`Architecture:                    x86_64
+CPU op-mode(s):                  32-bit, 64-bit
+Byte Order:                      Little Endian
+CPU(s):                          2
+On-line CPU(s) list:             0,1
+Thread(s) per core:              1
+Core(s) per socket:              2
+Socket(s):                       1
+NUMA node(s):                    1
+Vendor ID:                       GenuineIntel
+Model name:                      Intel(R) Xeon(R) CPU E5-2676 v3 @ 2.40GHz
+CPU MHz:                         2400.000
+L1d cache:                       32K
+L2 cache:                        256K
+L3 cache:                        30720K`);
+}
+
+function cmd_ip(args) {
+  const sub = args[0];
+  if (sub==='a' || sub==='addr' || sub==='address') {
+    Object.entries(NETWORK.interfaces).forEach(([iface, info]) => {
+      out(`${iface}: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state ${info.status}
+    link/ether ${info.mac} brd ff:ff:ff:ff:ff:ff
+    inet ${info.ip}/${info.mask==='255.255.255.0'?24:8} brd ${info.ip.split('.').slice(0,3).join('.')}.255 scope global ${iface}`);
+    });
+  } else if (sub==='r' || sub==='route') {
+    NETWORK.routes.forEach(r => out(`${r.dest.padEnd(18)} via ${r.gw.padEnd(15)} dev ${r.iface}`));
+  } else if (sub==='link') {
+    Object.keys(NETWORK.interfaces).forEach(i => out(`${i}: <BROADCAST,MULTICAST,UP,LOWER_UP>`));
+  } else {
+    out(`Usage: ip [addr|route|link]`,'muted');
+  }
+}
+
+function cmd_ifconfig() {
+  Object.entries(NETWORK.interfaces).forEach(([iface, info]) => {
+    out(`${iface}: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet ${info.ip}  netmask ${info.mask}
+        ether ${info.mac}  txqueuelen 1000  (Ethernet)
+        RX bytes ${info.rx}   TX bytes ${info.tx}`);
+  });
+}
+
+function cmd_netstat(flags) {
+  const listen = flags.includes('-l');
+  const tcp = flags.includes('-t') || !flags.length;
+  out(`Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      ${SERVICES.ssh.pid}/sshd
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      ${SERVICES.nginx.pid}/nginx
+tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      ${SERVICES.mysql.pid}/mysqld
+tcp        0      0 127.0.0.1:9000          0.0.0.0:*               LISTEN      ${SERVICES['php8.2-fpm'].pid}/php-fpm
+tcp        0    128 10.0.0.5:22             192.168.1.100:54321     ESTABLISHED ${SERVICES.ssh.pid}/sshd`);
+}
+
+function cmd_ss(flags) {
+  cmd_netstat(flags);
+}
+
+function cmd_ping(host, flags) {
+  if (!host) { out(`ping: usage: ping [-c count] host`, 'error'); return; }
+  const cIdx = flags.indexOf('-c');
+  const count = cIdx >= 0 ? parseInt(flags[cIdx+1]||'4') : 4;
+  out(`PING ${host} (${host.includes('.')?host:'93.184.216.34'}): 56 data bytes`);
+  for(let i=1;i<=Math.min(count,4);i++) {
+    out(`64 bytes from ${host}: icmp_seq=${i} ttl=64 time=${(Math.random()*5+1).toFixed(3)} ms`);
+  }
+  out(`--- ${host} ping statistics ---\n${Math.min(count,4)} packets transmitted, ${Math.min(count,4)} received, 0% packet loss, time ${Math.min(count,4)*1000}ms`);
+}
+
+function cmd_curl(args) {
+  const url = args.find(a=>a.startsWith('http')||a.startsWith('ftp'));
+  const headOnly = args.includes('-I');
+  const output = args.includes('-O');
+  const silent = args.includes('-s');
+  
+  if (!url) { out(`curl: no URL provided`, 'error'); return; }
+  
+  if (headOnly) {
+    out(`HTTP/1.1 200 OK\nDate: ${new Date().toUTCString()}\nServer: nginx/1.18.0\nContent-Type: text/html; charset=UTF-8\nX-Powered-By: PHP/8.2.5`);
+  } else if (output) {
+    out(`  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+100  1234  100  1234    0     0   5678      0  0:00:00 --:--:-- --:--:--  5678`,'info');
+  } else {
+    out(`curl: (6) Could not resolve host: ${url.split('/')[2]} [SIMULATOR]`, 'warn');
+    out(`[SIMULATOR] Real curl network calls not available in browser. Simulated response shown.`, 'muted');
+  }
+}
+
+function cmd_wget(url) {
+  if (!url) { out(`wget: missing URL`, 'error'); return; }
+  out(`--2024-01-15 10:00:00--  ${url}
+Resolving ${url.split('/')[2]}... [SIMULATOR]
+Connecting to ${url.split('/')[2]}... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 12345 (12K) [application/zip]
+Saving to: '${url.split('/').pop()}'
+
+${url.split('/').pop()}     100%[===================>]  12.06K  --.-KB/s    in 0.1s
+Downloaded: 1 file(s) in 0.1s`, 'info');
+}
+
+function cmd_nmap(args) {
+  const host = args.find(a=>!a.startsWith('-')) || STATE.hostname;
+  out(`Starting Nmap 7.80 ( https://nmap.org )
+Nmap scan report for ${host}
+Host is up (0.0010s latency).
+PORT     STATE SERVICE  VERSION
+22/tcp   open  ssh      OpenSSH 8.9p1 Ubuntu
+80/tcp   open  http     nginx 1.18.0
+443/tcp  closed https
+3306/tcp filtered mysql
+9000/tcp filtered php-fpm
+
+Nmap done: 1 IP address (1 host up) scanned`);
+}
+
+function cmd_ufw(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  
+  if (STATE.user !== 'root') { out(`ERROR: You need to be root to run this command\nUse: sudo ufw ...`, 'error'); return; }
+  
+  if (sub === 'status') {
+    out(`Status: ${NETWORK.firewall.status}\n\nTo                         Action      From\n--                         ------      ----`);
+    NETWORK.firewall.rules.forEach(r => {
+      out(`${r.to.padEnd(26)} ${r.action.padEnd(11)} ${r.from}`);
+    });
+  } else if (sub === 'enable') {
+    NETWORK.firewall.status = 'active';
+    out(`Firewall is active and enabled on system startup`, 'success');
+  } else if (sub === 'disable') {
+    NETWORK.firewall.status = 'inactive';
+    out(`Firewall stopped and disabled on system startup`, 'warn');
+  } else if (sub === 'allow') {
+    const rule = rest.join(' ');
+    NETWORK.firewall.rules.push({ num: String(NETWORK.firewall.rules.length+1), action:'ALLOW IN', from:'Anywhere', to:rule });
+    out(`Rule added: ALLOW ${rule}`, 'success');
+  } else if (sub === 'deny') {
+    const rule = rest.join(' ');
+    NETWORK.firewall.rules.push({ num: String(NETWORK.firewall.rules.length+1), action:'DENY IN', from:'Anywhere', to:rule });
+    out(`Rule added: DENY ${rule}`, 'success');
+  } else if (sub === 'delete') {
+    const idx = parseInt(rest[0])-1;
+    if (idx>=0 && idx<NETWORK.firewall.rules.length) {
+      const removed = NETWORK.firewall.rules.splice(idx,1)[0];
+      out(`Rule deleted: ${removed.action} ${removed.to}`, 'success');
+    }
+  } else if (sub === 'reset') {
+    NETWORK.firewall.rules = [];
+    out(`All rules deleted. Firewall disabled.`, 'warn');
+  } else {
+    out(`Usage: ufw [enable|disable|status|allow <port>|deny <port>|delete <num>]`,'muted');
+  }
+}
+
+function cmd_iptables(args) {
+  out(`[iptables] Simulated. Use ufw for simplified firewall management.`, 'muted');
+  out(`Chain INPUT (policy ACCEPT)\ntarget     prot opt source               destination\nACCEPT     tcp  --  anywhere             anywhere             tcp dpt:22\nACCEPT     tcp  --  anywhere             anywhere             tcp dpt:80\nACCEPT     tcp  --  anywhere             anywhere             tcp dpt:443\nDROP       tcp  --  anywhere             anywhere             tcp dpt:3306`);
+}
+
+function cmd_systemctl(args) {
+  const action = args[0];
+  const svc = args[1]?.replace('.service','');
+  
+  if (!action) {
+    out(`systemctl: missing action\nUsage: systemctl [start|stop|restart|reload|status|enable|disable|is-active|list-units]`, 'muted');
+    return;
+  }
+  
+  if (action === 'list-units') {
+    out(`UNIT                          LOAD   ACTIVE SUB     DESCRIPTION`);
+    Object.entries(SERVICES).forEach(([name, svc]) => {
+      out(`  ${(name+'.service').padEnd(30)} loaded active ${svc.status==='running'?'running':'dead   '} ${name}`);
+    });
+    return;
+  }
+  
+  if (!svc) { out(`systemctl: no service specified`, 'error'); return; }
+  
+  if (action === 'status') {
+    const s = SERVICES[svc] || SERVICES[svc.replace('2','')] || SERVICES[Object.keys(SERVICES).find(k=>k.includes(svc))];
+    if (!s) { out(`Unit ${svc}.service could not be found.`, 'error'); return; }
+    const activeStr = s.status==='running'?`<span style="color:#3fb950">● ${svc}.service</span>`:s.status==='stopped'?`<span style="color:#f85149">○ ${svc}.service</span>`:`<span style="color:#4a5568">○ ${svc}.service</span>`;
+    out(`${activeStr}
+   Loaded: loaded (/lib/systemd/system/${svc}.service; enabled)
+   Active: ${s.status==='running'?'active (running)':'inactive (dead)'} since Mon 2024-01-15 09:00:00
+   ${s.pid?`Main PID: ${s.pid} (${svc})`:''}
+   Memory: ${s.memory}
+      CPU: ${s.cpu === '-' ? '0ms' : s.cpu}`);
+    return;
+  }
+  
+  if (action === 'is-active') {
+    const s = SERVICES[svc];
+    out(s?.status==='running'?'active':'inactive');
+    return;
+  }
+  
+  if (STATE.user !== 'root') { out(`Failed to ${action} ${svc}.service: Interactive authentication required.\nUse: sudo systemctl ${action} ${svc}`, 'error'); return; }
+  
+  const s = SERVICES[svc] || SERVICES[Object.keys(SERVICES).find(k=>k.includes(svc)||svc.includes(k))];
+  if (!s) { out(`Failed to ${action}: Unit ${svc}.service not found.`, 'error'); return; }
+  
+  if (action === 'start') {
+    if (s.status==='running') { out(`${svc}.service already running`, 'warn'); return; }
+    s.status='running'; s.pid=Math.floor(Math.random()*9000)+1000;
+    out(`Started ${svc}.service`, 'success');
+  } else if (action === 'stop') {
+    s.status='stopped'; s.pid=null;
+    out(`Stopped ${svc}.service`, 'warn');
+  } else if (action === 'restart') {
+    s.status='running'; s.pid=Math.floor(Math.random()*9000)+1000;
+    out(`Restarted ${svc}.service`, 'success');
+  } else if (action === 'reload') {
+    if (s.status!=='running') { out(`${svc}.service is not running`, 'error'); return; }
+    out(`Reloaded ${svc}.service`, 'success');
+  } else if (action === 'enable') {
+    out(`Created symlink /etc/systemd/system/multi-user.target.wants/${svc}.service → /lib/systemd/system/${svc}.service`, 'success');
+  } else if (action === 'disable') {
+    out(`Removed /etc/systemd/system/multi-user.target.wants/${svc}.service`, 'warn');
+  }
+  updateSidePanels();
+}
+
+function cmd_service(args) {
+  if (args.length < 2) { out(`Usage: service <name> [start|stop|restart|status]`, 'muted'); return; }
+  cmd_systemctl([args[1], args[0]]);
+}
+
+function cmd_journalctl(args) {
+  const uIdx = args.indexOf('-u');
+  const svc = uIdx>=0 ? args[uIdx+1] : null;
+  const follow = args.includes('-f');
+  const lines = args.includes('-n') ? parseInt(args[args.indexOf('-n')+1]||'50') : 50;
+  
+  const svcLogs = {
+    nginx: `/var/log/nginx/error.log`,
+    mysql: `/var/log/mysql/error.log`,
+    'php8.2-fpm': `/var/log/php8.2-fpm.log`,
+    ssh: `/var/log/auth.log`,
+  };
+  
+  out(`-- Logs begin at Mon 2024-01-15 08:59:00 IST --`);
+  if (svc) {
+    out(`Jan 15 09:00:00 prod-server-01 systemd[1]: Starting ${svc}...
+Jan 15 09:00:01 prod-server-01 systemd[1]: Started ${svc}.service
+Jan 15 09:05:00 prod-server-01 ${svc}[${SERVICES[svc]?.pid||1234}]: Service running normally
+Jan 15 10:00:00 prod-server-01 ${svc}[${SERVICES[svc]?.pid||1234}]: Periodic health check OK`);
+  } else {
+    const syslog = FS['/var/log/syslog']?.content || '';
+    out(escHtml(syslog));
+  }
+  if (follow) out(`[SIMULATOR: Follow mode - new logs would appear here]`, 'muted');
+}
+
+function cmd_crontab(flags) {
+  if (flags.includes('-l')) {
+    out(escHtml(crontab));
+  } else if (flags.includes('-e')) {
+    out(`# crontab editor opened (nano simulation)`);
+    out(escHtml(crontab));
+    out(`\n[SIMULATOR] To add/edit cron jobs, ye format use karo:`,'muted');
+    out(`echo "* * * * * command" >> /tmp/newcron && crontab /tmp/newcron`, 'muted');
+  } else if (flags.includes('-r')) {
+    crontab = '';
+    out(`Crontab removed for ${STATE.user}`, 'warn');
+  } else {
+    out(`crontab: usage: crontab [-l|-e|-r|-u user]`, 'muted');
+  }
+}
+
+function cmd_apt(args) {
+  const sub = args[0];
+  const pkg = args.find((a,i)=>i>0&&!a.startsWith('-'));
+  const yes = args.includes('-y');
+  
+  if (STATE.user !== 'root') { out(`E: Could not open lock file - open (13: Permission denied)\nUse: sudo apt ${args.join(' ')}`, 'error'); return; }
+  
+  if (sub === 'update') {
+    out(`Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+Get:2 http://security.ubuntu.com/ubuntu jammy-security InRelease [110 kB]
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+${Math.floor(Math.random()*20)} packages can be upgraded.`, 'info');
+  } else if (sub === 'upgrade') {
+    out(`Reading package lists... Done\nBuilding dependency tree... Done\n${yes?'Do you want to continue? [Y/n] Y':''}\nStarting upgrade... Done`, 'success');
+  } else if (sub === 'install' && pkg) {
+    out(`Reading package lists... Done
+Building dependency tree... Done
+The following NEW packages will be installed: ${pkg}
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Unpacking ${pkg} ...
+Setting up ${pkg} ...
+Processing triggers...`, 'success');
+  } else if (sub === 'remove' && pkg) {
+    out(`Removing ${pkg} ...\nPurging configuration files for ${pkg} ...\nDone.`, 'warn');
+  } else if (sub === 'list') {
+    out(`nginx/jammy-updates,now 1.18.0-6ubuntu14 amd64 [installed]
+php8.2-fpm/jammy-updates,now 8.2.5 amd64 [installed]
+mysql-server/jammy-updates,now 8.0.32 amd64 [installed]
+supervisor/jammy 4.2.2-2ubuntu0 amd64 [installed]
+git/jammy-updates,now 2.34.1 amd64 [installed]`);
+  } else if (sub === 'search' && pkg) {
+    out(`Sorting... Done\nFull Text Search... Done\n${pkg}/jammy - ${pkg} package for Ubuntu\nnginx/jammy - A high performance web server\nphp8.2/jammy - PHP scripting language`, 'info');
+  } else if (sub === 'autoremove') {
+    out(`Reading package lists... Done\n0 upgraded, 0 newly installed, 3 to remove.\nAutoremove complete.`, 'success');
+  } else {
+    out(`apt: valid subcommands: update, upgrade, install, remove, list, search, autoremove`, 'muted');
+  }
+}
+
+function cmd_dpkg(args) {
+  const l = args.includes('-l');
+  const pkg = args.find(a=>!a.startsWith('-'));
+  if (l && pkg) {
+    out(`||/ Name             Version          Architecture Description
++++-================-================-============-================================
+ii  ${pkg.padEnd(16)} 1.0.0            amd64        ${pkg} package`);
+  } else if (args.includes('-i') && pkg) {
+    out(`Selecting previously unselected package ${pkg}.\nSetting up ${pkg}...`, 'success');
+  } else {
+    out(`dpkg: usage: dpkg [-l|-i|-r] [package]`, 'muted');
+  }
+}
+
+function cmd_which(cmd) {
+  if (!cmd) { out(`which: missing argument`, 'error'); return; }
+  const paths = { php:'/usr/bin/php', composer:'/usr/local/bin/composer', git:'/usr/bin/git', nginx:'/usr/sbin/nginx', mysql:'/usr/bin/mysql', python3:'/usr/bin/python3', node:'/usr/bin/node', npm:'/usr/bin/npm', curl:'/usr/bin/curl', wget:'/usr/bin/wget', tar:'/usr/bin/tar', zip:'/usr/bin/zip', nano:'/usr/bin/nano', vim:'/usr/bin/vim', bash:'/bin/bash', sh:'/bin/sh', sudo:'/usr/bin/sudo', supervisorctl:'/usr/bin/supervisorctl' };
+  if (paths[cmd]) out(paths[cmd]);
+  else out(`which: no ${cmd} in PATH`, 'error');
+}
+
+function cmd_php(args) {
+  const sub = args[0];
+  if (sub === '-v' || sub === '--version') {
+    out(`PHP 8.2.5 (cli) (built: May  1 2023 00:00:00)\nCopyright (c) The PHP Group\nZend Engine v4.2.5, Copyright (c) Zend Technologies\n    with Zend OPcache v8.2.5`);
+  } else if (sub === '-i' || sub === '--info') {
+    out(`phpinfo()\nPHP Version => 8.2.5\nSystem => Linux prod-server-01 5.15.0-91-generic\nBuild Date => May  1 2023\n\n[Configuration File (php.ini) Path] => /etc/php/8.2/cli`);
+  } else if (sub === '-m') {
+    out(`[PHP Modules]\nbcmath\ncurl\ndate\ngd\njson\nmysqli\nmysqlnd\nPDO\npdo_mysql\nopenssl\nsession\nxdebug\nxml\nzip\n[Zend Modules]\nOPcache`);
+  } else if (sub === '-l') {
+    const file = args[1];
+    if (file) out(`No syntax errors detected in ${file}`, 'success');
+    else out(`php -l: missing filename`, 'error');
+  } else if (sub === '-r') {
+    out(`[PHP code execution - simulated]`);
+  } else if (sub === 'artisan') {
+    cmd_artisan(args.slice(1));
+  } else {
+    out(`PHP 8.2.5  Usage: php [options] <file>\nOptions: -v (version), -m (modules), -i (info), -l <file> (lint), artisan [...]`, 'muted');
+  }
+}
+
+function cmd_artisan(args) {
+  const laravelPath = '/var/www/html/mylaravel';
+  const isInLaravel = STATE.cwd.startsWith(laravelPath) || FS[`${STATE.cwd}/artisan`];
+  if (!isInLaravel && !FS[`${STATE.cwd}/artisan`]) {
+    const artisan = FS[resolvePath('artisan')];
+    if (!artisan) { out(`Could not open input file: artisan\nHint: cd /var/www/html/mylaravel pehle jao`, 'error'); return; }
+  }
+  
+  const cmd2 = args[0];
+  const sub = args[1];
+  const flags = args.filter(a=>a.startsWith('--'));
+  
+  const artisanCmds = {
+    'migrate': () => {
+      const force = flags.includes('--force');
+      if (!force) {
+        out(`  <span style="color:#d29922">WARNING</span>  Application In Production!\n  Do you really wish to run this command? (yes/no) [no]:\n  > yes`, 'warn');
+      }
+      out(`   INFO  Running migrations.\n\n  2024_01_01_000000_create_users_table ..............................................<span style="color:#3fb950"> DONE</span>
+  2024_01_01_000001_create_cache_table ..............................................<span style="color:#3fb950"> DONE</span>
+  2024_01_05_000000_create_products_table ...........................................<span style="color:#3fb950"> DONE</span>
+  2024_01_10_000000_create_orders_table .............................................<span style="color:#3fb950"> DONE</span>`);
+    },
+    'migrate:rollback': () => out(`   INFO  Rolling back migrations.\n  2024_01_10_000000_create_orders_table ...............<span style="color:#f85149"> DONE</span>`,'warn'),
+    'migrate:status': () => out(`  Migration Status\n\n  Ran\n  .......<span style="color:#3fb950">✓</span> 2024_01_01_000000_create_users_table\n  .......<span style="color:#3fb950">✓</span> 2024_01_01_000001_create_cache_table\n  Pending\n  .......<span style="color:#d29922">⚬</span> 2024_01_15_000000_add_column_to_orders`),
+    'migrate:fresh': () => { out(`<span style="color:#f85149">Dropped all tables</span>\n`, 'error'); out(`   INFO  Running migrations.\n  All tables created fresh.`, 'success'); },
+    'cache:clear': () => { out(`   INFO  Application cache cleared successfully.`, 'success'); },
+    'config:clear': () => { out(`   INFO  Configuration cache cleared successfully.`, 'success'); delete FS[`${laravelPath}/bootstrap/cache/config.php`]; },
+    'config:cache': () => { out(`   INFO  Configuration cached successfully.`, 'success'); FS[`${laravelPath}/bootstrap/cache/config.php`]={type:'file',owner:'www-data',group:'www-data',perm:'644',content:'<?php return array(...);'}; },
+    'route:clear': () => { out(`   INFO  Route cache cleared successfully.`, 'success'); },
+    'route:cache': () => { out(`   INFO  Routes cached successfully.`, 'success'); FS[`${laravelPath}/bootstrap/cache/routes-v7.php`]={type:'file',owner:'www-data',group:'www-data',perm:'644'}; },
+    'view:clear': () => { out(`   INFO  Blade template cache cleared successfully.`, 'success'); },
+    'view:cache': () => { out(`   INFO  Blade templates cached successfully.`, 'success'); },
+    'optimize': () => { out(`   INFO  Caching framework bootstrap, configuration, and metadata.\n  config ..........<span style="color:#3fb950"> DONE</span>\n  events ..........<span style="color:#3fb950"> DONE</span>\n  routes ..........<span style="color:#3fb950"> DONE</span>`, 'success'); },
+    'optimize:clear': () => { out(`   INFO  Clearing cached bootstrap files.\n  config ..........<span style="color:#3fb950"> DONE</span>\n  routes ..........<span style="color:#3fb950"> DONE</span>\n  views ..........<span style="color:#3fb950"> DONE</span>`, 'success'); },
+    'storage:link': () => { 
+      const linkPath = `${laravelPath}/public/storage`;
+      const targetPath = `${laravelPath}/storage/app/public`;
+      FS[linkPath] = { type:'symlink', target:targetPath, owner:'www-data', group:'www-data', perm:'777' };
+      out(`   INFO  The [public/storage] link has been connected to [storage/app/public].`, 'success'); 
+    },
+    'key:generate': () => { out(`   INFO  Application key set successfully.`, 'success'); },
+    'queue:work': () => { out(`   INFO  Processing jobs from the [default] queue.\n  ${new Date().toISOString()} Processing: App\\Jobs\\SendEmailJob\n  ${new Date().toISOString()} Processed:  App\\Jobs\\SendEmailJob`, 'info'); },
+    'queue:listen': () => { out(`   INFO  Listening for jobs on [default] queue...`, 'info'); },
+    'queue:restart': () => { out(`   INFO  Broadcasting queue restart signal.`, 'success'); },
+    'schedule:run': () => { out(`   INFO  Running scheduled command: closure\n   INFO  Scheduled commands ran in 0.1 seconds.`, 'success'); },
+    'schedule:list': () => { out(`  ┌──────────────────────────────────────┬──────────────┬──────────────────┐\n  │ Command                              │ Interval     │ Next Due         │\n  ├──────────────────────────────────────┼──────────────┼──────────────────┤\n  │ php artisan emails:send              │ Every hour   │ 2024-01-15 11:00 │\n  │ php artisan reports:generate         │ Daily at 1am │ 2024-01-16 01:00 │\n  └──────────────────────────────────────┴──────────────┴──────────────────┘`); },
+    'tinker': () => { out(`Psy Shell v0.11.21 (PHP 8.2.5)\n>>> `, 'info'); out(`[SIMULATOR] Tinker REPL simulated. Type PHP code for live execution.`,'muted'); },
+    'make:model': () => { const name=args[1]||'MyModel'; out(`   INFO  Model [app/Models/${name}.php] created successfully.`, 'success'); },
+    'make:controller': () => { const name=args[1]||'MyController'; out(`   INFO  Controller [app/Http/Controllers/${name}.php] created successfully.`, 'success'); },
+    'make:migration': () => { const name=args.slice(1).join('_'); out(`   INFO  Migration [database/migrations/${new Date().toISOString().slice(0,10).replace(/-/g,'_')}_${name||'create_table'}.php] created successfully.`, 'success'); },
+    'make:seeder': () => { out(`   INFO  Seeder [database/seeders/${args[1]||'DatabaseSeeder'}.php] created successfully.`, 'success'); },
+    'db:seed': () => { out(`   INFO  Seeding database.\n  DatabaseSeeder ..........<span style="color:#3fb950"> DONE</span>`, 'success'); },
+    'list': () => { out(`Laravel 10.x\n\nUsage: php artisan [command] [options]\n\nAvailable commands:\n  cache:clear          Flush the application cache\n  config:cache         Create a cache file for faster configuration loading\n  config:clear         Remove the configuration cache file\n  db:seed              Seed the database\n  key:generate         Set the application key\n  make:controller      Create a new controller class\n  make:migration       Create a new migration file\n  make:model           Create a new Eloquent model class\n  migrate              Run the database migrations\n  migrate:rollback     Rollback the last database migration\n  optimize             Cache the framework bootstrap files\n  optimize:clear       Remove the cached bootstrap files\n  queue:work           Start processing jobs on the queue\n  route:cache          Create a route cache file\n  route:clear          Remove the route cache file\n  schedule:run         Run the scheduled commands\n  serve                Serve the application on the PHP development server\n  storage:link         Create the symbolic links configured for the application\n  tinker               Interact with your application\n  view:clear           Clear all compiled view files`); },
+    'serve': () => { out(`   INFO  Server running on [http://127.0.0.1:8000].\n\n  Press Ctrl+C to stop the server`, 'success'); },
+  };
+  
+  if (!cmd2) { artisanCmds['list'](); return; }
+  const key = sub ? `${cmd2}:${sub}` : cmd2;
+  const handler = artisanCmds[key] || artisanCmds[cmd2];
+  if (handler) handler();
+  else out(`   <span style="color:#f85149">ERROR</span>  Command "${key}" is not defined.\n\nDid you mean one of these?\n    ${Object.keys(artisanCmds).filter(k=>k.startsWith(cmd2.charAt(0))).slice(0,3).join('\n    ')}`, 'error');
+}
+
+function cmd_composer(args) {
+  const sub = args[0];
+  const pkg = args.find((a,i)=>i>0&&!a.startsWith('-'));
+  const nodev = args.includes('--no-dev');
+  const opt = args.includes('--optimize-autoloader');
+  
+  const memLimit = args.find(a=>a.startsWith('COMPOSER_MEMORY'));
+  
+  out(`  <span style="color:#3fb950">★</span> Composer 2.6.6`);
+  
+  if (sub === 'install') {
+    out(`Installing dependencies from lock file (including require-dev)\nVerifying lock file contents can be installed on current platform.
+Package operations: 45 installs, 0 updates, 0 removals
+  - Downloading packages...
+  - Installing laravel/framework (v10.28.0): OK
+  - Installing guzzlehttp/guzzle (7.8.0): OK
+  - Installing doctrine/dbal (3.7.2): OK
+${nodev?'  Dev packages not installed (--no-dev)':'  - Installing phpunit/phpunit (10.4.2): OK'}
+${opt?'Generating optimized autoload files':'Generating autoload files'}
+72 packages are now up to date.`, 'success');
+  } else if (sub === 'update') {
+    out(`Loading composer repositories...\nUpdating dependencies...\nPackage operations: 3 updates\n  - Upgrading laravel/framework (v10.27.0 => v10.28.0): OK\n  - Upgrading symfony/http-foundation (v6.3.6 => v6.3.7): OK\nGenerating autoload files\n3 packages updated.`, 'success');
+  } else if (sub === 'require' && pkg) {
+    out(`Using version ^1.0 for ${pkg}\n./composer.json has been updated\nRunning composer update ${pkg}\n  - Installing ${pkg} (1.0.0): OK\nGenerating autoload files`, 'success');
+  } else if (sub === 'remove' && pkg) {
+    out(`./composer.json has been updated\n  - Removing ${pkg} (1.0.0)\nGenerating autoload files\nPackage uninstalled.`, 'warn');
+  } else if (sub === 'dump-autoload') {
+    out(`Generating optimized autoload files\n${opt?'Generated optimized autoload files (authoritative)':'Generated autoload files'}`, 'success');
+  } else if (sub === 'show') {
+    out(`laravel/framework    v10.28.0   The Laravel Framework.\nguzzlehttp/guzzle   7.8.0     Guzzle is a PHP HTTP client library.\ndoctrine/dbal       3.7.2     Database Abstraction Layer`);
+  } else if (sub === '--version' || sub === '-V') {
+    out(`Composer 2.6.6  2023-12-08 18:46:08`);
+  } else {
+    out(`Composer 2.6.6\nUsage: composer [command]\nCommands: install, update, require, remove, dump-autoload, show, --version`, 'muted');
+  }
+}
+
+function cmd_git(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  
+  if (sub === 'clone') {
+    const url = rest[0];
+    const dir = rest[1] || (url?.split('/').pop().replace('.git','')) || 'project';
+    if (!url) { out(`fatal: you must specify a repository to clone.`, 'error'); return; }
+    out(`Cloning into '${dir}'...\nremote: Enumerating objects: 1234, done.\nremote: Counting objects: 100% (1234/1234), done.\nremote: Compressing objects: 100% (567/567), done.\nReceiving objects: 100% (1234/1234), 2.34 MiB | 5.00 MiB/s, done.\nResolving deltas: 100% (345/345), done.`, 'success');
+    FS[`${STATE.cwd}/${dir}`] = { type:'dir', owner:STATE.user, group:STATE.user, perm:'755', children:['.git','src','README.md'] };
+  } else if (sub === 'pull') {
+    const remote = rest[0]||'origin', branch=rest[1]||'main';
+    out(`From github.com:username/myproject\n * branch            ${branch} -> FETCH_HEAD\nAlready up to date.\n\n-- OR --\n\nUpdating abc1234..def5678\nFast-forward\n app/Http/Controllers/UserController.php | 15 ++++++++++-----\n resources/views/users/index.blade.php   |  8 +++++---\n 2 files changed, 15 insertions(+), 8 deletions(-)`, 'success');
+  } else if (sub === 'push') {
+    out(`Enumerating objects: 5, done.\nCounting objects: 100% (5/5), done.\nDelta compression using up to 2 threads\nCompressing objects: 100% (3/3), done.\nWriting objects: 100% (3/3), 1.23 KiB | 1.23 MiB/s, done.\nTo github.com:username/myproject.git\n   abc1234..def5678  main -> main`, 'success');
+  } else if (sub === 'status') {
+    out(`On branch main\nYour branch is up to date with 'origin/main'.\n\nChanges not staged for commit:\n  (use "git add <file>..." to update what will be committed)\n\n\t<span style="color:#f85149">modified:   app/Http/Controllers/UserController.php</span>\n\nUntracked files:\n  (use "git add <file>..." to include in what will be committed)\n\n\t<span style="color:#f85149">.env</span>\n\nno changes added to commit`);
+  } else if (sub === 'log') {
+    const oneline = rest.includes('--oneline');
+    if (oneline) {
+      out(`<span style="color:#d29922">def5678</span> Fix permission issue in storage\n<span style="color:#d29922">abc1234</span> Add user dashboard feature\n<span style="color:#d29922">123abcd</span> Initial Laravel project setup\n<span style="color:#d29922">000aaaa</span> Add .gitignore`);
+    } else {
+      out(`commit def5678abc1234567890abcdef1234567890abcdef\nAuthor: Dev Name <dev@example.com>\nDate:   Mon Jan 15 09:00:00 2024 +0530\n\n    Fix permission issue in storage\n\ncommit abc1234def5678901234567890abcdef12345678\nAuthor: Dev Name <dev@example.com>\nDate:   Sun Jan 14 20:00:00 2024 +0530\n\n    Add user dashboard feature`);
+    }
+  } else if (sub === 'branch') {
+    if (rest[0] && !rest[0].startsWith('-')) {
+      out(`Branch '${rest[0]}' created`, 'success');
+    } else {
+      out(`* <span style="color:#3fb950">main</span>\n  develop\n  feature/user-auth\n  hotfix/permission-fix`);
+    }
+  } else if (sub === 'checkout') {
+    const branch = rest.find(a=>!a.startsWith('-'));
+    if (!branch) { out(`error: missing branch name`, 'error'); return; }
+    if (rest.includes('-b')) out(`Switched to a new branch '${branch}'`, 'success');
+    else out(`Switched to branch '${branch}'\nYour branch is up to date with 'origin/${branch}'.`, 'success');
+  } else if (sub === 'stash') {
+    const action = rest[0];
+    if (!action || action==='push') out(`Saved working directory and index state WIP on main: def5678 Fix permission issue`, 'success');
+    else if (action==='pop') out(`On branch main\nChanges not staged for commit:\n\tmodified: app/Http/Controllers/UserController.php\nDropped refs/stash@{0} (abc1234...)`, 'success');
+    else if (action==='list') out(`stash@{0}: WIP on main: def5678 Fix permission issue`);
+  } else if (sub === 'add') {
+    out(`Changes staged for commit`,'success');
+  } else if (sub === 'commit') {
+    const mIdx = rest.indexOf('-m');
+    const msg = mIdx>=0?rest[mIdx+1]:'commit message';
+    out(`[main abc${Math.floor(Math.random()*9999)}] ${msg}\n 1 file changed, 5 insertions(+), 2 deletions(-)`, 'success');
+  } else if (sub === 'diff') {
+    out(`diff --git a/app/Http/Controllers/UserController.php b/app/Http/Controllers/UserController.php\n<span style="color:#58a6ff">index abc1234..def5678 100644</span>\n<span style="color:#f85149">--- a/app/Http/Controllers/UserController.php</span>\n<span style="color:#3fb950">+++ b/app/Http/Controllers/UserController.php</span>\n<span style="color:#58a6ff">@@ -45,7 +45,7 @@ class UserController extends Controller</span>\n<span style="color:#f85149">-        $users = User::all();</span>\n<span style="color:#3fb950">+        $users = User::paginate(20);</span>`);
+  } else if (sub === 'reset') {
+    const hard = rest.includes('--hard');
+    out(`HEAD is now at def5678 ${hard?'(hard reset - changes discarded)':'Fix permission issue'}`, hard?'warn':'success');
+  } else if (sub === 'remote') {
+    out(`origin  https://github.com/username/myproject.git (fetch)\norigin  https://github.com/username/myproject.git (push)`);
+  } else if (sub === 'fetch') {
+    out(`remote: Counting objects: 3, done.\nFrom github.com:username/myproject\n   def5678..abc1234  main -> origin/main`, 'info');
+  } else if (sub === '--version') {
+    out(`git version 2.34.1`);
+  } else if (sub === 'init') {
+    out(`Initialized empty Git repository in ${STATE.cwd}/.git/`, 'success');
+  } else if (sub === 'config') {
+    out(`[SIMULATOR] Git config set`, 'success');
+  } else {
+    out(`usage: git [clone|pull|push|status|log|branch|checkout|stash|add|commit|diff|reset|remote|fetch|init]\n\nCommon git commands:\n  git clone <url>       - repository clone\n  git pull origin main  - latest code pull\n  git status            - changes check\n  git log --oneline     - commit history`, 'muted');
+  }
+}
+
+function cmd_mysql(args) {
+  const uIdx = args.indexOf('-u');
+  const pFlag = args.includes('-p');
+  const user = uIdx>=0 ? args[uIdx+1] : 'root';
+  const db = args.find((a,i)=>i>0&&!a.startsWith('-')&&a!==user);
+  
+  if (!uIdx && !pFlag) { out(`ERROR 1045 (28000): Access denied for user '${STATE.user}'@'localhost'`, 'error'); return; }
+  
+  out(`mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor. Commands end with ; or \\g.
+Your MySQL connection id is 42
+Server version: 8.0.32-0ubuntu0.22.04.2
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+mysql>`, 'success');
+  
+  MYSQL_STATE.active = true;
+  MYSQL_STATE.selectedDb = db || null;
+  
+  out(`<span style="color:#4a5568">[MySQL mode active. SQL commands type karo. 'exit' ya 'quit' se bahar aao.]</span>`, 'muted');
+}
+
+function runMysql(input) {
+  const q = input.trim().replace(/;$/, '').trim().toUpperCase();
+  const raw = input.trim().replace(/;$/, '').trim();
+  
+  if (q === 'EXIT' || q === 'QUIT' || q === '\\Q') {
+    out(`Bye`, 'muted');
+    MYSQL_STATE.active = false;
+    MYSQL_STATE.selectedDb = null;
+    return;
+  }
+  
+  out(`<span style="color:#4a5568">mysql></span> ${escHtml(input)}`);
+  
+  if (q === 'SHOW DATABASES' || q === 'SHOW DATABASES;') {
+    out(`+--------------------+\n| Database           |\n+--------------------+\n| information_schema |\n| mylaraveldb        |\n| mysql              |\n+--------------------+\n3 rows in set (0.01 sec)`);
+  } else if (q.startsWith('USE ')) {
+    const db = raw.slice(4).trim();
+    if (MYSQL_STATE.databases[db]) {
+      MYSQL_STATE.selectedDb = db;
+      out(`Database changed`,'success');
+    } else out(`ERROR 1049 (42000): Unknown database '${db}'`,'error');
+  } else if (q === 'SHOW TABLES' || q === 'SHOW TABLES;') {
+    if (!MYSQL_STATE.selectedDb) { out(`ERROR 1046 (3D000): No database selected`,'error'); return; }
+    const db = MYSQL_STATE.databases[MYSQL_STATE.selectedDb];
+    const tables = Array.isArray(db.tables) ? db.tables : Object.keys(db.tables);
+    out(`+----------------------------+\n| Tables_in_${MYSQL_STATE.selectedDb.padEnd(15)} |\n+----------------------------+\n${tables.map(t=>`| ${t.padEnd(26)} |`).join('\n')}\n+----------------------------+\n${tables.length} rows in set (0.00 sec)`);
+  } else if (q.startsWith('DESCRIBE ') || q.startsWith('DESC ')) {
+    const tbl = raw.split(' ').pop().toLowerCase();
+    const db = MYSQL_STATE.databases[MYSQL_STATE.selectedDb];
+    const tblData = db?.tables?.[tbl];
+    if (!tblData) { out(`ERROR 1146 (42S02): Table '${MYSQL_STATE.selectedDb}.${tbl}' doesn't exist`,'error'); return; }
+    out(`+--------------+---------------------+------+-----+---------+----------------+\n| Field        | Type                | Null | Key | Default | Extra          |\n+--------------+---------------------+------+-----+---------+----------------+`);
+    tblData.cols.split(',').forEach((col,i) => {
+      const types = {id:'int unsigned',name:'varchar(255)',email:'varchar(255)',password:'varchar(255)',created_at:'timestamp',key:'varchar(255)',value:'mediumtext',queue:'varchar(255)',payload:'longtext'};
+      const t = types[col.trim()]||'varchar(255)';
+      out(`| ${col.trim().padEnd(12)} | ${t.padEnd(19)} | ${i===0?'NO':'YES'} | ${i===0?'PRI':'   '} | ${i===0?'NULL':i===1?'NULL':'NULL'} | ${i===0?'auto_increment  ':'-               '} |`);
+    });
+    out(`+--------------+---------------------+------+-----+---------+----------------+`);
+  } else if (q.startsWith('SELECT COUNT') || q.startsWith('SELECT COUNT(*)')) {
+    const match = raw.match(/FROM\s+(\w+)/i);
+    const tbl = match?.[1]?.toLowerCase();
+    const db = MYSQL_STATE.databases[MYSQL_STATE.selectedDb];
+    const rows = db?.tables?.[tbl]?.rows || Math.floor(Math.random()*1000)+1;
+    out(`+----------+\n| COUNT(*) |\n+----------+\n| ${String(rows).padEnd(8)} |\n+----------+\n1 row in set (0.01 sec)`);
+  } else if (q.startsWith('SELECT ')) {
+    const match = raw.match(/FROM\s+(\w+)/i);
+    const tbl = match?.[1]?.toLowerCase();
+    const db = MYSQL_STATE.databases[MYSQL_STATE.selectedDb];
+    const tblData = db?.tables?.[tbl];
+    if (!tblData) { out(`ERROR 1146 (42S02): Table doesn't exist`,'error'); return; }
+    const cols = tblData.cols.split(',').slice(0,3).map(c=>c.trim());
+    out(`+${cols.map(c=>'-'.repeat(c.length+2)).join('+')}+\n| ${cols.join(' | ')} |\n+${cols.map(c=>'-'.repeat(c.length+2)).join('+')}+`);
+    for(let i=1;i<=3;i++) out(`| ${cols.map((c,ci)=>ci===0?String(i):ci===1?'Sample '+c+' '+i:'value'+i).map((v,ci)=>v.padEnd(cols[ci].length)).join(' | ')} |`);
+    out(`+${cols.map(c=>'-'.repeat(c.length+2)).join('+')}+\n3 rows in set (sample, actual: ${tblData.rows} rows) (0.01 sec)`);
+  } else if (q.startsWith('CREATE DATABASE')) {
+    const dbName = raw.match(/CREATE DATABASE\s+(\w+)/i)?.[1];
+    if (dbName) { MYSQL_STATE.databases[dbName]={tables:{}}; out(`Query OK, 1 row affected (0.01 sec)`,'success'); }
+  } else if (q.startsWith('CREATE USER')) {
+    out(`Query OK, 0 rows affected (0.01 sec)`,'success');
+  } else if (q.startsWith('GRANT ')) {
+    out(`Query OK, 0 rows affected (0.01 sec)`,'success');
+  } else if (q === 'FLUSH PRIVILEGES') {
+    out(`Query OK, 0 rows affected (0.01 sec)`,'success');
+  } else if (q.startsWith('DROP ')) {
+    out(`Query OK, 0 rows affected (0.01 sec)`,'warn');
+  } else if (q.startsWith('INSERT ')) {
+    out(`Query OK, 1 row affected (0.01 sec)`,'success');
+  } else if (q.startsWith('UPDATE ')) {
+    out(`Query OK, ${Math.floor(Math.random()*10)+1} row(s) affected (0.01 sec)`,'success');
+  } else if (q.startsWith('DELETE ')) {
+    out(`Query OK, ${Math.floor(Math.random()*5)+1} row(s) affected (0.01 sec)`,'warn');
+  } else if (q.startsWith('SHOW CREATE TABLE')) {
+    const tbl = raw.match(/TABLE\s+(\w+)/i)?.[1];
+    out(`CREATE TABLE \`${tbl}\` (\n  \`id\` int unsigned NOT NULL AUTO_INCREMENT,\n  \`name\` varchar(255) NOT NULL,\n  \`email\` varchar(255) NOT NULL,\n  \`created_at\` timestamp NULL,\n  PRIMARY KEY (\`id\`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+  } else if (q.startsWith('SHOW PROCESSLIST')) {
+    out(`+----+------+-----------+-------------+---------+------+-------+------------------+\n| Id | User | Host      | db          | Command | Time | State | Info             |\n+----+------+-----------+-------------+---------+------+-------+------------------+\n| 42 | root | localhost | mylaraveldb | Query   |    0 | init  | SHOW PROCESSLIST |\n+----+------+-----------+-------------+---------+------+-------+------------------+`);
+  } else if (q === 'STATUS') {
+    out(`mysql  Ver 8.0.32\nConnection id: 42\nCurrent database: ${MYSQL_STATE.selectedDb||'(none)'}\nCurrent user: root@localhost\nServer version: 8.0.32\nUptime: 1 day 1 hour`);
+  } else {
+    out(`ERROR 1064 (42000): You have an error in your SQL syntax. Check the manual.\n(Common commands: SHOW DATABASES; USE db; SHOW TABLES; DESCRIBE table; SELECT * FROM table LIMIT 5;)`,'error');
+  }
+}
+
+function cmd_mysqldump(args) {
+  const uIdx = args.indexOf('-u');
+  const pFlag = args.includes('-p');
+  const db = args.find((a,i)=>i>0&&!a.startsWith('-')&&a!==args[uIdx+1]);
+  const output = args.find(a=>a.endsWith('.sql')||a.endsWith('.sql.gz'));
+  if (!db) { out(`mysqldump: error: No database given`, 'error'); return; }
+  out(`-- MySQL dump 10.13  Distrib 8.0.32
+-- Host: localhost    Database: ${db}
+-- Dump date: ${new Date().toISOString()}
+-- Server version: 8.0.32
+SET NAMES utf8mb4;
+-- Table structure for \`users\`
+DROP TABLE IF EXISTS \`users\`;
+CREATE TABLE \`users\` (...) ...
+-- Dump completed on ${new Date().toISOString()}`, 'success');
+  if (output || args.some(a=>a==='>')) {
+    const filename = output || `${db}_backup.sql`;
+    out(`mysqldump: Backup saved${output?` to ${output}`:''}`, 'success');
+  }
+}
+
+function cmd_tar(args) {
+  const create = args.includes('-c') || args.includes('czf') || args.some(a=>a.includes('c'));
+  const extract = args.includes('-x') || args.some(a=>a.includes('x'));
+  const verbose = args.includes('-v') || args.some(a=>a.includes('v'));
+  const gzip = args.includes('-z') || args.some(a=>a.includes('z'));
+  const fIdx = args.findIndex(a=>a.includes('f'));
+  const file = args.find(a=>(a.endsWith('.tar.gz')||a.endsWith('.tar')||a.endsWith('.tgz')));
+  const sources = args.filter(a=>!a.startsWith('-')&&a!==file);
+  
+  if (!file) { out(`tar: Refusing to create empty archive\nUsage: tar [czf|xzf] [archive] [files...]`,'error'); return; }
+  
+  if (create) {
+    out(`Creating archive: ${file}${sources.length?` from ${sources.join(', ')}`:''}`);
+    if (verbose) {
+      ['/var/www/html/mylaravel/app','storage','config','routes','.env'].forEach(f=>out(f));
+    }
+    FS[resolvePath(file)] = { type:'file', owner:STATE.user, group:STATE.user, perm:'644', size:'45M' };
+    const parent = resolvePath(file).split('/').slice(0,-1).join('/')||'/';
+    const name = resolvePath(file).split('/').pop();
+    if(FS[parent]&&!FS[parent].children?.includes(name)){if(!FS[parent].children)FS[parent].children=[];FS[parent].children.push(name);}
+    out(`${file} created (${gzip?'gzip compressed':'tar archive'})`, 'success');
+  } else if (extract) {
+    const targetFlag = args.indexOf('-C');
+    const target = targetFlag>=0 ? args[targetFlag+1] : STATE.cwd;
+    out(`Extracting ${file} to ${target}...`);
+    if (verbose) {
+      out(`./myproject/\n./myproject/app/\n./myproject/config/\n./myproject/routes/\n./myproject/.env`);
+    }
+    out(`Extraction complete to ${target}`, 'success');
+  } else if (args.includes('-t') || args.some(a=>a.includes('t'))) {
+    out(`./myproject/\n./myproject/app/\n./myproject/config/\n./myproject/storage/\n./myproject/.env`);
+  } else {
+    out(`tar: usage: tar [czf|xzf|tzf] [archive] [files...]`,'muted');
+  }
+}
+
+function cmd_zip(pos, flags) {
+  if (!pos.length) { out(`zip: missing archive name`,'error'); return; }
+  const [archive, ...sources] = pos;
+  const recursive = flags.includes('-r');
+  out(`  adding: ${sources.join(', ')} (deflated 65%)\nArchive created: ${archive}`, 'success');
+  const rp = resolvePath(archive);
+  FS[rp] = { type:'file', owner:STATE.user, group:STATE.user, perm:'644', size:'23M' };
+}
+
+function cmd_unzip(pos, flags) {
+  if (!pos.length) { out(`unzip: missing archive name`,'error'); return; }
+  const dIdx = flags.indexOf('-d');
+  const dest = dIdx>=0 ? pos[dIdx+1]||STATE.cwd : STATE.cwd;
+  out(`Archive:  ${pos[0]}\n  inflating: myproject/app/Http/Controllers/\n  inflating: myproject/config/\n  inflating: myproject/.env\nExtracted to: ${dest}`, 'success');
+}
+
+function cmd_scp(args) {
+  if (args.length < 2) { out(`usage: scp [-r] source destination`,'error'); return; }
+  const recursive = args.includes('-r');
+  const [src, dst] = args.filter(a=>!a.startsWith('-'));
+  const isUpload = !src.includes('@') && dst?.includes('@');
+  const isDownload = src?.includes('@') && !dst?.includes('@');
+  out(`${src} → ${dst}\n${Math.floor(Math.random()*50)+1}.2MB transferred\n100% |████████████████████| ${Math.floor(Math.random()*1000)+100} KB/s`, 'success');
+}
+
+function cmd_rsync(args) {
+  const src = args.find(a=>!a.startsWith('-'));
+  const dst = args.filter(a=>!a.startsWith('-'))[1];
+  const verbose = args.includes('-v') || args.includes('-a') || args.some(a=>a.includes('v'));
+  out(`sending incremental file list`);
+  if (verbose) {
+    out(`./\napp/Http/Controllers/UserController.php\nresources/views/users/index.blade.php`);
+  }
+  out(`\nsent 45,123 bytes  received 678 bytes  ${Math.floor(Math.random()*5000)+1000} bytes/sec\ntotal size is 23,456,789  speedup is 518.11`, 'success');
+}
+
+function cmd_ssh(args) {
+  const host = args.find(a=>!a.startsWith('-'));
+  if (!host) { out(`usage: ssh [user@]host`,'error'); return; }
+  out(`ssh: connect to host ${host} port 22: [SIMULATOR] Remote connections simulated.\nIn real terminal, this would open a new SSH session.`, 'warn');
+}
+
+function cmd_env() {
+  Object.entries({...STATE.env,...STATE.vars}).forEach(([k,v]) => out(`${k}=${escHtml(v)}`));
+}
+
+function cmd_export(args) {
+  args.forEach(a => {
+    const [k,v] = a.split('=');
+    if (k && v !== undefined) { STATE.env[k] = v; out(`export ${k}=${v}`, 'success'); }
+    else if (k) out(`export: ${k} (undefined)`, 'muted');
+  });
+}
+
+function cmd_alias(args) {
+  if (!args.length) {
+    out(`alias ll='ls -alF'\nalias la='ls -A'\nalias l='ls -CF'\nalias update='sudo apt update && sudo apt upgrade'\nalias deploy='cd /var/www/html/mylaravel && git pull'`);
+  } else {
+    out(`Alias set: ${args.join(' ')}`, 'success');
+  }
+}
+
+function cmd_history() {
+  cmdHistory.forEach((cmd, i) => out(`  ${String(i+1).padStart(3)}  ${cmd}`));
+}
+
+function cmd_man(cmd) {
+  if (!cmd) { out(`What manual page do you want?`, 'error'); return; }
+  const manuals = {
+    chmod:'chmod - change file mode bits\nUsage: chmod [OPTION]... MODE FILE...\n  -R  change files recursively\n  MODE examples: 755, 644, 775, +x, -w',
+    chown:'chown - change file owner and group\nUsage: chown [OPTION]... [OWNER[:GROUP]] FILE...\n  -R  operate on files recursively',
+    nginx:'nginx - HTTP and reverse proxy server\nUsage: nginx [-t|-s stop|reload|reopen]\n  -t  test configuration\n  -s reload  send signal to reload config',
+    systemctl:'systemctl - Control systemd and service manager\nUsage: systemctl [start|stop|restart|reload|status|enable|disable] service',
+    crontab:'crontab - maintain crontab files\nUsage: crontab [-l|-e|-r]\nFormat: MIN HOUR DAY MONTH WEEKDAY command',
+    ssh:'ssh - OpenSSH remote login client\nUsage: ssh [-i keyfile] [-p port] [user@]hostname',
+    git:'git - the stupid content tracker\nCommon commands: clone, pull, push, status, log, branch, checkout',
+    mysql:'mysql - MySQL command-line client\nUsage: mysql [-u user] [-p] [database]',
+    tar:'tar - an archiving utility\nUsage: tar [czf|xzf] archive.tar.gz [files]\n  c=create, x=extract, z=gzip, f=file, v=verbose',
+    composer:'composer - Dependency Manager for PHP\nUsage: composer [install|update|require|remove|dump-autoload|show]',
+  };
+  out(`MANUAL: ${cmd.toUpperCase()}\n${'='.repeat(40)}\n${manuals[cmd]||`No manual entry for '${cmd}' (this is a simulator)`}`,'info');
+}
+
+function cmd_help() {
+  out(`<span style="color:#3fb950">🐧 Linux Admin Simulator — Available Commands</span>
+
+<span style="color:#58a6ff">Navigation:</span>     pwd, ls, cd, tree
+<span style="color:#58a6ff">File Ops:</span>       mkdir, touch, cp, mv, rm, ln
+<span style="color:#58a6ff">File View:</span>      cat, less, head, tail, grep, wc, find, stat, diff
+<span style="color:#58a6ff">Edit:</span>           nano, vim (simulated), echo, tee
+<span style="color:#58a6ff">Permissions:</span>    chmod, chown, chgrp, umask
+<span style="color:#58a6ff">Users:</span>          whoami, id, who, w, last, su, sudo, useradd, userdel, usermod, groupadd, passwd, groups
+<span style="color:#58a6ff">Processes:</span>      ps, top, htop, kill, pkill, jobs, lsof
+<span style="color:#58a6ff">System:</span>         uname, uptime, date, hostname, df, du, free, lscpu, nproc
+<span style="color:#58a6ff">Network:</span>        ip, ifconfig, netstat, ss, ping, curl, wget, nmap
+<span style="color:#58a6ff">Firewall:</span>       ufw, iptables
+<span style="color:#58a6ff">Services:</span>       systemctl, service, journalctl
+<span style="color:#58a6ff">Cron:</span>           crontab
+<span style="color:#58a6ff">Packages:</span>       apt, apt-get, dpkg, which
+<span style="color:#58a6ff">PHP/Laravel:</span>    php, composer, (php artisan ...)
+<span style="color:#58a6ff">Git:</span>            git (clone, pull, push, status, log, branch...)
+<span style="color:#58a6ff">Database:</span>       mysql, mysqldump, mysqlcheck
+<span style="color:#58a6ff">Archive:</span>        tar, zip, unzip, gzip, gunzip
+<span style="color:#58a6ff">Transfer:</span>       scp, rsync, ssh, wget, curl
+<span style="color:#58a6ff">Supervisor:</span>     supervisorctl
+<span style="color:#58a6ff">SSL:</span>            certbot, openssl
+<span style="color:#58a6ff">Misc:</span>           clear, history, man, env, export, alias, sleep, reboot
+
+<span style="color:#4a5568">Hint: Tab = autocomplete | ↑↓ = history | man [cmd] = help</span>`);
+}
+
+function cmd_certbot(args) {
+  const sub = args[0];
+  const domain = args.find(a=>!a.startsWith('-')&&a!==sub&&!a.startsWith('--'));
+  if (sub==='--nginx') {
+    out(`Saving debug log to /var/log/letsencrypt/letsencrypt.log\nRequesting a certificate for ${domain||'mysite.com'} and www.${domain||'mysite.com'}
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/${domain||'mysite.com'}/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/${domain||'mysite.com'}/privkey.pem
+
+Deploying certificate to ${domain||'mysite.com'}...
+Successfully deployed certificate.
+Congratulations! You have successfully enabled HTTPS on https://${domain||'mysite.com'}`, 'success');
+  } else if (sub==='renew') {
+    out(`Saving debug log to /var/log/letsencrypt/letsencrypt.log\nProcessing /etc/letsencrypt/renewal/mysite.com.conf\nCertificate not yet due for renewal. Simulating renewal of an existing certificate.`, 'success');
+  } else {
+    out(`certbot usage:\n  certbot --nginx -d domain.com\n  certbot renew --dry-run\n  certbot certificates`,'muted');
+  }
+}
+
+function cmd_supervisorctl(args) {
+  const action = args[0];
+  const prog = args[1];
+  
+  if (action === 'status') {
+    out(`laravel-worker:laravel-worker_00   RUNNING   pid 4521, uptime 0:02:15
+laravel-worker:laravel-worker_01   RUNNING   pid 4522, uptime 0:02:15`,'success');
+  } else if (action === 'start') {
+    out(`${prog||'laravel-worker:*'}: started`, 'success');
+  } else if (action === 'stop') {
+    out(`${prog||'laravel-worker:*'}: stopped`, 'warn');
+  } else if (action === 'restart') {
+    out(`${prog||'laravel-worker:*'}: stopped\n${prog||'laravel-worker:*'}: started`, 'success');
+  } else if (action === 'reread') {
+    out(`laravel-worker: available`, 'info');
+  } else if (action === 'update') {
+    out(`laravel-worker: added process group`, 'success');
+  } else {
+    out(`supervisorctl actions: status, start, stop, restart, reread, update`,'muted');
+  }
+}
+
+function cmd_runscript(script, args) {
+  const rp = resolvePath(script.slice(2));
+  const node = FS[rp];
+  if (!node) { out(`bash: ${script}: No such file or directory`, 'error'); return; }
+  if (!node.perm?.endsWith('5') && !node.perm?.includes('7')) { out(`bash: ${script}: Permission denied\nHint: chmod +x ${script}`, 'error'); return; }
+  out(`[Running: ${rp}]`, 'muted');
+  const content = node.content || '';
+  // Execute key commands from script
+  const lines = content.split('\n').filter(l=>l.trim()&&!l.trim().startsWith('#'));
+  lines.slice(0,5).forEach(l => {
+    if (l.includes('echo')) out(escHtml(l.replace('echo','').replace(/['"]/g,'').trim()), 'success');
+  });
+  out(`Script completed successfully`, 'success');
+}
+
+function cmd_assign(expr) {
+  const [k, ...vParts] = expr.split('=');
+  const v = vParts.join('=');
+  STATE.vars[k] = v;
+}
+
+// ===================== AUTOCOMPLETE =====================
+function getAutocompletions(input) {
+  const parts = input.split(' ');
+  const lastPart = parts[parts.length-1];
+  
+  if (parts.length === 1) {
+    // Command completion
+    return ALL_CMDS.filter(c=>c.startsWith(lastPart)).slice(0,8);
+  } else {
+    // Path completion
+    const dirPart = lastPart.includes('/') ? lastPart.slice(0, lastPart.lastIndexOf('/')+1) : '';
+    const filePart = lastPart.includes('/') ? lastPart.slice(lastPart.lastIndexOf('/')+1) : lastPart;
+    
+    const searchDir = dirPart ? resolvePath(dirPart) : STATE.cwd;
+    const node = FS[searchDir];
+    if (!node || node.type !== 'dir') return [];
+    
+    const children = node.children || [];
+    return children
+      .filter(c=>c.startsWith(filePart))
+      .map(c=>{
+        const fullPath = dirPart + c;
+        const childPath = searchDir==='/'?'/'+c:searchDir+'/'+c;
+        const childNode = FS[childPath];
+        return childNode?.type==='dir' ? fullPath+'/' : fullPath;
+      })
+      .slice(0,8);
+  }
+}
+
+function showAutocomplete(completions, input) {
+  const box = document.getElementById('autocomplete-box');
+  if (!completions.length) { box.style.display='none'; acList=[]; acIdx=-1; return; }
+  acList = completions; acIdx = -1;
+  box.innerHTML = completions.map((c,i)=>`<div class="ac-item" onclick="applyAC('${c}')">${escHtml(c)}</div>`).join('');
+  box.style.display = 'block';
+}
+
+function applyAC(completion) {
+  const input = document.getElementById('cmd-input');
+  const parts = input.value.split(' ');
+  parts[parts.length-1] = completion;
+  input.value = parts.join(' ');
+  document.getElementById('autocomplete-box').style.display = 'none';
+  acList = []; acIdx = -1;
+  input.focus();
+}
+
+// ===================== SIDE PANELS =====================
+function updateSidePanels() {
+  // Services
+  const svcList = document.getElementById('svc-list');
+  svcList.innerHTML = Object.entries(SERVICES).map(([name, svc])=>`
+    <div class="service-row" onclick="rpServiceClick('${name}')">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="svc-status ${svc.status}"></div>
+        <span style="color:${svc.status==='running'?'#e6edf3':'#4a5568'}">${name}</span>
+      </div>
+      <span style="font-size:10px;color:#4a5568">${svc.pid||'-'}</span>
+    </div>`).join('');
+  
+  // Processes
+  const procList = document.getElementById('proc-list');
+  procList.innerHTML = `<div style="display:flex;gap:6px;padding:2px 0;font-size:10px;color:#4a5568;border-bottom:1px solid #0a0e14"><span style="min-width:36px">PID</span><span style="min-width:32px">CPU</span><span>COMMAND</span></div>` + 
+    [...processes].sort((a,b)=>parseFloat(b.cpu)-parseFloat(a.cpu)).slice(0,12).map(p=>`
+    <div class="proc-row">
+      <span class="pid">${p.pid}</span>
+      <span class="cpu">${p.cpu}%</span>
+      <span class="name">${p.cmd.split(' ')[0].split('/').pop()}</span>
+    </div>`).join('');
+  
+  // Network
+  document.getElementById('net-info').innerHTML = `
+    <div class="rp-section">
+      <div class="rp-section-title">Interfaces</div>
+      ${Object.entries(NETWORK.interfaces).map(([iface, info])=>`
+        <div class="rp-row"><span class="k">${iface}</span><span class="v green">${info.status}</span></div>
+        <div class="rp-row"><span class="k">IP</span><span class="v">${info.ip}</span></div>
+        <div class="rp-row"><span class="k">RX/TX</span><span class="v">${info.rx}/${info.tx}</span></div>
+      `).join('')}
+    </div>
+    <div class="rp-section">
+      <div class="rp-section-title">Open Ports</div>
+      ${Object.entries(NETWORK.ports).map(([port, svc])=>`
+        <div class="rp-row"><span class="k">${port}/tcp</span><span class="v green">${svc}</span></div>
+      `).join('')}
+    </div>
+    <div class="rp-section">
+      <div class="rp-section-title">Firewall (UFW)</div>
+      <div class="rp-row"><span class="k">Status</span><span class="v ${NETWORK.firewall.status==='active'?'green':'red'}">${NETWORK.firewall.status}</span></div>
+      <div class="rp-row"><span class="k">Rules</span><span class="v">${NETWORK.firewall.rules.length} rules</span></div>
+    </div>`;
+  
+  // Users
+  document.getElementById('user-list').innerHTML = Object.entries(USERS).map(([uname, u])=>`
+    <div class="rp-row">
+      <span class="k" style="color:${uname===STATE.user?'#3fb950':'#4a5568'}">${uname===STATE.user?'▶ ':''} ${uname}</span>
+      <span class="v">${u.uid}</span>
+    </div>
+    <div style="font-size:10px;color:#1e2d3d;padding:0 0 4px 12px">${u.groups.slice(0,3).join(', ')}</div>
+  `).join('');
+}
+
+function rpServiceClick(name) {
+  document.getElementById('cmd-input').value = `systemctl status ${name}`;
+  document.getElementById('cmd-input').focus();
+}
+
+function rpSwitch(btn, id) {
+  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#rp-content > div').forEach(d=>d.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+// ===================== FILE TREE =====================
+function buildFileTree() {
+  const ft = document.getElementById('filetree');
+  const topDirs = ['/', '/etc', '/var/www/html', '/var/log', '/home/ubuntu'];
+  let html = '';
+  
+  topDirs.forEach(dir => {
+    const depth = dir === '/' ? 0 : dir.split('/').filter(Boolean).length;
+    const node = FS[dir];
+    if (!node) return;
+    const name = dir === '/' ? '/ (root)' : dir.split('/').pop();
+    const isActive = STATE.cwd === dir || STATE.cwd.startsWith(dir + '/');
+    html += `<div class="ft-item ft-depth-${Math.min(depth,3)} ${isActive?'selected':''}" onclick="ftClick('${dir}')">
+      <span class="ft-icon">📁</span>${name}
+    </div>`;
+  });
+  ft.innerHTML = html;
+}
+
+function ftClick(path) {
+  STATE.cwd = path;
+  updatePromptDisplay();
+  buildFileTree();
+  out(`cd ${path}`, 'muted');
+  out(`[Navigated to ${path}]`, 'muted');
+}
+
+function updatePromptDisplay() {
+  const path = STATE.cwd === STATE.env.HOME ? '~' : STATE.cwd;
+  document.getElementById('prompt-display').innerHTML = `<span class="ps1-user">${STATE.user}</span><span class="ps1-at">@</span><span class="ps1-host">${STATE.hostname}</span><span class="ps1-sep">:</span><span class="ps1-path">${path}</span><span class="ps1-dollar"> ${STATE.user==='root'?'#':'$'}</span>`;
+  document.getElementById('sb-user').textContent = STATE.user;
+  buildFileTree();
+}
+
+// ===================== TABS =====================
+function addTab() {
+  STATE.tabCount++;
+  const tabs = document.getElementById('tabs');
+  const newTab = document.createElement('div');
+  newTab.className = 'tab';
+  newTab.id = `tab-${STATE.tabCount}`;
+  newTab.textContent = `Terminal ${STATE.tabCount}`;
+  newTab.onclick = () => { document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); newTab.classList.add('active'); };
+  tabs.insertBefore(newTab, document.getElementById('tab-add'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  newTab.classList.add('active');
+  out(`New terminal session opened`, 'muted');
+}
+
+// ===================== UPTIME COUNTER =====================
+setInterval(() => {
+  const e = Math.floor((Date.now()-STATE.startTime)/1000);
+  const d=Math.floor(e/86400), h=Math.floor((e%86400)/3600), m=Math.floor((e%3600)/60);
+  document.getElementById('sb-uptime').textContent = `${d}d ${h}h ${m}m`;
+  
+  // Animate CPU/mem
+  const cpu = Math.floor(Math.random()*15+15);
+  const mem = Math.floor(Math.random()*10+53);
+  document.getElementById('cpu-bar').style.width = cpu+'%';
+  document.getElementById('cpu-val').textContent = cpu+'%';
+  document.getElementById('mem-bar').style.width = mem+'%';
+  document.getElementById('mem-val').textContent = mem+'%';
+  
+  // Clock
+  document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
+}, 3000);
+
+// ===================== INPUT HANDLER =====================
+document.getElementById('cmd-input').addEventListener('keydown', function(e) {
+  const ac = document.getElementById('autocomplete-box');
+  
+  if (e.key === 'Enter') {
+    const cmd = this.value.trim();
+    if (MYSQL_STATE.active) {
+      if (cmd) { this.value=''; runMysql(cmd); }
+      return;
+    }
+    if (cmd) { prompt_line(cmd); runCmd(cmd); }
+    this.value = '';
+    histIndex = cmdHistory.length;
+    ac.style.display='none'; acList=[]; acIdx=-1;
+    return;
+  }
+  
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    if (acList.length && acIdx >= 0) {
+      applyAC(acList[acIdx]);
+    } else {
+      const completions = getAutocompletions(this.value);
+      if (completions.length === 1) {
+        applyAC(completions[0]);
+      } else if (completions.length > 1) {
+        showAutocomplete(completions, this.value);
+        acIdx = 0;
+        document.querySelectorAll('.ac-item').forEach((el,i)=>el.classList.toggle('selected',i===acIdx));
+      }
+    }
+    return;
+  }
+  
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (acList.length) {
+      acIdx = Math.max(0, acIdx-1);
+      document.querySelectorAll('.ac-item').forEach((el,i)=>el.classList.toggle('selected',i===acIdx));
+    } else {
+      if (histIndex > 0) { histIndex--; this.value = cmdHistory[histIndex] || ''; }
+    }
+    return;
+  }
+  
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (acList.length) {
+      acIdx = Math.min(acList.length-1, acIdx+1);
+      document.querySelectorAll('.ac-item').forEach((el,i)=>el.classList.toggle('selected',i===acIdx));
+    } else {
+      if (histIndex < cmdHistory.length-1) { histIndex++; this.value = cmdHistory[histIndex] || ''; }
+      else { histIndex = cmdHistory.length; this.value=''; }
+    }
+    return;
+  }
+  
+  if (e.key === 'Escape') { ac.style.display='none'; acList=[]; acIdx=-1; return; }
+  if (e.key === 'l' && e.ctrlKey) { e.preventDefault(); document.getElementById('terminal').innerHTML=''; return; }
+  if (e.key === 'c' && e.ctrlKey) { 
+    e.preventDefault(); 
+    if (MYSQL_STATE.active) { MYSQL_STATE.active=false; out(`Bye`,'muted'); return; }
+    out(`^C`,'muted'); this.value=''; 
+    return; 
+  }
+  if (e.key === 'u' && e.ctrlKey) { e.preventDefault(); this.value=''; return; }
+  if (e.key === 'a' && e.ctrlKey) { e.preventDefault(); this.setSelectionRange(0,0); return; }
+  if (e.key === 'e' && e.ctrlKey) { e.preventDefault(); this.setSelectionRange(this.value.length,this.value.length); return; }
+});
+
+document.getElementById('cmd-input').addEventListener('input', function() {
+  if (this.value.length > 1) {
+    const completions = getAutocompletions(this.value);
+    if (completions.length > 1) showAutocomplete(completions, this.value);
+    else document.getElementById('autocomplete-box').style.display='none';
+  } else {
+    document.getElementById('autocomplete-box').style.display='none';
+  }
+});
+
+// Click outside closes autocomplete
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#autocomplete-box') && !e.target.closest('#cmd-input')) {
+    document.getElementById('autocomplete-box').style.display='none';
+  }
+});
+
+// ===================== INIT =====================
+function init() {
+  updatePromptDisplay();
+  updateSidePanels();
+  
+  out(`<span style="color:#3fb950">████████████████████████████████████████████</span>`);
+  out(`<span style="color:#3fb950">🐧  LINUX ADMIN SIMULATOR v2.0</span>`);
+  out(`<span style="color:#3fb950">████████████████████████████████████████████</span>`);
+  out(`Ubuntu 22.04.3 LTS — prod-server-01
+<span style="color:#4a5568">System information as of ${new Date().toDateString()}</span>
+
+  System load:  0.15              Users logged in:     2
+  Usage of /:   67.0% of 49.09GB  IPv4 address (eth0): 10.0.0.5
+  Memory usage: 58%               Swap usage:          0%
+  Processes:    ${processes.length}
+
+<span style="color:#d29922">* Configured services: nginx, mysql, php8.2-fpm, supervisor</span>
+<span style="color:#d29922">* Laravel project: /var/www/html/mylaravel</span>
+
+<span style="color:#4a5568">Type 'help' for all available commands.</span>
+<span style="color:#4a5568">Try: ls /var/www/html/mylaravel | cat .env | php artisan list | systemctl status nginx</span>
+`);
+  
+  document.getElementById('cmd-input').focus();
+}
+
+init();
+</script>
+</body>
+</html>

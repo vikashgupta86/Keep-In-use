@@ -1,0 +1,3215 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Zero to Hero — Hinglish Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050a0f;
+  --bg2: #0a1520;
+  --bg3: #0f1e2e;
+  --bg4: #142233;
+  --border: #1a3048;
+  --border2: #1e3a56;
+  --text: #d4e8f7;
+  --muted: #5a7a96;
+  --accent: #00d4ff;
+  --accent2: #0099cc;
+  --green: #00ff88;
+  --green2: #00cc6a;
+  --orange: #ff8c00;
+  --red: #ff4466;
+  --purple: #a855f7;
+  --yellow: #ffd700;
+  --pink: #ff6eb4;
+  --terminal: #020c14;
+  --terminal-text: #00ff88;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* LAYOUT */
+#app { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+#sidebar {
+  width: 270px;
+  min-width: 270px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.sb-logo {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sb-logo .title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+}
+
+.sb-logo .sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.sb-progress {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sb-progress .label { font-size: 10px; color: var(--muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+.sb-progress .bar { height: 3px; background: var(--border); border-radius: 2px; }
+.sb-progress .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 2px; transition: width 0.5s; width: 0%; }
+
+.sb-search {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sb-search input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: 'Outfit', sans-serif;
+  outline: none;
+}
+
+.sb-search input:focus { border-color: var(--accent); }
+.sb-search input::placeholder { color: var(--muted); }
+
+.sb-section-title {
+  padding: 10px 16px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--muted);
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.sb-item:hover { background: var(--bg3); color: var(--text); }
+.sb-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,212,255,0.05); }
+.sb-item .badge { margin-left: auto; font-size: 9px; background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); border-radius: 10px; padding: 1px 6px; font-family: 'Space Mono', monospace; }
+.sb-item .badge.red { background: rgba(255,68,102,0.1); color: var(--red); border-color: rgba(255,68,102,0.2); }
+.sb-item .badge.green { background: rgba(0,255,136,0.1); color: var(--green); border-color: rgba(0,255,136,0.2); }
+.sb-item .icon { font-size: 14px; flex-shrink: 0; }
+
+/* MAIN CONTENT */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.content-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 40px 100px;
+}
+
+/* PAGE HEADER */
+.page-hdr {
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.page-hdr .chapter {
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-hdr .chapter::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.page-hdr h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.page-hdr h1 span { color: var(--accent); }
+
+.page-hdr .desc {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* CONCEPT CARDS */
+.concept {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.concept:hover { border-color: var(--border2); }
+
+.concept-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.concept-hdr .ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.concept-hdr .info { flex: 1; }
+.concept-hdr .info h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 2px; }
+.concept-hdr .info p { font-size: 12px; color: var(--muted); }
+
+.concept-hdr .toggle-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.concept.open .toggle-btn { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); transform: rotate(45deg); }
+
+.concept-body {
+  display: none;
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.concept.open .concept-body { display: block; }
+.concept-body > *:first-child { margin-top: 16px; }
+
+/* SECTION LABELS */
+.sec-label {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 16px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.sec-label.blue { color: var(--accent); }
+.sec-label.green { color: var(--green); }
+.sec-label.orange { color: var(--orange); }
+.sec-label.red { color: var(--red); }
+.sec-label.purple { color: var(--purple); }
+.sec-label.yellow { color: var(--yellow); }
+.sec-label.pink { color: var(--pink); }
+
+/* TERMINAL */
+.terminal {
+  background: var(--terminal);
+  border: 1px solid #0a2a3a;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+  font-family: 'Space Mono', monospace;
+}
+
+.terminal-bar {
+  background: #0a1a28;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid #0a2a3a;
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.red { background: #ff5f57; }
+.dot.yellow { background: #febc2e; }
+.dot.green { background: #28c840; }
+
+.terminal-title {
+  margin-left: 8px;
+  font-size: 11px;
+  color: #2a5a7a;
+  font-family: 'Space Mono', monospace;
+  flex: 1;
+}
+
+.copy-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Space Mono', monospace;
+  transition: all 0.15s;
+}
+
+.copy-btn:hover { color: var(--green); border-color: var(--green); }
+
+.terminal-body {
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+
+.terminal-body .p { color: #2a9d8f; }
+.terminal-body .cmd { color: #e9f5db; }
+.terminal-body .flag { color: #ff8c00; }
+.terminal-body .arg { color: #a8dadc; }
+.terminal-body .comment { color: #2a5a7a; font-style: italic; }
+.terminal-body .out { color: #4a7a9b; }
+.terminal-body .ok { color: var(--green); }
+.terminal-body .err { color: var(--red); }
+.terminal-body .warn { color: var(--orange); }
+.terminal-body .path { color: var(--purple); }
+.terminal-body .val { color: var(--yellow); }
+.terminal-body .hl { color: var(--accent); }
+
+/* BOXES */
+.box {
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 10px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  border-left: 3px solid;
+}
+
+.box.tip { background: rgba(0,255,136,0.05); border-color: var(--green); }
+.box.warn { background: rgba(255,140,0,0.05); border-color: var(--orange); }
+.box.danger { background: rgba(255,68,102,0.05); border-color: var(--red); }
+.box.info { background: rgba(0,212,255,0.05); border-color: var(--accent); }
+.box.purple { background: rgba(168,85,247,0.05); border-color: var(--purple); }
+
+.box-title {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.box.tip .box-title { color: var(--green); }
+.box.warn .box-title { color: var(--orange); }
+.box.danger .box-title { color: var(--red); }
+.box.info .box-title { color: var(--accent); }
+.box.purple .box-title { color: var(--purple); }
+
+/* INTERVIEW CARD */
+.interview-card {
+  background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(0,212,255,0.05));
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 12px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.interview-card::before {
+  content: '💼';
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  font-size: 20px;
+  opacity: 0.3;
+}
+
+.interview-card .iq-label {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.interview-card .iq-q {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.interview-card .iq-a {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.interview-card .iq-a code {
+  background: rgba(0,0,0,0.3);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+/* TABLE */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tbl th {
+  background: var(--bg3);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+}
+
+.tbl td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(255,255,255,0.02); }
+.tbl td:first-child { font-family: 'Space Mono', monospace; color: var(--green); font-size: 12px; }
+
+/* TAGS */
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-family: 'Space Mono', monospace; font-weight: 700; }
+.tag.g { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+.tag.b { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); }
+.tag.o { background: rgba(255,140,0,0.1); color: var(--orange); border: 1px solid rgba(255,140,0,0.2); }
+.tag.r { background: rgba(255,68,102,0.1); color: var(--red); border: 1px solid rgba(255,68,102,0.2); }
+.tag.p { background: rgba(168,85,247,0.1); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+
+/* CODE INLINE */
+code { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.15); border-radius: 4px; padding: 1px 6px; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); }
+
+/* TEXT ELEMENTS */
+p { margin: 8px 0; font-size: 14px; color: var(--text); }
+h4 { font-size: 16px; font-weight: 700; color: white; margin: 16px 0 8px; }
+strong { color: white; font-weight: 600; }
+ul, ol { padding-left: 20px; margin: 8px 0; }
+li { margin: 4px 0; font-size: 13.5px; color: var(--text); line-height: 1.6; }
+li::marker { color: var(--accent); }
+
+/* PERM VISUAL */
+.perm-visual {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.perm-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.perm-block .num { font-size: 28px; font-weight: 800; font-family: 'Space Mono', monospace; color: var(--accent); }
+.perm-block .sym { font-size: 13px; font-family: 'Space Mono', monospace; color: var(--green); margin: 4px 0; }
+.perm-block .desc { font-size: 11px; color: var(--muted); }
+
+/* QUIZ SECTION */
+.quiz-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  margin: 12px 0;
+}
+
+.quiz-q { font-size: 14px; font-weight: 600; color: white; margin-bottom: 12px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  padding: 10px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(0,255,136,0.05); color: var(--green); }
+.quiz-opt.wrong { border-color: var(--red); background: rgba(255,68,102,0.05); color: var(--red); }
+.quiz-opt .opt-letter { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); min-width: 20px; }
+
+.quiz-exp { margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px; font-size: 13px; color: var(--muted); display: none; }
+.quiz-exp.show { display: block; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 10px 0; }
+
+@media (max-width: 700px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  #sidebar { display: none; }
+  .content-wrap { padding: 20px 16px 60px; }
+  .page-hdr h1 { font-size: 22px; }
+}
+
+/* STAT CARDS */
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-card .num { font-size: 32px; font-weight: 800; font-family: 'Space Mono', monospace; background: linear-gradient(135deg, var(--accent), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-card .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* CHAPTER DIVIDER */
+.chapter-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 20px;
+}
+
+.chapter-divider .num {
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent);
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.chapter-divider .line { flex: 1; height: 1px; background: var(--border); }
+.chapter-divider h2 { font-size: 18px; font-weight: 700; color: white; white-space: nowrap; }
+
+/* STEP FLOW */
+.step-flow { display: flex; flex-direction: column; gap: 0; }
+.step-item { display: flex; gap: 16px; position: relative; padding-bottom: 20px; }
+.step-item:last-child { padding-bottom: 0; }
+.step-item:not(:last-child)::before { content: ''; position: absolute; left: 19px; top: 40px; bottom: 0; width: 1px; background: var(--border); }
+.step-num { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: var(--accent); font-family: 'Space Mono', monospace; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+.step-content h5 { font-size: 14px; font-weight: 600; color: white; margin-bottom: 4px; margin-top: 8px; }
+.step-content p { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* ACTIVE NAV INDICATOR */
+.active-line {
+  width: 3px;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* HOME HERO */
+.hero {
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.08) 0%, transparent 60%),
+              linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 40px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero .emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+.hero h1 { font-size: 42px; font-weight: 900; color: white; line-height: 1.15; margin-bottom: 14px; }
+.hero h1 span { color: var(--accent); }
+.hero .sub { font-size: 16px; color: var(--muted); max-width: 520px; margin: 0 auto 28px; line-height: 1.6; }
+
+.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 700px; margin: 0 auto; }
+
+/* ROADMAP */
+.roadmap-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.roadmap-item:last-child { border-bottom: none; }
+.roadmap-day { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--accent); min-width: 52px; padding-top: 2px; }
+.roadmap-content h6 { font-size: 13px; font-weight: 600; color: white; margin-bottom: 3px; }
+.roadmap-content p { font-size: 12px; color: var(--muted); margin: 0; }
+
+/* PERMISSION CALCULATOR */
+.perm-calc { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 12px 0; }
+.perm-calc h5 { font-size: 13px; font-weight: 600; color: white; margin-bottom: 12px; }
+.perm-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.perm-check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.perm-check input { accent-color: var(--accent); width: 14px; height: 14px; }
+.perm-check label { font-size: 13px; cursor: pointer; }
+.perm-result { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--accent); font-weight: 700; margin-top: 10px; }
+
+/* HIDDEN */
+.hidden { display: none !important; }
+
+/* CHEATSHEET GRID */
+.cs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+@media (max-width: 600px) { .cs-grid { grid-template-columns: 1fr; } }
+.cs-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.cs-card-hdr { background: var(--bg3); padding: 8px 14px; font-size: 11px; font-family: 'Space Mono', monospace; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.cs-card-body { padding: 8px 0; }
+.cs-row { display: flex; justify-content: space-between; padding: 4px 14px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.cs-row:last-child { border-bottom: none; }
+.cs-row .c { font-family: 'Space Mono', monospace; color: var(--green); font-size: 11px; flex: 1; }
+.cs-row .d { color: var(--muted); font-size: 11.5px; flex: 1; text-align: right; }
+
+/* TABS */
+.tab-row { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+.tab-btn { padding: 8px 16px; font-size: 12px; font-family: 'Space Mono', monospace; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; margin-bottom: -1px; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* CHECKLIST */
+.cl-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: flex-start; cursor: pointer; }
+.cl-item:last-child { border-bottom: none; }
+.cl-box { width: 18px; height: 18px; border: 1px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.cl-item.done .cl-box { background: var(--green); border-color: var(--green); color: #000; font-size: 10px; }
+.cl-text { font-size: 13.5px; }
+.cl-item.done .cl-text { text-decoration: line-through; color: var(--muted); }
+
+/* SCROLLTOP */
+#scrolltop { position: fixed; bottom: 24px; right: 24px; width: 40px; height: 40px; background: var(--accent); border: none; border-radius: 50%; color: var(--bg); font-size: 18px; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 100; }
+#scrolltop.show { display: flex; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="title">🐧 Linux Tutorial</div>
+    <div class="sub">Zero to Hero • Hinglish</div>
+  </div>
+  <div class="sb-progress">
+    <div class="label"><span>Progress</span><span id="prog-pct">0%</span></div>
+    <div class="bar"><div class="fill" id="prog-fill"></div></div>
+  </div>
+  <div class="sb-search">
+    <input type="text" id="search-inp" placeholder="Topic dhundho..." oninput="filterNav(this.value)">
+  </div>
+  <div id="nav-list"></div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+  <div id="page-content"></div>
+</main>
+
+</div>
+
+<button id="scrolltop" onclick="document.getElementById('main').scrollTop=0">↑</button>
+
+<script>
+// ==================== NAV DATA ====================
+const PAGES = [
+  { id:'home', label:'Home & Overview', icon:'🏠', group:'start', badge:'Start Here' },
+  { id:'what-is-linux', label:'Linux Kya Hai?', icon:'🌍', group:'basics' },
+  { id:'linux-arch', label:'Linux Architecture', icon:'🏗️', group:'basics' },
+  { id:'filesystem', label:'Filesystem Hierarchy', icon:'📁', group:'basics' },
+  { id:'terminal', label:'Terminal & Shell', icon:'⌨️', group:'basics' },
+  { id:'navigation', label:'Navigation Commands', icon:'🧭', group:'basics' },
+  { id:'file-ops', label:'File Operations', icon:'✂️', group:'basics' },
+  { id:'file-view', label:'File Viewing & Editing', icon:'👁️', group:'basics' },
+  { id:'permissions', label:'Permissions & Ownership', icon:'🔒', group:'intermediate', badge:'Important' },
+  { id:'users-groups', label:'Users & Groups', icon:'👥', group:'intermediate' },
+  { id:'processes', label:'Process Management', icon:'⚙️', group:'intermediate' },
+  { id:'networking', label:'Networking', icon:'🌐', group:'intermediate' },
+  { id:'services', label:'Services & Systemd', icon:'🔧', group:'intermediate' },
+  { id:'packages', label:'Package Management', icon:'📦', group:'intermediate' },
+  { id:'disk-storage', label:'Disk & Storage', icon:'💾', group:'advanced' },
+  { id:'cron-jobs', label:'Cron Jobs', icon:'⏰', group:'advanced' },
+  { id:'shell-scripting', label:'Shell Scripting', icon:'📜', group:'advanced' },
+  { id:'networking-adv', label:'Advanced Networking', icon:'🔌', group:'advanced' },
+  { id:'security', label:'Security & Firewall', icon:'🛡️', group:'advanced' },
+  { id:'logs', label:'Logs & Monitoring', icon:'📊', group:'advanced' },
+  { id:'ssh', label:'SSH & Remote Access', icon:'🔐', group:'advanced' },
+  { id:'interview', label:'Interview Questions', icon:'💼', group:'interview', badge:'Must Read', badgeColor:'red' },
+  { id:'cheatsheet', label:'Cheat Sheet', icon:'📋', group:'resources', badge:'Quick Ref', badgeColor:'green' },
+  { id:'roadmap', label:'30-Day Roadmap', icon:'🗺️', group:'resources' },
+  { id:'checklist', label:'Deploy Checklist', icon:'✅', group:'resources' },
+];
+
+const GROUPS = {
+  start: 'Getting Started',
+  basics: 'Basics (Week 1)',
+  intermediate: 'Intermediate (Week 2)',
+  advanced: 'Advanced (Week 3-4)',
+  interview: 'Interview Prep',
+  resources: 'Resources'
+};
+
+let visited = new Set(['home']);
+
+// ==================== NAV BUILD ====================
+function buildNav() {
+  const nav = document.getElementById('nav-list');
+  const grouped = {};
+  PAGES.forEach(p => { if (!grouped[p.group]) grouped[p.group]=[]; grouped[p.group].push(p); });
+  
+  let html = '';
+  Object.entries(GROUPS).forEach(([key, label]) => {
+    if (!grouped[key]) return;
+    html += `<div class="sb-section-title">${label}</div>`;
+    grouped[key].forEach(p => {
+      const bc = p.badgeColor || 'b';
+      html += `<div class="sb-item" id="nav-${p.id}" onclick="loadPage('${p.id}')">
+        <span class="icon">${p.icon}</span>
+        <span>${p.label}</span>
+        ${p.badge ? `<span class="badge ${bc}">${p.badge}</span>` : ''}
+      </div>`;
+    });
+  });
+  nav.innerHTML = html;
+}
+
+function filterNav(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function setActive(id) {
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('nav-'+id);
+  if (el) {
+    el.classList.add('active');
+    el.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  }
+  visited.add(id);
+  const pct = Math.round(visited.size / PAGES.length * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function loadPage(id) {
+  const content = PAGES_CONTENT[id] || `<div class="content-wrap"><p>Content loading...</p></div>`;
+  document.getElementById('page-content').innerHTML = content;
+  setActive(id);
+  document.getElementById('main').scrollTop = 0;
+}
+
+// ==================== TERMINAL HELPER ====================
+function term(title, lines) {
+  const id = 'term-' + Math.random().toString(36).slice(2,7);
+  const content = lines.map(l => {
+    if (!l) return '';
+    if (l.startsWith('# ')) return `<span class="comment">${l}</span>`;
+    if (l.startsWith('$ ')) return `<span class="p">ubuntu@server</span><span class="cmd">:~$ </span><span class="cmd">${l.slice(2)}</span>`;
+    if (l.startsWith('# ')) return `<span class="p">root@server</span><span class="cmd">:~# </span><span class="cmd">${l.slice(2)}</span>`;
+    if (l.startsWith('>> ')) return `<span class="out">${l.slice(3)}</span>`;
+    if (l.startsWith('OK ')) return `<span class="ok">${l.slice(3)}</span>`;
+    if (l.startsWith('ERR ')) return `<span class="err">${l.slice(4)}</span>`;
+    if (l.startsWith('WARN ')) return `<span class="warn">${l.slice(5)}</span>`;
+    if (l.startsWith('HL ')) return `<span class="hl">${l.slice(3)}</span>`;
+    return `<span class="cmd">${l}</span>`;
+  }).join('\n');
+  return `<div class="terminal" id="${id}">
+    <div class="terminal-bar">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <span class="terminal-title">${title}</span>
+      <button class="copy-btn" onclick="copyTerm('${id}')">copy</button>
+    </div>
+    <pre class="terminal-body">${content}</pre>
+  </div>`;
+}
+
+function copyTerm(id) {
+  const el = document.getElementById(id).querySelector('.terminal-body');
+  const text = el.innerText;
+  navigator.clipboard.writeText(text);
+  const btn = document.getElementById(id).querySelector('.copy-btn');
+  btn.textContent = 'copied!'; btn.style.color = 'var(--green)';
+  setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 1500);
+}
+
+function iq(q, a) {
+  return `<div class="interview-card">
+    <div class="iq-label">Interview Question</div>
+    <div class="iq-q">Q: ${q}</div>
+    <div class="iq-a"><strong>A:</strong> ${a}</div>
+  </div>`;
+}
+
+function concept(icon, bg, title, sub, body) {
+  const id = 'c-' + Math.random().toString(36).slice(2,7);
+  return `<div class="concept" id="${id}">
+    <div class="concept-hdr" onclick="toggleConcept('${id}')">
+      <div class="ico" style="background:${bg}">${icon}</div>
+      <div class="info"><h3>${title}</h3><p>${sub}</p></div>
+      <div class="toggle-btn">+</div>
+    </div>
+    <div class="concept-body">${body}</div>
+  </div>`;
+}
+
+function toggleConcept(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function quiz(q, opts, correct, exp) {
+  const id = 'q-' + Math.random().toString(36).slice(2,7);
+  const letters = ['A','B','C','D'];
+  const optsHtml = opts.map((o, i) => `<div class="quiz-opt" onclick="answerQuiz('${id}',${i},${correct})">${'<span class="opt-letter">'+letters[i]+'</span>'} ${o}</div>`).join('');
+  return `<div class="quiz-card">
+    <div class="quiz-q">🤔 ${q}</div>
+    <div class="quiz-opts" id="${id}">${optsHtml}</div>
+    <div class="quiz-exp" id="${id}-exp">💡 ${exp}</div>
+  </div>`;
+}
+
+function answerQuiz(id, chosen, correct) {
+  const opts = document.querySelectorAll(`#${id} .quiz-opt`);
+  opts.forEach((o, i) => {
+    o.onclick = null;
+    if (i === correct) o.classList.add('correct');
+    else if (i === chosen) o.classList.add('wrong');
+  });
+  document.getElementById(id + '-exp').classList.add('show');
+}
+
+function switchTab(btn, paneId) {
+  const wrap = btn.closest('.tab-wrap');
+  wrap.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  wrap.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+}
+
+// ==================== PAGES CONTENT ====================
+const PAGES_CONTENT = {
+
+// ==================== HOME ====================
+home: `
+<div class="hero">
+  <span class="emoji">🐧</span>
+  <h1>Linux <span>Zero to Hero</span></h1>
+  <p class="sub">Ekdum beginner se lekar expert tak — Hinglish mein, practical examples ke saath, aur interview preparation bhi.</p>
+  <div class="hero-stats">
+    <div class="stat-card"><div class="num">23</div><div class="lbl">Chapters</div></div>
+    <div class="stat-card"><div class="num">200+</div><div class="lbl">Commands</div></div>
+    <div class="stat-card"><div class="num">80+</div><div class="lbl">Interview Qs</div></div>
+    <div class="stat-card"><div class="num">30</div><div class="lbl">Day Roadmap</div></div>
+  </div>
+</div>
+<div class="content-wrap">
+  <div class="box info"><div class="box-title">Kaise Use Karein</div>Left sidebar se koi bhi chapter click karo. Concepts expand hote hain. Commands copy karne ke liye copy button hai. Interview questions har chapter mein hain, plus ek dedicated chapter bhi hai.</div>
+  
+  <div class="chapter-divider"><div class="num">Overview</div><div class="line"></div><h2>Kya Sikhoge?</h2><div class="line"></div></div>
+  
+  <div class="grid-2">
+    ${[['🟢','Week 1 — Basics','Linux kya hai, Terminal, Navigation, Files, Permissions'],['🔵','Week 2 — Intermediate','Users, Processes, Networking, Services, Packages'],['🟡','Week 3 — Advanced','Disk, Cron, Shell Scripting, Security, Logs'],['🔴','Week 4 — Production','SSH, Deployment, Monitoring, Troubleshooting']].map(([e,w,d])=>`<div class="concept"><div class="concept-hdr" style="cursor:default"><div class="ico" style="background:rgba(0,212,255,0.1)">${e}</div><div class="info"><h3>${w}</h3><p>${d}</p></div></div></div>`).join('')}
+  </div>
+  
+  <div class="box tip"><div class="box-title">💡 Pro Tip</div>Ek din mein ek chapter karo. Simulator pe practice karo. Interview questions roz padhho. 30 din mein confident ban jaoge!</div>
+</div>`,
+
+// ==================== WHAT IS LINUX ====================
+'what-is-linux': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 1</div>
+  <h1>Linux <span>Kya Hai?</span></h1>
+  <p class="desc">Operating system ki duniya ko samjho — Windows se Linux tak ka safar.</p>
+</div>
+
+${concept('🌍','rgba(0,212,255,0.1)','Linux — Ek Free, Open-Source OS','Duniya ka sabse popular server operating system',`
+<div class="sec-label blue">Simple Explanation</div>
+<p>Linux ek <strong>operating system</strong> hai — bilkul Windows aur macOS ki tarah. Lekin ye <strong>free</strong> hai, <strong>open-source</strong> hai, aur duniya ke 96% servers pe chalta hai.</p>
+<div class="sec-label green">Real Life Analogy</div>
+<div class="box info"><div class="box-title">🏗️ Analogy</div>Socho OS ek building manager hai. <strong>Windows</strong> = ek private colony (paise lagते hain, rules fixed hain). <strong>Linux</strong> = public park (free, koi bhi use kar sakta hai, modify kar sakta hai).</div>
+<div class="sec-label orange">Linux vs Windows — Key Differences</div>
+<table class="tbl">
+<tr><th>Feature</th><th>Windows</th><th>Linux</th></tr>
+<tr><td>Cost</td><td>Paid (₹10,000+)</td><td>FREE</td></tr>
+<tr><td>Source Code</td><td>Closed/Private</td><td>Open Source</td></tr>
+<tr><td>Security</td><td>Virus-prone</td><td>Very secure</td></tr>
+<tr><td>Stability</td><td>Crashes ho sakte hain</td><td>Years bina restart ke chalta hai</td></tr>
+<tr><td>GUI</td><td>Full GUI</td><td>Mostly CLI (servers pe)</td></tr>
+<tr><td>Server Use</td><td>Rare (IIS)</td><td>96% servers</td></tr>
+<tr><td>Package Mgmt</td><td>Manual downloads</td><td>apt, yum, dnf</td></tr>
+<tr><td>File System</td><td>C:\\, D:\\</td><td>/ (root se sab kuch)</td></tr>
+</table>
+${iq('Linux kyun use kiya jata hai servers pe?','Linux servers pe use hota hai kyunki: (1) Free hai — no licensing cost, (2) Stable — years bina restart ke chalta hai, (3) Secure — multi-user architecture aur minimal attack surface, (4) Performance — lightweight, efficient resource usage, (5) Open source — community support aur customization, (6) Command line — automation aur scripting ke liye perfect.')}
+`)}
+
+${concept('🐧','rgba(0,255,136,0.1)','Linux Distributions (Distros)','Ubuntu, CentOS, Debian — kaunsa aur kyun?',`
+<p>Linux ek kernel hai. Uske upar different "flavors" bane hain jise <strong>distributions</strong> ya <strong>distros</strong> kehte hain.</p>
+<table class="tbl">
+<tr><th>Distro</th><th>Based On</th><th>Use Case</th><th>Package Mgr</th></tr>
+<tr><td>Ubuntu</td><td>Debian</td><td>Beginners, Servers, Desktop</td><td>apt</td></tr>
+<tr><td>Debian</td><td>-</td><td>Stable servers</td><td>apt</td></tr>
+<tr><td>CentOS / RHEL</td><td>Red Hat</td><td>Enterprise servers</td><td>yum / dnf</td></tr>
+<tr><td>Fedora</td><td>Red Hat</td><td>Developers, testing</td><td>dnf</td></tr>
+<tr><td>Arch Linux</td><td>-</td><td>Advanced users</td><td>pacman</td></tr>
+<tr><td>Kali Linux</td><td>Debian</td><td>Security/Hacking</td><td>apt</td></tr>
+<tr><td>Amazon Linux</td><td>RHEL</td><td>AWS servers</td><td>yum</td></tr>
+</table>
+<div class="box tip"><div class="box-title">💡 Recommendation</div>Beginners ke liye <strong>Ubuntu 22.04 LTS</strong> best hai. Most tutorials Ubuntu pe hain. "LTS" = Long Term Support = 5 saal updates milenge.</div>
+${iq('Ubuntu aur CentOS mein kya fark hai?','Ubuntu Debian-based hai aur <code>apt</code> package manager use karta hai. CentOS Red Hat-based hai aur <code>yum/dnf</code> use karta hai. Ubuntu beginners aur developers ke liye better hai. CentOS enterprise environments mein popular tha (ab Rocky Linux/AlmaLinux ne replace kiya hai). Commands almost same hain — sirf package manager different hai.')}
+`)}
+
+${quiz('Linux ka kernel kitne % servers pe run karta hai?', ['50%','75%','96%','99%'], 2, 'Linux kernel duniya ke 96% web servers pe run karta hai. Top 500 supercomputers mein 100% Linux use hota hai. Android bhi Linux kernel pe based hai!')}
+</div>`,
+
+// ==================== LINUX ARCHITECTURE ====================
+'linux-arch': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 2</div>
+  <h1>Linux <span>Architecture</span></h1>
+  <p class="desc">Linux andar se kaise kaam karta hai — kernel, shell, aur user space.</p>
+</div>
+
+${concept('🏗️','rgba(168,85,247,0.1)','Linux Architecture Layers','Hardware se application tak ka safar',`
+<div class="sec-label blue">Architecture Layers (Upar se Neeche)</div>
+<div class="step-flow">
+  ${[['1','User Applications','Web browser, text editor, your PHP app — jo tum directly use karte ho'],['2','Shell / Terminal','Tumhara command interpreter — bash, zsh, sh. Commands yahan type hote hain'],['3','System Libraries','C library (glibc) — OS functions ko accessible banata hai programs ke liye'],['4','System Calls','User space aur kernel ke beech bridge — read(), write(), fork()'],['5','Linux Kernel','OS ka brain — memory, CPU, devices, filesystem manage karta hai'],['6','Hardware','Physical components — CPU, RAM, Disk, Network card']].map(([n,t,d])=>`<div class="step-item"><div class="step-num">${n}</div><div class="step-content"><h5>${t}</h5><p>${d}</p></div></div>`).join('')}
+</div>
+${iq('Linux kernel kya karta hai?','Linux kernel OS ka core hai. Ye kaam karta hai: (1) Process Management — CPU time allocate karna, (2) Memory Management — RAM allocate/deallocate karna, (3) Device Management — hardware drivers handle karna, (4) File System — files/folders manage karna, (5) Network Stack — TCP/IP handle karna. Kernel hardware aur software ke beech mediator hai.')}
+`)}
+
+${concept('💻','rgba(255,140,0,0.1)','Shell Types — bash, zsh, sh','Kaunsa shell use karna chahiye aur kyun',`
+<table class="tbl">
+<tr><th>Shell</th><th>Full Name</th><th>Features</th><th>Default In</th></tr>
+<tr><td>bash</td><td>Bourne Again Shell</td><td>Most common, scripting friendly</td><td>Ubuntu, most Linux</td></tr>
+<tr><td>zsh</td><td>Z Shell</td><td>Better autocomplete, themes</td><td>macOS (Catalina+)</td></tr>
+<tr><td>sh</td><td>Bourne Shell</td><td>Basic, POSIX compliant</td><td>Minimal systems</td></tr>
+<tr><td>fish</td><td>Friendly Shell</td><td>User friendly, syntax highlight</td><td>Optional install</td></tr>
+<tr><td>ksh</td><td>Korn Shell</td><td>Scripting, enterprise</td><td>Unix systems</td></tr>
+</table>
+${term('bash — default shell check karo',[
+  '$ echo $SHELL',
+  '>> /bin/bash',
+  '',
+  '$ cat /etc/shells',
+  '>> /bin/sh',
+  '>> /bin/bash',
+  '>> /bin/zsh',
+  '',
+  '# Current shell check karo',
+  '$ ps -p $$',
+  '>>   PID TTY          TIME CMD',
+  '>>  1234 pts/0    00:00:00 bash',
+])}
+${iq('bash aur sh mein kya fark hai?','<code>sh</code> original Bourne shell hai — basic aur POSIX compliant. <code>bash</code> (Bourne Again Shell) sh ka superset hai — scripting features zyada hain jaise arrays, string manipulation, [[...]] conditions. Production scripts mein always shebang <code>#!/bin/bash</code> use karo if bash features chahiye. Portability ke liye <code>#!/bin/sh</code> use hota hai.')}
+`)}
+</div>`,
+
+// ==================== FILESYSTEM ====================
+'filesystem': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 3</div>
+  <h1>Filesystem <span>Hierarchy</span></h1>
+  <p class="desc">Linux mein sab kuch ek jagah se shuru hota hai — "/" (root). Is hierarchy ko samajhna must hai.</p>
+</div>
+
+${concept('📁','rgba(0,212,255,0.1)','Filesystem Hierarchy Standard (FHS)','Har important directory ka purpose',`
+<div class="box info"><div class="box-title">🌳 Root (/)</div>Linux mein koi C:\\ ya D:\\ nahi hota. Sab kuch <strong>/</strong> (forward slash) se shuru hota hai. Ise "root" kehte hain.</div>
+<table class="tbl">
+<tr><th>Directory</th><th>Kya hota hai?</th><th>Examples</th></tr>
+<tr><td>/</td><td>Root — sab kuch yahan se shuru</td><td>Topmost directory</td></tr>
+<tr><td>/bin</td><td>Essential binary commands</td><td>ls, cp, mv, rm, bash</td></tr>
+<tr><td>/sbin</td><td>System binaries (admin ke liye)</td><td>fdisk, ifconfig, reboot</td></tr>
+<tr><td>/etc</td><td>Configuration files</td><td>nginx.conf, php.ini, hosts</td></tr>
+<tr><td>/home</td><td>Users ke home directories</td><td>/home/ubuntu, /home/deploy</td></tr>
+<tr><td>/root</td><td>Root user ka home</td><td>Root ka personal folder</td></tr>
+<tr><td>/var</td><td>Variable data — logs, cache</td><td>/var/log, /var/www</td></tr>
+<tr><td>/var/log</td><td>System aur app logs</td><td>nginx/error.log, syslog</td></tr>
+<tr><td>/var/www</td><td>Web files</td><td>/var/www/html/mysite</td></tr>
+<tr><td>/tmp</td><td>Temporary files</td><td>Session files, uploads temp</td></tr>
+<tr><td>/usr</td><td>User programs</td><td>/usr/bin/php, /usr/local/bin</td></tr>
+<tr><td>/usr/bin</td><td>Non-essential binaries</td><td>git, python3, composer</td></tr>
+<tr><td>/usr/local</td><td>Manually installed software</td><td>/usr/local/bin/composer</td></tr>
+<tr><td>/opt</td><td>Optional software</td><td>Third-party apps</td></tr>
+<tr><td>/proc</td><td>Virtual filesystem (processes)</td><td>/proc/cpuinfo, /proc/meminfo</td></tr>
+<tr><td>/sys</td><td>System hardware info</td><td>Device info</td></tr>
+<tr><td>/dev</td><td>Device files</td><td>/dev/sda (hard disk), /dev/null</td></tr>
+<tr><td>/mnt</td><td>Mount points</td><td>External drives, NFS</td></tr>
+<tr><td>/media</td><td>Removable media</td><td>USB drives, CDs</td></tr>
+<tr><td>/boot</td><td>Boot files</td><td>Kernel, GRUB bootloader</td></tr>
+<tr><td>/lib</td><td>Shared libraries</td><td>.so files — DLL jaisa</td></tr>
+<tr><td>/run</td><td>Runtime data</td><td>PID files, sockets</td></tr>
+</table>
+${iq('/etc directory mein kya hota hai?','<code>/etc</code> mein saari system configuration files hoti hain. "etc" = "etcetera" — ye directory-specific config files rakhti hai. Common examples: <code>/etc/nginx/nginx.conf</code> (Nginx config), <code>/etc/php/8.2/cli/php.ini</code> (PHP config), <code>/etc/hosts</code> (hostname-IP mapping), <code>/etc/passwd</code> (user accounts), <code>/etc/ssh/sshd_config</code> (SSH settings). Ye files mostly text hain aur text editor se edit hoti hain.')}
+`)}
+
+${concept('🔍','rgba(0,255,136,0.1)','Important Paths for Web Developers','Ye paths roz kaam aate hain',`
+${term('Most-Used Web Dev Paths',[
+  '# Web files (Apache/Nginx default)',
+  '/var/www/html/',
+  '',
+  '# Nginx configuration',
+  '/etc/nginx/nginx.conf',
+  '/etc/nginx/sites-available/',
+  '/etc/nginx/sites-enabled/',
+  '',
+  '# Apache configuration',
+  '/etc/apache2/apache2.conf',
+  '/etc/apache2/sites-available/',
+  '',
+  '# PHP configuration',
+  '/etc/php/8.2/cli/php.ini',
+  '/etc/php/8.2/fpm/php.ini',
+  '',
+  '# MySQL configuration',
+  '/etc/mysql/my.cnf',
+  '',
+  '# System logs',
+  '/var/log/nginx/access.log',
+  '/var/log/nginx/error.log',
+  '/var/log/apache2/error.log',
+  '/var/log/mysql/error.log',
+  '/var/log/syslog',
+  '/var/log/auth.log',
+])}
+${quiz('PHP configuration file kahan hoti hai?',['/var/www/php.ini','/etc/php/VERSION/cli/php.ini','/home/ubuntu/php.ini','/usr/php.ini'],1,'PHP configuration file <code>/etc/php/[VERSION]/cli/php.ini</code> (CLI ke liye) aur <code>/etc/php/[VERSION]/fpm/php.ini</code> (web server ke liye) hoti hai. Version ke jagah PHP version aayega jaise 7.4, 8.0, 8.2.')}
+`)}
+</div>`,
+
+// ==================== TERMINAL ====================
+'terminal': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 4</div>
+  <h1>Terminal <span>& Shell</span></h1>
+  <p class="desc">Linux ka asli power terminal se aata hai. Ye seekhna sabse important step hai.</p>
+</div>
+
+${concept('⌨️','rgba(0,212,255,0.1)','Terminal Basics — Prompt Samajhna','$ aur # ka matlab kya hai?',`
+<div class="sec-label blue">Prompt Structure</div>
+${term('Prompt Format Samajhna',[
+  '# Format: username@hostname:current_path$ command',
+  '',
+  'ubuntu@prod-server:~$ ls',
+  '>> Documents  Downloads  myproject',
+  '',
+  '# ~ matlab home directory (/home/ubuntu)',
+  'ubuntu@prod-server:~$ cd /var/www',
+  'ubuntu@prod-server:/var/www$ pwd',
+  '>> /var/www',
+  '',
+  '# Root user ke liye $ ki jagah # aata hai',
+  'root@prod-server:~# whoami',
+  '>> root',
+  '',
+  '# $ = normal user (safe)',
+  '# # = root user (careful!)',
+])}
+<div class="sec-label green">Essential Keyboard Shortcuts</div>
+<table class="tbl">
+<tr><th>Shortcut</th><th>Kya karta hai</th></tr>
+<tr><td>Tab</td><td>Autocomplete — command ya path complete karo</td></tr>
+<tr><td>Tab Tab</td><td>Saari possibilities dikhao</td></tr>
+<tr><td>↑ / ↓</td><td>Previous/next command history</td></tr>
+<tr><td>Ctrl + C</td><td>Running command ko cancel karo</td></tr>
+<tr><td>Ctrl + Z</td><td>Command background mein bhejo</td></tr>
+<tr><td>Ctrl + L</td><td>Screen clear karo (= clear command)</td></tr>
+<tr><td>Ctrl + A</td><td>Line ke shuruaat mein jao</td></tr>
+<tr><td>Ctrl + E</td><td>Line ke end mein jao</td></tr>
+<tr><td>Ctrl + U</td><td>Poori line delete karo</td></tr>
+<tr><td>Ctrl + R</td><td>History mein search karo</td></tr>
+<tr><td>Ctrl + D</td><td>Shell/session exit karo</td></tr>
+<tr><td>!!</td><td>Previous command repeat karo</td></tr>
+<tr><td>!n</td><td>History ka nth command run karo</td></tr>
+<tr><td>sudo !!</td><td>Previous command root ke saath run karo</td></tr>
+</table>
+${iq('Ctrl+C aur Ctrl+Z mein kya fark hai?','<strong>Ctrl+C</strong> — running process ko <em>terminate</em> (kill) kar deta hai — SIGINT signal bhejta hai. <strong>Ctrl+Z</strong> — process ko <em>pause/suspend</em> kar deta hai background mein — SIGTSTP signal. Ctrl+Z ke baad <code>fg</code> se wapas foreground mein la sakte ho, ya <code>bg</code> se background mein run kara sakte ho. <code>jobs</code> se suspended jobs dekh sakte ho.')}
+`)}
+
+${concept('📝','rgba(0,255,136,0.1)','Command Structure — Commands Kaise Likhte Hain','Options, flags, arguments samajhna',`
+<div class="sec-label blue">Command Anatomy</div>
+${term('Command Structure',[
+  '# Structure: command [options/flags] [arguments]',
+  '',
+  '# Simple command',
+  '$ ls',
+  '',
+  '# Command with flag',
+  '$ ls -l',
+  '',
+  '# Command with multiple flags',
+  '$ ls -la',
+  '# ya alag alag bhi',
+  '$ ls -l -a',
+  '',
+  '# Command with argument',
+  '$ ls /var/www',
+  '',
+  '# Command with flag + argument',
+  '$ ls -la /var/www/html',
+  '',
+  '# Flags combined',
+  '$ tar -czf backup.tar.gz /var/www/html',
+  '# -c = create, -z = gzip, -f = filename',
+])}
+<div class="sec-label green">Help Kaise Pao</div>
+${term('Help Commands',[
+  '# --help flag — quick help',
+  '$ ls --help',
+  '$ nginx --help',
+  '',
+  '# man — full manual',
+  '$ man ls',
+  '$ man nginx',
+  '# q dabao bahar aane ke liye',
+  '',
+  '# whatis — one-line description',
+  '$ whatis ls',
+  '>> ls (1)  - list directory contents',
+  '',
+  '# which — command ka full path',
+  '$ which php',
+  '>> /usr/bin/php',
+  '',
+  '# type — command type check',
+  '$ type ls',
+  '>> ls is aliased to "ls --color=auto"',
+])}
+`)}
+</div>`,
+
+// ==================== NAVIGATION ====================
+'navigation': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 5</div>
+  <h1>Navigation <span>Commands</span></h1>
+  <p class="desc">Server pe navigate karna — ye roz ka kaam hai. pwd, ls, cd master karo.</p>
+</div>
+
+${concept('🧭','rgba(0,212,255,0.1)','pwd — Print Working Directory','Main kahan hun?',`
+${term('pwd Examples',[
+  '# pwd — current location batao',
+  '$ pwd',
+  '>> /home/ubuntu',
+  '',
+  '# Koi bhi jagah se run karo',
+  '$ cd /var/www/html',
+  '$ pwd',
+  '>> /var/www/html',
+  '',
+  '# Script mein bhi useful',
+  '$ echo "I am in: $(pwd)"',
+  '>> I am in: /var/www/html',
+])}
+${iq('pwd command kab use karte hain?','<code>pwd</code> tab use karte hain jab ye confirm karna ho ki hum sahi directory mein hain. Scripts mein bhi current directory get karne ke liye use hota hai: <code>CURRENT_DIR=$(pwd)</code>. Ye ek bahut simple command hai lekin server pe navigate karte waqt bahut useful hai — especially jab bohot saari directories mein kaam kar rahe ho.')}
+`)}
+
+${concept('📋','rgba(0,255,136,0.1)','ls — List Directory Contents','Files aur folders dikhao',`
+${term('ls Command Variants',[
+  '# Basic list',
+  '$ ls',
+  '>> app  bootstrap  config  .env  public  storage  vendor',
+  '',
+  '# Long format (-l)',
+  '$ ls -l',
+  '>> drwxr-xr-x 5 www-data www-data 4096 Jan 15 app',
+  '>> -rw-r--r-- 1 ubuntu   ubuntu    892 Jan 15 .env',
+  '',
+  '# Hidden files bhi dikhao (-a)',
+  '$ ls -a',
+  '>> .  ..  .env  .git  .gitignore  app  config',
+  '',
+  '# Long + all hidden files (-la or -al)',
+  '$ ls -la',
+  '',
+  '# Human readable sizes (-lh)',
+  '$ ls -lh',
+  '>> -rw-r--r-- 1 ubuntu ubuntu 45M Jan 15 backup.tar.gz',
+  '',
+  '# Sort by time, newest first (-lt)',
+  '$ ls -lt',
+  '',
+  '# Specific directory ki list',
+  '$ ls /var/www/html',
+  '$ ls /etc/nginx/',
+  '',
+  '# Recursive list (-R)',
+  '$ ls -R /etc/nginx/',
+  '',
+  '# Only directories',
+  '$ ls -d */',
+])}
+<div class="sec-label orange">ls Output Samajhna</div>
+${term('ls -la Output Breakdown',[
+  '$ ls -la /var/www/html/myproject',
+  '>> total 48',
+  '>> drwxr-xr-x 12 www-data www-data 4096 Jan 15 10:00 .',
+  '>> drwxr-xr-x  3 root     root     4096 Jan 15 09:00 ..',
+  '>> -rw-r--r--  1 ubuntu   ubuntu    892 Jan 15 10:00 .env',
+  '>> drwxr-xr-x  9 www-data www-data 4096 Jan 15 10:00 app',
+  '>> -rwxr-xr-x  1 www-data www-data 1686 Jan 15 10:00 artisan',
+  '',
+  '# Column meanings:',
+  '# Col 1: permissions (drwxr-xr-x)',
+  '# Col 2: hard links count',
+  '# Col 3: owner (www-data)',
+  '# Col 4: group (www-data)',
+  '# Col 5: size (4096 bytes)',
+  '# Col 6-8: date/time',
+  '# Col 9: filename',
+])}
+`)}
+
+${concept('🚀','rgba(255,140,0,0.1)','cd — Change Directory','Ek folder se doosre mein jaana',`
+${term('cd Command Examples',[
+  '# Absolute path pe jao (/ se shuru)',
+  '$ cd /var/www/html/myproject',
+  '',
+  '# Relative path pe jao (current se)',
+  '$ cd public',
+  '$ cd ../config',
+  '',
+  '# Home directory',
+  '$ cd ~',
+  '$ cd',
+  '# Dono same kaam karte hain',
+  '',
+  '# Ek folder upar jao',
+  '$ cd ..',
+  '',
+  '# Do folder upar jao',
+  '$ cd ../..',
+  '',
+  '# Previous directory pe wapas jao',
+  '$ cd -',
+  '>> /var/www/html',
+  '',
+  '# Root pe jao',
+  '$ cd /',
+  '',
+  '# Kisi user ke home mein jao',
+  '$ cd ~ubuntu',
+  '$ cd ~deploy',
+])}
+<div class="sec-label blue">Absolute vs Relative Path</div>
+<table class="tbl">
+<tr><th>Type</th><th>Example</th><th>Kab use karein</th></tr>
+<tr><td>Absolute Path</td><td>/var/www/html/project</td><td>Kisi bhi jagah se — / se shuru karo</td></tr>
+<tr><td>Relative Path</td><td>../project ./file.php</td><td>Current directory ke relative</td></tr>
+<tr><td>. (dot)</td><td>./script.sh</td><td>Current directory</td></tr>
+<tr><td>.. (double dot)</td><td>../config</td><td>Parent directory</td></tr>
+<tr><td>~ (tilde)</td><td>~/scripts</td><td>Home directory</td></tr>
+</table>
+${iq('Absolute aur relative path mein kya fark hai?','<strong>Absolute path</strong> always <code>/</code> (root) se shuru hota hai — kisi bhi directory se use karo, same result milega. Example: <code>/var/www/html/myproject</code>. <strong>Relative path</strong> current directory se relative hota hai — <code>cd public</code> matlab current_dir/public. Scripts mein absolute paths use karo — relative paths tab break hoti hain jab script kisi aur directory se run ho.')}
+`)}
+
+${concept('🔍','rgba(168,85,247,0.1)','find — Files Dhundna','Poore server mein koi bhi file khojo',`
+${term('find Command',[
+  '# Name se file dhundho',
+  '$ find /var/www -name "*.php"',
+  '$ find / -name "php.ini"',
+  '',
+  '# Type se dhundho (f=file, d=directory)',
+  '$ find /etc -type f -name "*.conf"',
+  '$ find /var/www -type d -name "cache"',
+  '',
+  '# Size se dhundho',
+  '$ find /var/log -size +100M',
+  '$ find /tmp -size -1M',
+  '',
+  '# Modified time se dhundho',
+  '$ find /var/www -mtime -7',
+  '# 7 din se kam mein modified',
+  '',
+  '# Permission se dhundho',
+  '$ find /var/www -perm 777',
+  '',
+  '# Find + execute',
+  '$ find /var/www -name "*.log" -delete',
+  '$ find . -name "*.php" -exec php -l {} \\;',
+])}
+`)}
+</div>`,
+
+// ==================== FILE OPS ====================
+'file-ops': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 6</div>
+  <h1>File <span>Operations</span></h1>
+  <p class="desc">mkdir, touch, cp, mv, rm — files aur folders ko manage karna.</p>
+</div>
+
+${concept('📂','rgba(0,212,255,0.1)','mkdir — Directory Banana','Folders create karo',`
+${term('mkdir Examples',[
+  '# Simple folder banana',
+  '$ mkdir myproject',
+  '',
+  '# Nested folders ek saath (-p)',
+  '$ mkdir -p /var/www/html/myproject/public',
+  '',
+  '# Multiple folders ek saath',
+  '$ mkdir -p app/{controllers,models,views}',
+  '',
+  '# Permission ke saath banana',
+  '$ mkdir -m 755 /var/www/html/newsite',
+  '',
+  '# Verify',
+  '$ ls -la',
+])}
+`)}
+
+${concept('📄','rgba(0,255,136,0.1)','touch, cp, mv — Create, Copy, Move','Files banao, copy karo, move karo',`
+${term('touch — File Banana',[
+  '# Empty file banana',
+  '$ touch .env',
+  '$ touch index.php README.md',
+  '',
+  '# Timestamp update karo (file exist kare)',
+  '$ touch existing-file.php',
+])}
+${term('cp — Copy Files',[
+  '# File copy karo',
+  '$ cp file.php file_backup.php',
+  '',
+  '# Folder copy karo (-r = recursive)',
+  '$ cp -r oldfolder/ newfolder/',
+  '',
+  '# Preserve permissions (-p)',
+  '$ cp -p config.php config_backup.php',
+  '',
+  '# Copy multiple files',
+  '$ cp *.php /backup/',
+  '',
+  '# Verbose output (-v)',
+  '$ cp -rv myproject/ /var/www/html/',
+  ">> 'myproject/app' -> '/var/www/html/app'",
+])}
+${term('mv — Move ya Rename',[
+  '# File rename karo',
+  '$ mv oldname.php newname.php',
+  '',
+  '# File move karo',
+  '$ mv myfile.php /var/www/html/',
+  '',
+  '# Folder move karo',
+  '$ mv myproject/ /var/www/html/',
+  '',
+  '# Multiple files move karo',
+  '$ mv *.log /var/log/old/',
+])}
+`)}
+
+${concept('🗑️','rgba(255,68,102,0.1)','rm — Delete Karo (CAREFULLY!)','Galti se mat chalao — koi Recycle Bin nahi!',`
+<div class="box danger"><div class="box-title">☠️ DANGER — Linux mein UNDO nahi hota!</div>rm se delete hone ke baad file PERMANENTLY GONE hai. Koi Recycle Bin nahi, koi Ctrl+Z nahi. HAMESHA double-check karo!</div>
+${term('rm Command',[
+  '# Single file delete',
+  '$ rm file.php',
+  '',
+  '# Folder delete (-r = recursive)',
+  '$ rm -r oldfolder/',
+  '# Interactive confirmation maangega',
+  '',
+  '# Force delete, no confirmation (-f)',
+  '$ rm -rf oldfolder/',
+  '# DANGEROUS — no warning!',
+  '',
+  '# Safe practice — pehle dekho',
+  '$ ls /var/www/html/old_project/',
+  '# Theek lag raha hai?',
+  '$ rm -rf /var/www/html/old_project/',
+  '',
+  '# Ek file confirm karke delete',
+  '$ rm -i important.php',
+  '>> rm: remove regular file important.php? y',
+])}
+<div class="box danger"><div class="box-title">☠️ NEVER RUN THESE</div>
+<code>rm -rf /</code> — poora root delete! Server dead!<br>
+<code>rm -rf /*</code> — same result!<br>
+<code>rm -rf ~/</code> — apna home folder delete!<br>
+<br>Hamesha path <strong>double-check</strong> karo before rm -rf</div>
+${iq('rm -r aur rm -rf mein kya fark hai?','<code>rm -r</code> recursively folder delete karta hai lekin confirmation maangta hai for each file (sometimes). <code>rm -rf</code> mein <code>-f</code> (force) flag hai jo bina koi warning ya confirmation ke sab kuch delete karta hai. Production servers pe <code>rm -rf</code> bahut cautiously use karo. Hamesha pehle <code>ls</code> se dekho ki sahi path hai, phir delete karo.')}
+`)}
+
+${quiz('Ek folder aur uske andar sab kuch delete karna hai, kaunsa command use karoge?',['rm folder/','rm -d folder/','rm -rf folder/','rmdir folder/'],2,'<code>rm -rf folder/</code> recursively (-r) bina confirmation ke force delete (-f) karta hai. Lekin careful rahena — ye permanent hai!')}
+</div>`,
+
+// ==================== FILE VIEW ====================
+'file-view': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 7</div>
+  <h1>File Viewing <span>& Editing</span></h1>
+  <p class="desc">cat, less, tail, grep — files padhna aur nano/vim se edit karna.</p>
+</div>
+
+${concept('👁️','rgba(0,212,255,0.1)','cat, less, head, tail — File Contents Dekhna','',`
+${term('cat — File Print Karo',[
+  '# File content print karo',
+  '$ cat .env',
+  '>> APP_NAME=Laravel',
+  '>> APP_KEY=base64:...',
+  '',
+  '# Line numbers ke saath (-n)',
+  '$ cat -n config.php',
+  '>>      1  <?php',
+  '>>      2  return [',
+  '',
+  '# Multiple files combine karke print',
+  '$ cat file1.txt file2.txt',
+  '',
+  '# File mein write karo',
+  '$ cat > newfile.txt',
+  '# Type karo, Ctrl+D se save',
+])}
+${term('less — Scrollable Viewer',[
+  '# Large files ke liye best',
+  '$ less /var/log/nginx/access.log',
+  '',
+  '# less ke andar shortcuts:',
+  '# Space / f  = next page',
+  '# b          = previous page',
+  '# /pattern   = search karo',
+  '# n          = next match',
+  '# G          = end pe jao',
+  '# g          = start pe jao',
+  '# q          = quit',
+  '# F          = tail -f mode (live follow)',
+])}
+${term('head aur tail',[
+  '# Pehli 10 lines',
+  '$ head file.log',
+  '',
+  '# Pehli 20 lines',
+  '$ head -20 file.log',
+  '$ head -n 20 file.log',
+  '',
+  '# Aakhiri 10 lines',
+  '$ tail file.log',
+  '',
+  '# Aakhiri 50 lines',
+  '$ tail -50 file.log',
+  '',
+  '# LIVE LOG WATCHING — sabse useful command!',
+  '$ tail -f /var/log/nginx/error.log',
+  '$ tail -f storage/logs/laravel.log',
+  '# Ctrl+C se stop karo',
+  '',
+  '# Multiple files simultaneously',
+  '$ tail -f /var/log/nginx/error.log \\',
+  '         storage/logs/laravel.log',
+])}
+`)}
+
+${concept('🔍','rgba(0,255,136,0.1)','grep — Text Search','Files mein kuch dhundna',`
+${term('grep — Pattern Search',[
+  '# Basic search',
+  '$ grep "ERROR" storage/logs/laravel.log',
+  '',
+  '# Case insensitive (-i)',
+  '$ grep -i "error" app.log',
+  '',
+  '# Line numbers ke saath (-n)',
+  '$ grep -n "exception" laravel.log',
+  '>> 45: [2024-01-15] exception.ERROR...',
+  '',
+  '# Recursive search in directory (-r)',
+  '$ grep -r "DB_HOST" /etc/',
+  '',
+  '# Inverse match — jo match na kare (-v)',
+  '$ grep -v "INFO" laravel.log',
+  '',
+  '# Show N lines before/after match',
+  '$ grep -A 3 "ERROR" laravel.log',
+  '$ grep -B 2 "ERROR" laravel.log',
+  '$ grep -C 3 "ERROR" laravel.log',
+  '',
+  '# Count matches (-c)',
+  '$ grep -c "ERROR" laravel.log',
+  '>> 42',
+  '',
+  '# Multiple patterns',
+  '$ grep -E "ERROR|WARNING|CRITICAL" laravel.log',
+  '',
+  '# Pipe ke saath use',
+  '$ ps aux | grep nginx',
+  '$ cat access.log | grep "500"',
+])}
+${iq('grep -r aur grep mein kya fark hai?','<code>grep "pattern" file</code> ek single file mein search karta hai. <code>grep -r "pattern" /directory</code> recursively saari files mein search karta hai — directory aur uski saari subdirectories mein. Server debugging mein <code>grep -r "error_message" /var/www/html/myproject/</code> jaise use hota hai poore codebase mein kuch dhundne ke liye.')}
+`)}
+
+${concept('✏️','rgba(255,140,0,0.1)','nano aur vim — File Edit Karna','Server pe directly files edit karo',`
+<div class="sec-label green">nano — Beginner Friendly</div>
+${term('nano Editor',[
+  '# File open karo ya naya banao',
+  '$ nano .env',
+  '$ sudo nano /etc/nginx/sites-available/mysite.conf',
+  '',
+  '# nano ke andar shortcuts (Ctrl key):',
+  '# Ctrl+O  = Save (Write Out)',
+  '# Enter   = Confirm filename',
+  '# Ctrl+X  = Exit',
+  '# Ctrl+W  = Search',
+  '# Ctrl+K  = Line cut',
+  '# Ctrl+U  = Paste (UnCut)',
+  '# Ctrl+G  = Help',
+  '# Ctrl+/  = Go to line number',
+  '# Ctrl+\\  = Find and replace',
+])}
+<div class="sec-label orange">vim — Powerful but Complex</div>
+${term('vim Survival Commands',[
+  '# vim open karo',
+  '$ vim config.php',
+  '',
+  '# vim mein DO MODES hain:',
+  '# 1. NORMAL mode — navigation (default)',
+  '# 2. INSERT mode — typing',
+  '',
+  '# Normal mode mein:',
+  'i       = Insert mode shuru karo (cursor pe)',
+  'a       = Insert mode (cursor ke baad)',
+  'o       = Neeche new line banana + insert',
+  'Esc     = Normal mode wapas jao',
+  '',
+  '# Normal mode — Navigation:',
+  'h j k l = left, down, up, right',
+  'gg      = File ke start pe jao',
+  'G       = File ke end pe jao',
+  ':n      = Line n pe jao (:45 = line 45)',
+  '',
+  '# Normal mode — Save/Exit:',
+  ':w      = Save karo',
+  ':q      = Quit (sirf agar saved)',
+  ':q!     = Force quit WITHOUT saving',
+  ':wq     = Save aur quit',
+  ':wq!    = Force save aur quit',
+  'ZZ      = Save aur quit (shortcut)',
+  '',
+  '# Normal mode — Edit:',
+  'dd      = Current line delete',
+  'yy      = Current line copy',
+  'p       = Paste karo',
+  'u       = Undo',
+  'Ctrl+r  = Redo',
+  '/word   = Search karo',
+  'n       = Next search result',
+  ':%s/old/new/g = Find & replace all',
+])}
+<div class="box tip"><div class="box-title">💡 vim mein phas gaye?</div>Hamesha ye karo: <code>Esc</code> dabao → <code>:q!</code> type karo → Enter dabao. Ye bina save kiye exit kar deta hai. Server pe commonly vim khul jaata hai accidentally — ye yaad rakho!</div>
+${iq('nano aur vim mein se kaunsa better hai?','Dono apni jagah useful hain. <strong>nano</strong> simple, beginner-friendly hai — quick edits ke liye perfect. <strong>vim</strong> powerful hai — large files, complex edits, macros, plugins ke liye best. Production developer ke liye: nano for quick .env/config edits, vim for serious code editing. Most important: vim mein <code>:q!</code> se exit karna yaad rakho!')}
+`)}
+</div>`,
+
+// ==================== PERMISSIONS ====================
+'permissions': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 8</div>
+  <h1>Permissions <span>& Ownership</span></h1>
+  <p class="desc">Linux ka sabse important concept — ye samajhna production deployment ke liye must hai!</p>
+</div>
+
+${concept('🔒','rgba(255,140,0,0.1)','Permission System — rwx Samajhna','Read, Write, Execute — teen types, teen groups',`
+<div class="sec-label blue">Permission Types</div>
+<table class="tbl">
+<tr><th>Symbol</th><th>Name</th><th>Number</th><th>Files par</th><th>Directories par</th></tr>
+<tr><td>r</td><td>read</td><td>4</td><td>File padhh sakte ho</td><td>Contents list kar sakte ho (ls)</td></tr>
+<tr><td>w</td><td>write</td><td>2</td><td>File modify kar sakte ho</td><td>Files create/delete kar sakte ho</td></tr>
+<tr><td>x</td><td>execute</td><td>1</td><td>File run kar sakte ho</td><td>Directory mein enter kar sakte ho (cd)</td></tr>
+<tr><td>-</td><td>none</td><td>0</td><td>Permission nahi</td><td>Permission nahi</td></tr>
+</table>
+
+<div class="sec-label green">Three Groups</div>
+<table class="tbl">
+<tr><th>Group</th><th>Symbol</th><th>Kaun hai?</th></tr>
+<tr><td>Owner (User)</td><td>u</td><td>File ka owner — jo create kiya ya assigned hai</td></tr>
+<tr><td>Group</td><td>g</td><td>Ek group ke saare users (e.g., www-data, developers)</td></tr>
+<tr><td>Others</td><td>o</td><td>Duniya mein baaki sab log</td></tr>
+</table>
+
+<div class="sec-label orange">Permission String Padhna</div>
+${term('ls -la output samajhna',[
+  '$ ls -la',
+  '>> drwxr-xr-x  12 www-data www-data  4096 artisan',
+  '>> -rw-r--r--   1 ubuntu   ubuntu     892 .env',
+  '>> -rwxr-xr-x   1 www-data www-data  1686 deploy.sh',
+  '',
+  '# drwxr-xr-x breakdown:',
+  '# d   = type: d=directory, -=file, l=symlink',
+  '# rwx = owner: read+write+execute (7)',
+  '# r-x = group: read+execute only (5)',
+  '# r-x = others: read+execute only (5)',
+  '# So: 755',
+  '',
+  '# -rw-r--r-- breakdown:',
+  '# -   = regular file',
+  '# rw- = owner: read+write (6)',
+  '# r-- = group: read only (4)',
+  '# r-- = others: read only (4)',
+  '# So: 644',
+])}
+
+<div class="sec-label purple">Permission Calculator</div>
+<div class="perm-calc" id="perm-calc">
+  <h5>🔢 Permission Calculator</h5>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+    <div>
+      <div style="font-size:11px;color:var(--accent);margin-bottom:6px;font-family:'Space Mono',monospace">OWNER (u)</div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="ur" checked><label for="ur">Read (4)</label></label></div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="uw" checked><label for="uw">Write (2)</label></label></div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="ux" checked><label for="ux">Execute (1)</label></label></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--green);margin-bottom:6px;font-family:'Space Mono',monospace">GROUP (g)</div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="gr" checked><label for="gr">Read (4)</label></label></div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="gw"><label for="gw">Write (2)</label></label></div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="gx" checked><label for="gx">Execute (1)</label></label></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--orange);margin-bottom:6px;font-family:'Space Mono',monospace">OTHERS (o)</div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="or2" checked><label for="or2">Read (4)</label></label></div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="ow"><label for="ow">Write (2)</label></label></div>
+      <div class="perm-row"><label class="perm-check"><input type="checkbox" onchange="calcPerm()" id="ox" checked><label for="ox">Execute (1)</label></label></div>
+    </div>
+  </div>
+  <div style="margin-top:12px;padding:12px;background:var(--bg2);border-radius:6px;border:1px solid var(--border)">
+    <span style="font-size:11px;color:var(--muted)">Result:</span>
+    <div class="perm-result" id="perm-result">755 — rwxr-xr-x</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px" id="perm-desc">Owner: read+write+execute | Group: read+execute | Others: read+execute</div>
+  </div>
+</div>
+`)}
+
+${concept('🔢','rgba(0,212,255,0.1)','Common Permission Values','Yaad rakho — ye roz kaam aate hain',`
+<div class="perm-visual">
+  ${[['755','rwxr-xr-x','Folders aur executables ke liye standard'],['644','rw-r--r--','Normal files — .php, .html, .css'],['775','rwxrwxr-x','Shared group folders — Laravel storage'],['600','rw-------','Private files — .env, SSH keys'],['700','rwx------','Private directories — .ssh'],['777','rwxrwxrwx','⚠️ DANGEROUS — everyone can do everything'],['664','rw-rw-r--','Group writable files'],['400','r--------','Read-only — SSH private key best practice']].map(([n,s,d])=>`<div class="perm-block"><div class="num">${n}</div><div class="sym">${s}</div><div class="desc">${d}</div></div>`).join('')}
+</div>
+<div class="box danger"><div class="box-title">☠️ 777 Kyun Dangerous Hai?</div>777 matlab <strong>duniya mein koi bhi</strong> — hackers bhi — file likh sakta hai aur run kar sakta hai. Kabhi bhi production pe 777 mat karo. Agar koi bolta hai "777 kar do kaam ho jaayega" — woh security hole bana raha hai. 775 ya 755 use karo.</div>
+${term('chmod — Permission Change Karo',[
+  '# Numeric mode',
+  '$ chmod 755 myscript.sh',
+  '$ chmod 644 config.php',
+  '$ chmod -R 775 storage/',
+  '$ chmod -R 755 /var/www/html/myproject',
+  '',
+  '# Symbolic mode',
+  '$ chmod +x myscript.sh',
+  '$ chmod u+w file.php',
+  '$ chmod g-w file.php',
+  '$ chmod o-rwx .env',
+  '$ chmod a+r file.txt',
+  '',
+  '# Special — .env ke liye',
+  '$ chmod 600 .env',
+  '',
+  '# Laravel permission setup',
+  '$ chmod -R 775 storage/',
+  '$ chmod -R 775 bootstrap/cache/',
+  '$ chmod 600 .env',
+])}
+${iq('chmod 755 aur 644 mein kab kya use karein?','<strong>755</strong> directories ke liye — owner read+write+execute, group+others read+execute. Execute bit directories ke liye <code>cd</code> karne ke liye chahiye. <strong>644</strong> regular files ke liye — owner read+write, group+others read only. PHP files, HTML, CSS — sab 644 hona chahiye. Laravel storage/ aur bootstrap/cache/ ke liye 775 use karo kyunki web server (www-data) ko write access chahiye.')}
+`)}
+
+${concept('👥','rgba(0,255,136,0.1)','chown — Ownership Change Karna','www-data aur web server concept',`
+<div class="box info"><div class="box-title">🌐 www-data Kaun Hai?</div>Apache aur Nginx ek special user <strong>www-data</strong> se chalta hai. Jab web server koi file access karta hai, woh www-data user ke naam se karta hai. Laravel projects ko www-data user ko read/write access dena hota hai.</div>
+${term('chown — Ownership Change',[
+  '# File ka owner change karo',
+  '$ sudo chown ubuntu file.php',
+  '',
+  '# Owner aur group dono change karo',
+  '$ sudo chown ubuntu:www-data file.php',
+  '',
+  '# Recursive (-R)',
+  '$ sudo chown -R www-data:www-data /var/www/html/myproject',
+  '',
+  '# Current user aur www-data group',
+  '$ sudo chown -R $USER:www-data /var/www/html/myproject',
+  '',
+  '# Complete Laravel Permission Setup:',
+  '$ cd /var/www/html/myproject',
+  '$ sudo chown -R $USER:www-data .',
+  '$ find . -type f -exec chmod 664 {} \\;',
+  '$ find . -type d -exec chmod 775 {} \\;',
+  '$ chmod -R 775 storage/ bootstrap/cache/',
+  '$ chmod 600 .env',
+  '',
+  '# Apne user ko www-data group mein add karo',
+  '$ sudo usermod -aG www-data $USER',
+  '# Logout-login karo group apply hone ke liye',
+])}
+${iq('Laravel mein permission denied error kyun aata hai?','Mostly teen reasons hain: (1) <code>storage/</code> ya <code>bootstrap/cache/</code> directory www-data ke liye writable nahi hai — fix: <code>chmod -R 775 storage/ bootstrap/cache/</code>, (2) Files ka owner www-data nahi hai — fix: <code>chown -R www-data:www-data .</code>, (3) .env file ka permissions galat hai — fix: <code>chmod 640 .env chown www-data:www-data .env</code>. Ye teen commands yaad rakho — 90% permission issues fix ho jaate hain.')}
+`)}
+</div>`,
+
+// ==================== USERS & GROUPS ====================
+'users-groups': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 9</div>
+  <h1>Users <span>& Groups</span></h1>
+  <p class="desc">Multi-user Linux system — users banao, manage karo, aur security maintain karo.</p>
+</div>
+
+${concept('👤','rgba(0,212,255,0.1)','User Management','useradd, userdel, usermod',`
+${term('User Commands',[
+  '# Current user check',
+  '$ whoami',
+  '>> ubuntu',
+  '',
+  '# User detail check',
+  '$ id',
+  '>> uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),27(sudo)',
+  '',
+  '# Naya user banana',
+  '$ sudo useradd -m -s /bin/bash deployuser',
+  '# -m = home directory banana',
+  '# -s = shell specify karo',
+  '',
+  '# Password set karo',
+  '$ sudo passwd deployuser',
+  '>> New password:',
+  '>> Retype new password:',
+  '',
+  '# User ko group mein add karo',
+  '$ sudo usermod -aG www-data deployuser',
+  '$ sudo usermod -aG sudo deployuser',
+  '',
+  '# User ki info dekho',
+  '$ cat /etc/passwd | grep deployuser',
+  '>> deployuser:x:1001:1001::/home/deployuser:/bin/bash',
+  '',
+  '# User delete karo',
+  '$ sudo userdel deployuser',
+  '# Home directory bhi delete (-r)',
+  '$ sudo userdel -r deployuser',
+  '',
+  '# User ko lock karo (login band)',
+  '$ sudo usermod -L deployuser',
+  '# Unlock karo',
+  '$ sudo usermod -U deployuser',
+  '',
+  '# Sabhi users dekho',
+  '$ cat /etc/passwd',
+  '$ getent passwd',
+  '',
+  '# Logged in users',
+  '$ who',
+  '$ w',
+  '$ last | head -20',
+])}
+${iq('/etc/passwd file mein kya hota hai?','<code>/etc/passwd</code> mein har user ki entry hoti hai. Format: <code>username:x:UID:GID:GECOS:home_dir:shell</code>. Example: <code>ubuntu:x:1000:1000:Ubuntu,,,:/home/ubuntu:/bin/bash</code> — username=ubuntu, x=password in /etc/shadow, uid=1000, gid=1000, home=/home/ubuntu, shell=/bin/bash. Password field mein "x" matlab actual encrypted password <code>/etc/shadow</code> mein hai (more secure).')}
+`)}
+
+${concept('👥','rgba(0,255,136,0.1)','Group Management','Groups create, modify, check',`
+${term('Group Commands',[
+  '# User ke groups dekho',
+  '$ groups ubuntu',
+  '>> ubuntu : ubuntu sudo www-data docker',
+  '',
+  '# Naya group banana',
+  '$ sudo groupadd developers',
+  '',
+  '# User ko group mein add karo',
+  '$ sudo usermod -aG developers ubuntu',
+  '',
+  '# Group remove karo user se',
+  '$ sudo gpasswd -d ubuntu developers',
+  '',
+  '# Group mein sabhi users dekho',
+  '$ cat /etc/group | grep www-data',
+  '>> www-data:x:33:ubuntu,deploy',
+  '',
+  '# Group delete karo',
+  '$ sudo groupdel oldgroup',
+])}
+`)}
+
+${concept('🔑','rgba(255,140,0,0.1)','sudo — Superuser Powers','Root ke bina root powers',`
+<div class="box info"><div class="box-title">Sudo kya hai?</div><strong>sudo</strong> = "Substitute User DO" — ek command ke liye temporarily root ban jao, bina root login ke. Ye security ke liye important hai — har time root mat bano.</div>
+${term('sudo Commands',[
+  '# Single command root se run karo',
+  '$ sudo systemctl restart nginx',
+  '',
+  '# Root shell open karo',
+  '$ sudo -i',
+  '# OR',
+  '$ sudo su -',
+  '',
+  '# Doosre user se run karo',
+  '$ sudo -u www-data php artisan optimize',
+  '',
+  '# Previous command sudo ke saath run karo',
+  '$ sudo !!',
+  '',
+  '# sudo kab expire hoga — list dekho',
+  '$ sudo -l',
+  '',
+  '# sudoers file edit karo (ALWAYS visudo se!)',
+  '$ sudo visudo',
+  '',
+  '# Common sudoers entry:',
+  '>> ubuntu ALL=(ALL:ALL) ALL',
+  '# Username   Hosts=(Users:Groups) Commands',
+  '',
+  '# Password-less sudo (deployment user ke liye)',
+  '>> deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl',
+])}
+${iq('sudo aur su mein kya fark hai?','<code>su</code> = Switch User — completely doosre user ban jao (password chahiye). <code>sudo</code> = Superuser Do — apne password se ek command root ke naam pe run karo. Security best practice: always sudo use karo, su avoid karo. <code>sudo -i</code> root shell deta hai. <code>su - username</code> specific user ban jata hai. Production servers pe root login disable karo aur sudo use karo.')}
+`)}
+</div>`,
+
+// ==================== PROCESSES ====================
+'processes': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 10</div>
+  <h1>Process <span>Management</span></h1>
+  <p class="desc">Running processes ko monitor karo, manage karo, aur kill karo.</p>
+</div>
+
+${concept('⚙️','rgba(0,212,255,0.1)','ps — Process Status','Running processes dekho',`
+${term('ps Command',[
+  '# Current user ke processes',
+  '$ ps',
+  '>>   PID TTY          TIME CMD',
+  '>>  1234 pts/0    00:00:00 bash',
+  '',
+  '# Saare processes (most common)',
+  '$ ps aux',
+  '>> USER    PID %CPU %MEM  VSZ  RSS TTY  STAT CMD',
+  '>> root      1  0.0  0.3 ...',
+  '>> nginx  1234  0.1  0.5 ...',
+  '',
+  '# Specific process dhundho',
+  '$ ps aux | grep nginx',
+  '$ ps aux | grep php',
+  '',
+  '# Process tree dekho',
+  '$ ps auxf',
+  '',
+  '# Specific user ke processes',
+  '$ ps aux | grep www-data',
+  '',
+  '# PID se process dekho',
+  '$ ps -p 1234',
+])}
+${iq('ps aux mein columns ka kya matlab hai?','<code>ps aux</code> output: USER=process owner, PID=Process ID, %CPU=CPU usage, %MEM=Memory usage, VSZ=Virtual memory size (KB), RSS=Real memory (KB) — actual RAM usage, TTY=terminal (? = background), STAT=state (S=sleeping, R=running, Z=zombie, D=uninterruptible wait), TIME=CPU time used, CMD=command name. %CPU aur %MEM pe dhyan do — high values = resource issue.')}
+`)}
+
+${concept('📊','rgba(0,255,136,0.1)','top aur htop — Live Monitoring','Real-time system monitoring',`
+${term('top Command',[
+  '$ top',
+  '',
+  '# top ke andar shortcuts:',
+  '# q = quit',
+  '# k = kill process (PID daalo)',
+  '# M = Memory se sort karo',
+  '# P = CPU se sort karo',
+  '# 1 = Individual CPU cores dekho',
+  '# u = Specific user filter karo',
+  '# h = Help',
+  '',
+  '# Non-interactive top (batch mode)',
+  '$ top -bn1 | head -20',
+  '',
+  '# htop install karo',
+  '$ sudo apt install htop',
+  '$ htop',
+  '# htop more user-friendly hai',
+  '# Mouse bhi support karta hai',
+  '# F9 = Kill, F10 = Quit',
+])}
+`)}
+
+${concept('🔫','rgba(255,68,102,0.1)','kill — Process Terminate Karo','Process band karo',`
+${term('kill Commands',[
+  '# PID se process kill karo (graceful)',
+  '$ kill 1234',
+  '# SIGTERM signal bhejta hai (15)',
+  '',
+  '# Force kill (immediately)',
+  '$ kill -9 1234',
+  '# SIGKILL — process ko choice nahi',
+  '',
+  '# Name se kill karo',
+  '$ pkill nginx',
+  '$ killall nginx',
+  '',
+  '# Process dhundho phir kill karo',
+  '$ ps aux | grep "php artisan queue"',
+  '>> ubuntu 4521 0.2 ...',
+  '$ kill 4521',
+  '',
+  '# Signal types',
+  '$ kill -l',
+  '# Common signals:',
+  '# 1  (SIGHUP)  = Reload/Hangup',
+  '# 2  (SIGINT)  = Interrupt (Ctrl+C)',
+  '# 9  (SIGKILL) = Force kill',
+  '# 15 (SIGTERM) = Graceful terminate',
+])}
+${iq('kill -9 aur kill mein kya fark hai?','<code>kill PID</code> (ya <code>kill -15 PID</code>) = SIGTERM bhejta hai — process ko gracefully shutdown karne ka moka deta hai (cleanup, close connections, etc.). <code>kill -9 PID</code> = SIGKILL — kernel directly process ko terminate karta hai, process ko kuch cleanup karne ka moka nahi milta. Pehle normal kill try karo, agar process respond nahi kare to kill -9 use karo.')}
+`)}
+</div>`,
+
+// ==================== NETWORKING ====================
+'networking': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 11</div>
+  <h1>Linux <span>Networking</span></h1>
+  <p class="desc">IP addresses, ports, connections — server networking basics.</p>
+</div>
+
+${concept('🌐','rgba(0,212,255,0.1)','Network Information Commands','IP, interfaces, connections dekho',`
+${term('ip Command (Modern)',[
+  '# IP addresses dekho',
+  '$ ip addr show',
+  '$ ip a',
+  '>> 2: eth0: <BROADCAST,MULTICAST,UP>',
+  '>>   inet 10.0.0.5/24 brd 10.0.0.255',
+  '',
+  '# Routing table dekho',
+  '$ ip route show',
+  '$ ip r',
+  '',
+  '# Interface up/down',
+  '$ sudo ip link set eth0 up',
+  '$ sudo ip link set eth0 down',
+])}
+${term('Network Diagnostics',[
+  '# Ping — connectivity test',
+  '$ ping google.com',
+  '$ ping -c 4 8.8.8.8',
+  '# -c 4 = sirf 4 packets',
+  '',
+  '# Open ports dekho',
+  '$ ss -tlnp',
+  '$ netstat -tlnp',
+  '>> Proto  Local Address    PID/Program',
+  '>> tcp    0.0.0.0:80       1234/nginx',
+  '>> tcp    127.0.0.1:3306   5678/mysqld',
+  '',
+  '# Active connections dekho',
+  '$ ss -tnp',
+  '',
+  '# DNS lookup',
+  '$ nslookup google.com',
+  '$ dig google.com',
+  '',
+  '# Route tracing',
+  '$ traceroute google.com',
+  '$ tracepath google.com',
+  '',
+  '# Network interfaces stats',
+  '$ ifstat',
+  '$ nethogs',
+])}
+${iq('ss aur netstat mein kya fark hai?','<code>netstat</code> older command hai (deprecated in modern Linux). <code>ss</code> (Socket Statistics) newer aur faster hai. Dono open ports aur network connections dikhate hain. Common use: <code>ss -tlnp</code> — t=TCP, l=listening, n=numeric (domain resolve mat karo), p=process show karo. Which ports are open check karne ke liye ye command use karo.')}
+`)}
+
+${concept('📡','rgba(0,255,136,0.1)','wget aur curl — Data Download','Files aur API calls',`
+${term('wget aur curl',[
+  '# wget — file download karo',
+  '$ wget https://example.com/file.zip',
+  '',
+  '# Background download',
+  '$ wget -b https://example.com/largefile.iso',
+  '',
+  '# Resume interrupted download',
+  '$ wget -c https://example.com/file.zip',
+  '',
+  '# curl — API calls aur more',
+  '$ curl https://api.example.com/data',
+  '',
+  '# Response headers dekho (-I)',
+  '$ curl -I https://mysite.com',
+  '',
+  '# POST request',
+  '$ curl -X POST -H "Content-Type: application/json" \\',
+  '  -d "{\"key\":\"value\"}" https://api.example.com',
+  '',
+  '# File save karo (-O)',
+  '$ curl -O https://example.com/file.zip',
+  '',
+  '# Follow redirects (-L)',
+  '$ curl -L https://example.com',
+  '',
+  '# Composer install ke liye curl',
+  '$ curl -sS https://getcomposer.org/installer | php',
+])}
+`)}
+</div>`,
+
+// ==================== SERVICES ====================
+'services': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 12</div>
+  <h1>Services <span>& Systemd</span></h1>
+  <p class="desc">nginx, mysql, php-fpm — services start, stop, restart, aur troubleshoot karna.</p>
+</div>
+
+${concept('🔧','rgba(0,212,255,0.1)','systemctl — Service Management','Linux ka service controller',`
+${term('systemctl Commands',[
+  '# Service status check',
+  '$ systemctl status nginx',
+  '$ systemctl status mysql',
+  '$ systemctl status php8.2-fpm',
+  '',
+  '# Service start karo',
+  '$ sudo systemctl start nginx',
+  '',
+  '# Service stop karo',
+  '$ sudo systemctl stop nginx',
+  '',
+  '# Service restart karo (stop + start)',
+  '$ sudo systemctl restart nginx',
+  '',
+  '# Service reload karo (no downtime)',
+  '$ sudo systemctl reload nginx',
+  '',
+  '# Boot pe auto-start enable karo',
+  '$ sudo systemctl enable nginx',
+  '$ sudo systemctl enable mysql',
+  '',
+  '# Boot pe auto-start disable karo',
+  '$ sudo systemctl disable nginx',
+  '',
+  '# Service active hai ya nahi check',
+  '$ systemctl is-active nginx',
+  '>> active',
+  '',
+  '# Service enabled hai ya nahi check',
+  '$ systemctl is-enabled nginx',
+  '>> enabled',
+  '',
+  '# Saari running services',
+  '$ systemctl list-units --type=service --state=running',
+  '',
+  '# Failed services dekho',
+  '$ systemctl list-units --failed',
+])}
+${iq('restart aur reload mein kya fark hai?','<code>restart</code> service ko completely band karke phir start karta hai — brief downtime hota hai. <code>reload</code> running service ko new configuration ke saath reload karta hai bina band kiye — zero downtime. Nginx config change karne ke baad <code>sudo nginx -t</code> se config test karo, phir <code>sudo systemctl reload nginx</code> use karo — downtime nahi hogi. Apache ke liye bhi same: <code>systemctl reload apache2</code>.')}
+`)}
+
+${concept('📋','rgba(0,255,136,0.1)','journalctl — Service Logs','systemd service logs dekhna',`
+${term('journalctl Commands',[
+  '# Service logs dekho',
+  '$ journalctl -u nginx',
+  '$ journalctl -u mysql',
+  '',
+  '# Live logs follow karo (-f)',
+  '$ journalctl -u nginx -f',
+  '',
+  '# Last N lines',
+  '$ journalctl -u nginx -n 50',
+  '',
+  '# Time se filter karo',
+  '$ journalctl -u nginx --since "1 hour ago"',
+  '$ journalctl -u nginx --since "2024-01-15"',
+  '',
+  '# Errors only',
+  '$ journalctl -u nginx -p err',
+  '',
+  '# Disk usage check',
+  '$ journalctl --disk-usage',
+  '',
+  '# Old logs clean karo',
+  '$ sudo journalctl --vacuum-time=7d',
+  '$ sudo journalctl --vacuum-size=500M',
+])}
+`)}
+</div>`,
+
+// ==================== PACKAGES ====================
+'packages': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 13</div>
+  <h1>Package <span>Management</span></h1>
+  <p class="desc">apt se software install karo, update karo, aur remove karo — Ubuntu/Debian ke liye.</p>
+</div>
+
+${concept('📦','rgba(0,212,255,0.1)','apt — Package Manager','Software install, update, remove',`
+${term('apt Commands',[
+  '# Package list update karo (pehle ye karo!)',
+  '$ sudo apt update',
+  '',
+  '# System upgrade karo',
+  '$ sudo apt upgrade',
+  '$ sudo apt full-upgrade',
+  '',
+  '# Software install karo',
+  '$ sudo apt install nginx',
+  '$ sudo apt install php8.2-fpm php8.2-mysql',
+  '$ sudo apt install git curl wget unzip',
+  '',
+  '# Confirmation ke bina install (-y)',
+  '$ sudo apt install -y nginx',
+  '',
+  '# Software remove karo',
+  '$ sudo apt remove nginx',
+  '# Config bhi remove karo',
+  '$ sudo apt purge nginx',
+  '',
+  '# Unused packages clean karo',
+  '$ sudo apt autoremove',
+  '',
+  '# Package search karo',
+  '$ apt search nginx',
+  '$ apt-cache search php',
+  '',
+  '# Package info dekho',
+  '$ apt show nginx',
+  '',
+  '# Installed packages list',
+  '$ apt list --installed',
+  '$ dpkg -l',
+  '',
+  '# Kaunse package mein file hai',
+  '$ dpkg -S /usr/bin/php',
+  '>> php8.2-cli: /usr/bin/php',
+])}
+<div class="sec-label green">Common Server Software Install</div>
+${term('Typical LAMP/LEMP Stack Install',[
+  '# Update first',
+  '$ sudo apt update',
+  '',
+  '# Nginx install',
+  '$ sudo apt install -y nginx',
+  '',
+  '# PHP install',
+  '$ sudo apt install -y php8.2-fpm php8.2-cli \\',
+  '  php8.2-mysql php8.2-gd php8.2-curl \\',
+  '  php8.2-mbstring php8.2-xml php8.2-zip',
+  '',
+  '# MySQL install',
+  '$ sudo apt install -y mysql-server',
+  '$ sudo mysql_secure_installation',
+  '',
+  '# Git install',
+  '$ sudo apt install -y git',
+  '',
+  '# Composer install',
+  '$ curl -sS https://getcomposer.org/installer | sudo php \\',
+  '  -- --install-dir=/usr/local/bin --filename=composer',
+  '',
+  '# Node.js install (npm ke liye)',
+  '$ curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -',
+  '$ sudo apt install -y nodejs',
+])}
+${iq('apt update aur apt upgrade mein kya fark hai?','<code>apt update</code> sirf package list (index) update karta hai — packages ke available versions ki information refresh karta hai. Actual kuch install/update nahi hota. <code>apt upgrade</code> actually installed packages ko latest version pe upgrade karta hai based on updated index. Hamesha pehle <code>apt update</code> phir <code>apt upgrade</code> karo. Production servers pe <code>apt upgrade</code> se pehle test karo — kabhi kabhi upgrades break kar sakte hain kuch cheezein.')}
+`)}
+</div>`,
+
+// ==================== DISK ====================
+'disk-storage': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 14</div>
+  <h1>Disk <span>& Storage</span></h1>
+  <p class="desc">Disk space monitor karo, manage karo, aur "disk full" issues fix karo.</p>
+</div>
+
+${concept('💾','rgba(0,212,255,0.1)','df aur du — Disk Usage','Disk space check karna',`
+${term('df — Disk Free',[
+  '# Disk space check karo',
+  '$ df -h',
+  '>> Filesystem   Size  Used Avail Use% Mounted on',
+  '>> /dev/sda1     50G   34G   14G  70% /',
+  '>> tmpfs        1.0G   52M  948M   6% /dev/shm',
+  '',
+  '# Human readable + inodes check',
+  '$ df -ih',
+  '',
+  '# Specific directory',
+  '$ df -h /var/www',
+  '',
+  '# Type bhi show karo',
+  '$ df -hT',
+])}
+${term('du — Directory Usage (kya occupy kar raha hai?)',[
+  '# Current directory ka size',
+  '$ du -sh .',
+  '>> 2.3G    .',
+  '',
+  '# Specific folder ka size',
+  '$ du -sh /var/www/html',
+  '$ du -sh /var/log',
+  '',
+  '# All top-level folders ka size',
+  '$ du -sh /var/* | sort -h',
+  '',
+  '# Top 10 bade folders dhundho',
+  '$ du -sh * | sort -rh | head -10',
+  '',
+  '# Disk full hai — kya occupy kar raha hai?',
+  '$ df -h',
+  '>> /dev/sda1 50G 49G 100M 100% /',
+  '$ du -sh /var/log/* | sort -rh | head',
+  '$ du -sh /var/www/html/* | sort -rh | head',
+  '$ du -sh /tmp/* | sort -rh',
+])}
+<div class="sec-label red">Disk Full Fix Karna</div>
+${term('Disk Full Emergency Fix',[
+  '# Step 1: Kahan se space kha raha hai?',
+  '$ df -h',
+  '$ sudo du -sh /* 2>/dev/null | sort -rh | head -20',
+  '',
+  '# Step 2: Log files clean karo',
+  '$ sudo find /var/log -name "*.gz" -delete',
+  '$ sudo find /var/log -name "*.log" -size +100M',
+  '',
+  '# Log file truncate (delete nahi, empty karo)',
+  '$ sudo truncate -s 0 /var/log/nginx/access.log',
+  '',
+  '# Step 3: Journal logs clean karo',
+  '$ sudo journalctl --vacuum-time=3d',
+  '$ sudo journalctl --vacuum-size=200M',
+  '',
+  '# Step 4: APT cache clean karo',
+  '$ sudo apt clean',
+  '$ sudo apt autoremove',
+  '',
+  '# Step 5: Laravel logs',
+  '$ sudo truncate -s 0 storage/logs/laravel.log',
+  '',
+  '# Step 6: tmp clean karo',
+  '$ sudo find /tmp -type f -atime +7 -delete',
+])}
+${iq('Production server pe disk full hai — kya karoge?','Step 1: <code>df -h</code> se confirm karo ki disk full hai. Step 2: <code>du -sh /* | sort -rh | head</code> se bada folder dhundho. Step 3: Log files check karo — <code>/var/log</code> mein large files. Step 4: <code>journalctl --vacuum-time=3d</code> se old journal logs. Step 5: <code>apt clean</code> — APT cache. Step 6: Application logs truncate karo. Step 7: Agar bhi nahi ho to mount karo extra storage ya server upgrade karo. Alert system setup karo 80% pe — 100% pe emergency mat aao.')}
+`)}
+</div>`,
+
+// ==================== CRON ====================
+'cron-jobs': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 15</div>
+  <h1>Cron <span>Jobs</span></h1>
+  <p class="desc">Scheduled tasks — automated backups, cleanups, aur Laravel scheduler.</p>
+</div>
+
+${concept('⏰','rgba(0,255,136,0.1)','Cron Syntax — Time Format Samajhna','5 fields, infinite possibilities',`
+<div class="sec-label blue">Cron Format</div>
+<div style="background:var(--terminal);border:1px solid #0a2a3a;border-radius:8px;padding:16px;font-family:'Space Mono',monospace;font-size:13px;margin:10px 0">
+  <span style="color:#00d4ff">*</span>  <span style="color:#00ff88">*</span>  <span style="color:#ff8c00">*</span>  <span style="color:#a855f7">*</span>  <span style="color:#ffd700">*</span>  command<br>
+  <span style="color:#00d4ff">│</span>  <span style="color:#00ff88">│</span>  <span style="color:#ff8c00">│</span>  <span style="color:#a855f7">│</span>  <span style="color:#ffd700">│</span><br>
+  <span style="color:#00d4ff">│</span>  <span style="color:#00ff88">│</span>  <span style="color:#ff8c00">│</span>  <span style="color:#a855f7">│</span>  <span style="color:#ffd700">└─ Weekday (0-7, 0=Sun)</span><br>
+  <span style="color:#00d4ff">│</span>  <span style="color:#00ff88">│</span>  <span style="color:#ff8c00">│</span>  <span style="color:#a855f7">└─── Month (1-12)</span><br>
+  <span style="color:#00d4ff">│</span>  <span style="color:#00ff88">│</span>  <span style="color:#ff8c00">└───── Day (1-31)</span><br>
+  <span style="color:#00d4ff">│</span>  <span style="color:#00ff88">└─────── Hour (0-23)</span><br>
+  <span style="color:#00d4ff">└───────── Minute (0-59)</span>
+</div>
+<table class="tbl">
+<tr><th>Cron Expression</th><th>Matlab</th></tr>
+<tr><td>* * * * *</td><td>Har minute</td></tr>
+<tr><td>0 * * * *</td><td>Har ghante mein (minute 0 pe)</td></tr>
+<tr><td>0 0 * * *</td><td>Roz raat 12 baje (midnight)</td></tr>
+<tr><td>0 2 * * *</td><td>Roz raat 2 baje</td></tr>
+<tr><td>0 0 * * 0</td><td>Har Sunday midnight</td></tr>
+<tr><td>0 0 1 * *</td><td>Har mahine 1 tarikh ko</td></tr>
+<tr><td>*/5 * * * *</td><td>Har 5 minute mein</td></tr>
+<tr><td>0 9-17 * * 1-5</td><td>Weekdays 9am-5pm har ghante</td></tr>
+<tr><td>30 6 * * 1,3,5</td><td>Mon, Wed, Fri 6:30am</td></tr>
+</table>
+${term('crontab Commands',[
+  '# Current user ke cron jobs dekho',
+  '$ crontab -l',
+  '',
+  '# Cron jobs edit karo',
+  '$ crontab -e',
+  '',
+  '# Cron jobs delete karo (CAREFUL!)',
+  '$ crontab -r',
+  '',
+  '# Doosre user ke cron jobs (root se)',
+  '$ sudo crontab -l -u ubuntu',
+  '$ sudo crontab -e -u ubuntu',
+  '',
+  '# Cron logs dekho',
+  '$ grep CRON /var/log/syslog',
+  '$ grep CRON /var/log/cron',
+])}
+`)}
+
+${concept('🚀','rgba(255,140,0,0.1)','Real-World Cron Examples','Laravel scheduler aur backups',`
+${term('Common Cron Jobs',[
+  '# Laravel Scheduler — MUST for production',
+  '* * * * * cd /var/www/html/myproject && \\',
+  'php artisan schedule:run >> /dev/null 2>&1',
+  '',
+  '# Daily database backup (2am pe)',
+  '0 2 * * * /home/ubuntu/scripts/backup.sh \\',
+  '>> /home/ubuntu/logs/backup.log 2>&1',
+  '',
+  '# Disk space alert (har 6 ghante)',
+  '0 */6 * * * df -h | mail -s "Disk Report" admin@mysite.com',
+  '',
+  '# Old logs delete karo (har hafte Sunday)',
+  '0 0 * * 0 find /var/log -name "*.gz" -mtime +30 -delete',
+  '',
+  '# PHP artisan queue restart (roz raat)',
+  '0 0 * * * sudo supervisorctl restart laravel-worker:*',
+  '',
+  '# SSL certificate renewal check',
+  '0 12 * * * /usr/bin/certbot renew --quiet',
+  '',
+  '# Website uptime check',
+  '*/5 * * * * curl -s -o /dev/null -w "%{http_code}" \\',
+  'https://mysite.com | grep -q 200 || \\',
+  'echo "Site Down!" | mail admin@mysite.com',
+])}
+<div class="box warn"><div class="box-title">⚠️ Cron Debugging Tips</div>
+1. Cron ko full path chahiye — <code>/usr/bin/php</code> not just <code>php</code><br>
+2. Output redirect karo log mein check karne ke liye<br>
+3. <code>>> /dev/null 2>&1</code> = all output discard karo<br>
+4. Environment variables alag hote hain cron mein<br>
+5. Pehle command manually run karke test karo</div>
+${iq('>> /dev/null 2>&1 ka kya matlab hai?','<code>/dev/null</code> Linux ka "black hole" hai — jo bhi bhejo, wahan jaata hai aur disappear ho jaata hai. <code>>></code> stdout (normal output) ko /dev/null mein redirect karta hai. <code>2>&1</code> stderr (error output) ko stdout mein redirect karta hai — matlab dono outputs discard ho jaate hain. Cron mein ye use karte hain jab output email ke through receive nahi karna. Log file save karna ho to: <code>>> /var/log/myapp.log 2>&1</code>')}
+`)}
+</div>`,
+
+// ==================== SHELL SCRIPTING ====================
+'shell-scripting': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 16</div>
+  <h1>Shell <span>Scripting</span></h1>
+  <p class="desc">Bash scripts likhna — automation, deployment scripts, aur repetitive tasks ko automate karna.</p>
+</div>
+
+${concept('📜','rgba(0,212,255,0.1)','Bash Script Basics','Script kaise likhte hain',`
+${term('Script Structure',[
+  '#!/bin/bash',
+  '# Shebang — konsa interpreter use karo',
+  '',
+  '# Script banana:',
+  '$ nano deploy.sh',
+  '',
+  '# Script run karo:',
+  '$ chmod +x deploy.sh',
+  '$ ./deploy.sh',
+  '# ya',
+  '$ bash deploy.sh',
+])}
+${term('Variables',[
+  '#!/bin/bash',
+  '',
+  '# Variable banana (spaces mat lagao = ke paas)',
+  'NAME="ubuntu"',
+  'PROJECT_DIR="/var/www/html/myproject"',
+  'DATE=$(date +%Y%m%d)',
+  '',
+  '# Variable use karna ($)',
+  'echo "Hello $NAME"',
+  'echo "Project: ${PROJECT_DIR}"',
+  'echo "Today: $DATE"',
+  '',
+  '# Command output variable mein save karo',
+  'CURRENT_DIR=$(pwd)',
+  'PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION;")',
+  'DISK_USAGE=$(df -h / | awk "NR==2{print $5}")',
+  '',
+  '# Read-only variable',
+  'readonly MAX_RETRIES=3',
+])}
+${term('Conditions — if/else',[
+  '#!/bin/bash',
+  '',
+  '# Simple if',
+  'if [ condition ]; then',
+  '  # code',
+  'fi',
+  '',
+  '# if-else',
+  'if [ $USER = "root" ]; then',
+  '  echo "You are root!"',
+  'else',
+  '  echo "Not root user"',
+  'fi',
+  '',
+  '# File exists check',
+  'if [ -f "/var/www/html/myproject/.env" ]; then',
+  '  echo ".env exists"',
+  'else',
+  '  echo "ERROR: .env not found!"',
+  '  exit 1',
+  'fi',
+  '',
+  '# Directory exists check',
+  'if [ -d "/var/www/html/myproject" ]; then',
+  '  echo "Directory exists"',
+  'fi',
+  '',
+  '# Number comparison',
+  'DISK=$(df / | awk "NR==2{print $5}" | tr -d "%")',
+  'if [ $DISK -gt 90 ]; then',
+  '  echo "ALERT: Disk usage $DISK%"',
+  'fi',
+  '',
+  '# String comparison',
+  'STATUS=$(systemctl is-active nginx)',
+  'if [ "$STATUS" = "active" ]; then',
+  '  echo "Nginx running"',
+  'fi',
+])}
+${term('Loops',[
+  '# for loop',
+  'for i in 1 2 3 4 5; do',
+  '  echo "Number: $i"',
+  'done',
+  '',
+  '# For loop with range',
+  'for i in {1..10}; do',
+  '  echo "Day $i"',
+  'done',
+  '',
+  '# Array loop',
+  'SERVICES=("nginx" "mysql" "php8.2-fpm")',
+  'for svc in "${SERVICES[@]}"; do',
+  '  echo "Checking $svc..."',
+  '  systemctl is-active $svc && echo "OK" || echo "DOWN"',
+  'done',
+  '',
+  '# While loop',
+  'COUNT=0',
+  'while [ $COUNT -lt 5 ]; do',
+  '  echo "Count: $COUNT"',
+  '  COUNT=$((COUNT + 1))',
+  'done',
+])}
+${term('Real Deployment Script',[
+  '#!/bin/bash',
+  '',
+  '# Deployment script — production use karo',
+  'set -e  # Koi bhi error pe script stop ho',
+  '',
+  'PROJECT_DIR="/var/www/html/mylaravel"',
+  'LOG_FILE="/var/log/deploy.log"',
+  'DATE=$(date "+%Y-%m-%d %H:%M:%S")',
+  '',
+  'log() {',
+  '  echo "[$DATE] $1" | tee -a $LOG_FILE',
+  '}',
+  '',
+  'log "=== Deployment Started ==="',
+  '',
+  '# Project directory check',
+  'if [ ! -d "$PROJECT_DIR" ]; then',
+  '  log "ERROR: Project directory not found!"',
+  '  exit 1',
+  'fi',
+  '',
+  'cd $PROJECT_DIR',
+  '',
+  '# Git pull',
+  'log "Pulling latest code..."',
+  'git pull origin main',
+  '',
+  '# Composer',
+  'log "Installing dependencies..."',
+  'composer install --no-dev --optimize-autoloader',
+  '',
+  '# Artisan commands',
+  'log "Running migrations..."',
+  'php artisan migrate --force',
+  '',
+  'log "Clearing caches..."',
+  'php artisan optimize:clear',
+  'php artisan config:cache',
+  'php artisan route:cache',
+  '',
+  '# Permissions',
+  'log "Setting permissions..."',
+  'chmod -R 775 storage/ bootstrap/cache/',
+  '',
+  '# Restart services',
+  'log "Reloading Nginx..."',
+  'sudo systemctl reload nginx',
+  '',
+  'log "=== Deployment Complete! ==="',
+])}
+${iq('set -e script mein kyun use karte hain?','<code>set -e</code> (errexit) script mein daalne se script automatically exit ho jaata hai agar koi bhi command non-zero exit code return kare (i.e., fail kare). Bina <code>set -e</code> ke, script continue karta hai even if git pull fail ho jaaye ya composer install fail ho — jo dangerous hai production mein. <code>set -e</code> ensure karta hai ki failure pe immediately stop ho. <code>set -u</code> bhi use karo (undefined variables pe error) aur <code>set -o pipefail</code> (pipe mein failure catch karo).')}
+`)}
+</div>`,
+
+// ==================== ADVANCED NETWORKING ====================
+'networking-adv': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 17</div>
+  <h1>Advanced <span>Networking</span></h1>
+  <p class="desc">scp, rsync, SSH tunneling — production data transfer aur remote access.</p>
+</div>
+
+${concept('📤','rgba(0,212,255,0.1)','scp aur rsync — Secure File Transfer','Files server pe push/pull karna',`
+${term('scp — Secure Copy',[
+  '# Local se server pe upload',
+  '$ scp localfile.zip ubuntu@server:/var/www/html/',
+  '',
+  '# Server se local pe download',
+  '$ scp ubuntu@server:/home/ubuntu/backup.sql.gz ./',
+  '',
+  '# Folder upload (-r)',
+  '$ scp -r myproject/ ubuntu@server:/var/www/html/',
+  '',
+  '# Custom port (-P uppercase)',
+  '$ scp -P 2222 file.zip ubuntu@server:~/',
+  '',
+  '# Private key use karo (-i)',
+  '$ scp -i ~/.ssh/mykey.pem file.zip ubuntu@server:~/',
+])}
+${term('rsync — Incremental Sync (Better!)',[
+  '# Basic sync (only changed files)',
+  '$ rsync -avz myproject/ ubuntu@server:/var/www/html/myproject/',
+  '',
+  '# Exclude folders',
+  '$ rsync -avz --exclude="vendor" --exclude=".env" \\',
+  '  myproject/ ubuntu@server:/var/www/html/myproject/',
+  '',
+  '# Delete files on server jo local pe nahi',
+  '$ rsync -avz --delete myproject/ ubuntu@server:/var/www/html/',
+  '',
+  '# Dry run — actually kuch mat karo, sirf dikhao',
+  '$ rsync -avzn myproject/ ubuntu@server:/var/www/html/',
+  '',
+  '# Progress dikhao',
+  '$ rsync -avz --progress myproject/ ubuntu@server:~/',
+  '',
+  '# Download (server se local)',
+  '$ rsync -avz ubuntu@server:/var/www/html/ ./backup/',
+])}
+${iq('scp aur rsync mein kya fark hai?','<code>scp</code> simple file copy hai — hamesha complete file transfer karta hai. <code>rsync</code> smarter hai — sirf changed parts transfer karta hai (incremental), resume kar sakta hai, aur exclude options support karta hai. Large deployments ke liye rsync zyada efficient hai. Rsync mein <code>--delete</code> flag destination se extra files delete karta hai — source aur destination sync karne ke liye. Production deployment ke liye rsync preferred hai.')}
+`)}
+</div>`,
+
+// ==================== SECURITY ====================
+'security': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 18</div>
+  <h1>Security <span>& Firewall</span></h1>
+  <p class="desc">Server ko secure karna — UFW, SSH hardening, aur basic security practices.</p>
+</div>
+
+${concept('🛡️','rgba(255,68,102,0.1)','UFW — Uncomplicated Firewall','Ports control karo',`
+${term('UFW Commands',[
+  '# UFW status check',
+  '$ sudo ufw status',
+  '$ sudo ufw status verbose',
+  '',
+  '# Rules add karo (pehle SSH allow!))',
+  '$ sudo ufw allow ssh',
+  '$ sudo ufw allow 22/tcp',
+  '$ sudo ufw allow 80/tcp',
+  '$ sudo ufw allow 443/tcp',
+  '',
+  '# Port block karo',
+  '$ sudo ufw deny 3306/tcp',
+  '$ sudo ufw deny 27017/tcp',
+  '',
+  '# Specific IP se access allow karo',
+  '$ sudo ufw allow from 192.168.1.100 to any port 22',
+  '',
+  '# Enable karo (PEHLE SSH ALLOW KARO!)',
+  '$ sudo ufw enable',
+  '',
+  '# Disable karo',
+  '$ sudo ufw disable',
+  '',
+  '# Rule delete karo',
+  '$ sudo ufw delete allow 80/tcp',
+  '',
+  '# Rule number se delete karo',
+  '$ sudo ufw status numbered',
+  '$ sudo ufw delete 2',
+  '',
+  '# UFW reset (saare rules delete)',
+  '$ sudo ufw reset',
+])}
+<div class="box danger"><div class="box-title">⚠️ UFW Enable Karne Se Pehle</div>Hamesha pehle SSH allow karo: <code>sudo ufw allow ssh</code> — phir enable karo. Agar SSH allow nahi kiya to server se locked out ho jaoge!</div>
+${iq('UFW mein MySQL port (3306) kyun block karna chahiye?','MySQL by default 0.0.0.0:3306 pe listen karta hai — matlab publicly accessible hota hai. Agar firewall nahi hai to koi bhi internet se MySQL ko brute force attack kar sakta hai. <code>sudo ufw deny 3306</code> se ye port block ho jaata hai. Aur MySQL config mein <code>bind-address = 127.0.0.1</code> set karo — ye locally hi accessible rahega. Sirf internal applications ko MySQL access chahiye, public internet ko nahi.')}
+`)}
+
+${concept('🔐','rgba(0,212,255,0.1)','SSH Hardening','SSH ko secure banana',`
+${term('SSH Security Config',[
+  '# SSH config file edit karo',
+  '$ sudo nano /etc/ssh/sshd_config',
+  '',
+  '# Recommended settings:',
+  'Port 2222                  # Default port change karo',
+  'PermitRootLogin no         # Root login band karo',
+  'PasswordAuthentication no  # Password auth band (key only)',
+  'PubkeyAuthentication yes   # Key auth allow',
+  'MaxAuthTries 3             # 3 attempts ke baad block',
+  'AllowUsers ubuntu deploy   # Sirf ye users',
+  '',
+  '# Apply karo',
+  '$ sudo systemctl restart sshd',
+  '',
+  '# SSH key generate karo (local pe)',
+  '$ ssh-keygen -t rsa -b 4096',
+  '',
+  '# Public key server pe copy karo',
+  '$ ssh-copy-id ubuntu@server',
+  '# ya manually:',
+  '$ cat ~/.ssh/id_rsa.pub',
+  '# Server pe paste karo:',
+  '$ nano ~/.ssh/authorized_keys',
+  '',
+  '# Fail2Ban install karo (brute force protection)',
+  '$ sudo apt install fail2ban',
+  '$ sudo systemctl enable fail2ban',
+  '$ sudo systemctl start fail2ban',
+  '',
+  '# Brute force attempts dekho',
+  '$ sudo fail2ban-client status sshd',
+  '$ grep "Failed password" /var/log/auth.log | wc -l',
+])}
+${iq('SSH key authentication kyun password se better hai?','SSH key authentication mein: (1) Private key kabhi network pe nahi jaati — sirf signature bheja jaata hai, (2) Brute force karna practically impossible hai (2048+ bit keys), (3) Koi passphrase yaad nahi rakhna padta (key file hi authentication hai), (4) Automated deployments possible hain bina password expose kiye. Password authentication mein: guessable hain, network pe travel karta hai, brute force possible. Production servers pe hamesha key-based auth use karo aur password auth disable karo.')}
+`)}
+
+${concept('🔒','rgba(0,255,136,0.1)','SSL/HTTPS — Let\'s Encrypt','Free SSL certificate install karna',`
+${term('Certbot SSL Setup',[
+  '# Certbot install karo',
+  '$ sudo apt install certbot python3-certbot-nginx',
+  '',
+  '# SSL certificate generate karo (Nginx)',
+  '$ sudo certbot --nginx -d mysite.com -d www.mysite.com',
+  '',
+  '# SSL certificate generate karo (Apache)',
+  '$ sudo certbot --apache -d mysite.com',
+  '',
+  '# Certificate info dekho',
+  '$ sudo certbot certificates',
+  '',
+  '# Renewal test karo (dry run)',
+  '$ sudo certbot renew --dry-run',
+  '',
+  '# Auto renewal cron setup',
+  '$ sudo systemctl status certbot.timer',
+  '# Ubuntu pe auto-renew default enabled hai',
+  '',
+  '# Certificate files kahan hain',
+  '/etc/letsencrypt/live/mysite.com/fullchain.pem',
+  '/etc/letsencrypt/live/mysite.com/privkey.pem',
+])}
+`)}
+
+<div class="box danger"><div class="box-title">🚨 Server Security Checklist</div>
+❌ <code>APP_DEBUG=true</code> production pe mat rakhho<br>
+❌ <code>.env</code> file publicly accessible mat chhodho<br>
+❌ <code>777</code> permissions kabhi mat do<br>
+❌ Root user se direct login mat karo<br>
+❌ MySQL port 3306 publicly open mat rakhho<br>
+❌ Default SSH port 22 pe mat raho (change karo 2222+)<br>
+✅ UFW firewall enable karo<br>
+✅ Fail2Ban install karo<br>
+✅ SSH key authentication use karo<br>
+✅ SSL/HTTPS use karo<br>
+✅ Regular backups lo<br>
+✅ <code>sudo apt update && upgrade</code> regularly karo
+</div>
+</div>`,
+
+// ==================== LOGS ====================
+'logs': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 19</div>
+  <h1>Logs <span>& Monitoring</span></h1>
+  <p class="desc">Logs padhna, analyze karna, aur server health monitor karna — debugging ka soul!</p>
+</div>
+
+${concept('📊','rgba(0,212,255,0.1)','Important Log Files','Kahan kya milega',`
+<table class="tbl">
+<tr><th>Log File</th><th>Kya hai?</th><th>Kab dekhein?</th></tr>
+<tr><td>/var/log/syslog</td><td>General system events</td><td>System issues</td></tr>
+<tr><td>/var/log/auth.log</td><td>Authentication, SSH logins</td><td>Security issues, failed logins</td></tr>
+<tr><td>/var/log/nginx/error.log</td><td>Nginx errors</td><td>502, 403, 500 errors</td></tr>
+<tr><td>/var/log/nginx/access.log</td><td>All HTTP requests</td><td>Traffic analysis</td></tr>
+<tr><td>/var/log/apache2/error.log</td><td>Apache errors</td><td>Apache issues</td></tr>
+<tr><td>/var/log/mysql/error.log</td><td>MySQL errors</td><td>Database issues</td></tr>
+<tr><td>/var/log/php8.2-fpm.log</td><td>PHP-FPM errors</td><td>PHP errors</td></tr>
+<tr><td>storage/logs/laravel.log</td><td>Laravel application logs</td><td>App errors, exceptions</td></tr>
+</table>
+${term('Log Analysis Commands',[
+  '# Live log watch (sabse useful!)',
+  '$ tail -f /var/log/nginx/error.log',
+  '$ tail -f storage/logs/laravel.log',
+  '',
+  '# Multiple logs simultaneously',
+  '$ tail -f /var/log/nginx/error.log \\',
+  '         storage/logs/laravel.log',
+  '',
+  '# Error grep karo',
+  '$ grep -i "error" /var/log/nginx/error.log',
+  '$ grep "ERROR" storage/logs/laravel.log | tail -20',
+  '',
+  '# Last hour ke errors',
+  '$ grep "$(date -d "1 hour ago" "+%Y/%m/%d %H")" \\',
+  '  /var/log/nginx/error.log',
+  '',
+  '# HTTP 500 errors count',
+  '$ grep " 500 " /var/log/nginx/access.log | wc -l',
+  '',
+  '# Top IPs hitting server',
+  '$ awk "{print $1}" /var/log/nginx/access.log | \\',
+  '  sort | uniq -c | sort -rn | head -10',
+])}
+`)}
+
+${concept('🔍','rgba(255,68,102,0.1)','Debugging Common Issues','500 error, permission denied, blank page',`
+<div class="sec-label red">500 Internal Server Error Debug</div>
+<div class="step-flow">
+  ${[
+    ['1','Laravel log check karo','tail -100 storage/logs/laravel.log | grep -A 5 ERROR'],
+    ['2','APP_DEBUG=true karo temporarily','.env mein APP_DEBUG=true set karo, config:clear karo'],
+    ['3','Web server error log','sudo tail -50 /var/log/nginx/error.log'],
+    ['4','PHP-FPM log check','sudo tail -50 /var/log/php8.2-fpm.log'],
+    ['5','Permissions check karo','ls -la storage/ bootstrap/cache/'],
+    ['6','PHP syntax check','php -l suspect_file.php'],
+  ].map(([n,t,d])=>`<div class="step-item"><div class="step-num">${n}</div><div class="step-content"><h5>${t}</h5><p><code>${d}</code></p></div></div>`).join('')}
+</div>
+${term('Complete Debug Workflow',[
+  '# 500 Error Debug:',
+  '$ tail -100 storage/logs/laravel.log',
+  '$ sudo tail -50 /var/log/nginx/error.log',
+  '$ sudo systemctl status php8.2-fpm',
+  '',
+  '# Permission Denied:',
+  '$ ls -la storage/ bootstrap/cache/',
+  '$ sudo chmod -R 775 storage/ bootstrap/cache/',
+  '$ sudo chown -R www-data:www-data .',
+  '',
+  '# Database Connection Error:',
+  '$ php artisan config:clear',
+  '$ mysql -u laraveluser -p mydb',
+  '$ systemctl status mysql',
+  '',
+  '# Cache Issues:',
+  '$ php artisan optimize:clear',
+  '$ php artisan config:cache',
+  '',
+  '# Disk Full:',
+  '$ df -h',
+  '$ sudo du -sh /var/log/* | sort -rh | head',
+  '$ sudo journalctl --vacuum-time=3d',
+])}
+${iq('Laravel mein 500 error aaye to kya karoge?','Systematic approach: (1) <code>tail -100 storage/logs/laravel.log</code> — Laravel ka own error log. (2) <code>.env</code> mein <code>APP_DEBUG=true</code> temporarily set karo phir browser mein detailed error dekho. (3) <code>sudo tail -50 /var/log/nginx/error.log</code> — web server ki problem. (4) <code>sudo systemctl status php8.2-fpm</code> — PHP running hai? (5) Permissions: <code>ls -la storage/</code>. (6) Config: <code>php artisan config:clear && php artisan config:cache</code>. Debug karne ke baad <code>APP_DEBUG=false</code> wapas karo!')}
+`)}
+</div>`,
+
+// ==================== SSH ====================
+'ssh': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Chapter 20</div>
+  <h1>SSH <span>& Remote Access</span></h1>
+  <p class="desc">SSH deep dive — keys, tunneling, config file, aur production best practices.</p>
+</div>
+
+${concept('🔐','rgba(0,212,255,0.1)','SSH Complete Guide','Connect, configure, secure',`
+${term('SSH Usage',[
+  '# Basic connect',
+  '$ ssh ubuntu@192.168.1.100',
+  '',
+  '# Key se connect (-i)',
+  '$ ssh -i ~/.ssh/mykey.pem ubuntu@server',
+  '',
+  '# Custom port (-p)',
+  '$ ssh -p 2222 ubuntu@server',
+  '',
+  '# Key + custom port',
+  '$ ssh -i ~/.ssh/mykey.pem -p 2222 ubuntu@server',
+  '',
+  '# SSH config file (~/.ssh/config):',
+  'Host myserver',
+  '  HostName 192.168.1.100',
+  '  User ubuntu',
+  '  Port 2222',
+  '  IdentityFile ~/.ssh/mykey.pem',
+  '',
+  '# Config ke baad:',
+  '$ ssh myserver',
+  '',
+  '# SSH key generate karo',
+  '$ ssh-keygen -t ed25519 -C "myemail@gmail.com"',
+  '$ ssh-keygen -t rsa -b 4096',
+  '',
+  '# Public key server pe copy karo',
+  '$ ssh-copy-id -i ~/.ssh/mykey.pub ubuntu@server',
+  '',
+  '# SSH agent (key yaad rakhne ke liye)',
+  '$ eval $(ssh-agent)',
+  '$ ssh-add ~/.ssh/mykey',
+  '',
+  '# File copy (SCP)',
+  '$ scp file.txt ubuntu@server:~/',
+  '',
+  '# SSH Tunneling (port forwarding)',
+  '$ ssh -L 8080:localhost:80 ubuntu@server',
+  '# Local 8080 → server 80',
+])}
+${iq('SSH keys kaise kaam karti hain?','SSH key authentication mein do keys hoti hain: Public key (server pe) aur Private key (aapke paas). Process: (1) Private key se digital signature create hoti hai, (2) Server pe stored public key se signature verify hota hai, (3) Match hone pe authentication successful. Private key kabhi server pe nahi jaati — sirf signature jaata hai. Security: 2048+ bit RSA ya Ed25519 keys practically uncrackable hain. <code>~/.ssh/authorized_keys</code> server pe public keys store karta hai.')}
+`)}
+</div>`,
+
+// ==================== INTERVIEW ====================
+'interview': `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Interview Prep</div>
+  <h1>Top Linux <span>Interview Questions</span></h1>
+  <p class="desc">80+ most-asked Linux interview questions — Hinglish mein simple aur clear answers ke saath.</p>
+</div>
+
+<div class="tab-wrap">
+<div class="tab-row">
+  <button class="tab-btn active" onclick="switchTab(this,'iq-basics')">Basics</button>
+  <button class="tab-btn" onclick="switchTab(this,'iq-files')">Files & Permissions</button>
+  <button class="tab-btn" onclick="switchTab(this,'iq-process')">Processes</button>
+  <button class="tab-btn" onclick="switchTab(this,'iq-network')">Networking</button>
+  <button class="tab-btn" onclick="switchTab(this,'iq-admin')">Sysadmin</button>
+  <button class="tab-btn" onclick="switchTab(this,'iq-scripting')">Scripting</button>
+</div>
+
+<div class="tab-pane active" id="iq-basics">
+${iq('Linux aur Unix mein kya fark hai?','Unix ek proprietary OS hai (1969, Bell Labs). Linux Unix-inspired open-source OS hai (1991, Linus Torvalds). Linux ka kernel free hai. Unix commercial hai (AIX, HP-UX, Solaris). macOS bhi Unix-certified hai.')}
+${iq('Inode kya hota hai?','Inode (Index Node) ek data structure hai jo file ki metadata store karta hai: permissions, owner, group, size, timestamps, aur disk blocks ke pointers. Inode mein filename nahi hota — sirf directory mein filename-inode mapping hoti hai. <code>ls -i</code> se inode number dekh sakte ho. <code>df -i</code> se inode usage.')}
+${iq('Hard link aur soft link mein kya fark hai?','<strong>Hard link</strong>: Same inode point karta hai — file ke data ka direct reference. Koi bhi link delete karo, data tab tak rahega jab tak ek bhi link bachi ho. Alag filesystems par nahi bana sakte. <code>ln file hardlink</code>. <strong>Soft link (Symlink)</strong>: Ek shortcut jaisa — ek aur path ko point karta hai. Original delete karo to symlink "broken" ho jaata hai. Alag filesystems par bhi bana sakte ho. <code>ln -s file softlink</code>.')}
+${iq('$? kya hota hai shell mein?','<code>$?</code> previous command ka exit code hold karta hai. 0 = success, non-zero = failure (error). Example: <code>ls /nonexistent; echo $?</code> → 2 (error). Scripts mein use: <code>if [ $? -ne 0 ]; then echo "Error!"; fi</code>. Iska shortcut: <code>command && echo "OK" || echo "Failed"</code>.')}
+${iq('&& aur || ka kya matlab hai?','<code>&&</code> = AND — pehla command succeed hone pe doosra run karo. <code>cmd1 && cmd2</code> — cmd2 sirf tab chalega agar cmd1 succeed kare (exit 0). <code>||</code> = OR — pehla command fail hone pe doosra run karo. <code>cmd1 || cmd2</code> — cmd2 sirf tab chalega agar cmd1 fail kare. Example: <code>nginx -t && systemctl reload nginx || echo "Config error!"</code>')}
+${iq('Linux mein zombie process kya hota hai?','Zombie process (defunct) woh process hai jiske parent ne uske exit status ko read nahi kiya. Process execute ho chuka hai (dead) lekin process table mein still present hai. Symbol: Z in <code>ps aux</code> STAT column. Kill nahi kar sakte zombie ko directly — parent process ko fix karo ya restart karo. Bohot zyada zombies = parent process ka bug.')}
+${iq('Swap space kya hota hai?','Swap = RAM extension. Jab RAM full ho jaata hai to OS disk pe temporary data swap karta hai. Slower than RAM. <code>free -m</code> mein Swap row dikhti hai. <code>swapon --show</code> se swap info. Swap file ya separate partition ho sakta hai. Recommended: RAM ka 2x swap (small RAM ke liye), ya RAM ke barabar (large RAM ke liye).')}
+${iq('PATH variable kya hota hai?','<code>PATH</code> ek environment variable hai jo directories ki list hai jahan shell commands dhundhta hai. <code>echo $PATH</code> — directories : se separate hain. Jab tum <code>php</code> type karte ho, shell PATH mein har directory check karta hai jab tak php nahi milti. Custom path add karo: <code>export PATH=$PATH:/custom/path</code> aur <code>~/.bashrc</code> mein daalo permanent ke liye.')}
+${iq('runlevels ya systemd targets kya hain?','Runlevels (SysV init) define karte hain system state ko. 0=halt, 1=single-user, 2-4=multi-user, 5=multi-user+GUI, 6=reboot. Systemd targets: poweroff.target (0), rescue.target (1), multi-user.target (3), graphical.target (5), reboot.target (6). Check: <code>systemctl get-default</code>. Change: <code>systemctl set-default multi-user.target</code>.')}
+</div>
+
+<div class="tab-pane" id="iq-files">
+${iq('chmod 777 kyun dangerous hai?','777 permission matlab owner+group+others sab read+write+execute kar sakte hain. Koi bhi user ya process file modify kar sakta hai ya execute kar sakta hai — malicious users bhi. Web server environment mein: koi bhi uploaded file execute ho sakti hai agar 777 permission hai. Security principle: Principle of Least Privilege — sirf minimum required permissions do. Use 755 for directories, 644 for files, 775 for shared writable dirs.')}
+${iq('/tmp directory ke baare mein batao?','<code>/tmp</code> temporary files ke liye hai. Most systems mein /tmp RAM-based (tmpfs) ya disk-based hota hai. System restart pe automatically clear ho jaata hai. World-writable (1777) hai — koi bhi user files create kar sakta hai lekin sirf owner hi delete kar sakta hai (sticky bit). Web apps session files, upload temps yahan rakhte hain. Sensitive data /tmp mein mat rakho — other users read kar sakte hain.')}
+${iq('umask kya hota hai?','umask file/directory creation ke default permissions determine karta hai. It "masks" (removes) bits from default. Default permissions: files=666, dirs=777. Common umask=022: files = 666-022=644, dirs = 777-022=755. <code>umask 027</code>: files=640, dirs=750 — group write aur others access band. <code>umask</code> command se current value dekho. <code>~/.bashrc</code> mein set karo permanent ke liye.')}
+${iq('find command se 7 din purani files kaise delete karein?','<code>find /tmp -type f -mtime +7 -delete</code> — <code>-mtime +7</code> matlab 7 din se zyada pahle modified. <code>-delete</code> se delete ho jaata hai. Safer version: pehle dry run: <code>find /tmp -type f -mtime +7</code> (bina delete ke). Ya: <code>find /tmp -type f -mtime +7 -exec rm {} \\;</code>. Log files ke liye: <code>find /var/log -name "*.log.gz" -mtime +30 -delete</code>.')}
+${iq('grep -E aur egrep mein kya fark hai?','Practically koi fark nahi — <code>egrep</code> = <code>grep -E</code>. Dono Extended Regular Expressions use karte hain. <code>grep -E "error|warning|critical"</code> = <code>egrep "error|warning|critical"</code>. Modern Linux mein egrep deprecated hai, <code>grep -E</code> use karo. <code>grep -P</code> Perl-compatible regex use karta hai (most powerful).')}
+${iq('Symbolic link broken ho jaaye to kaise fix karein?','Broken symlink tab hoti hai jab target file/dir delete ya move ho jaaye. Check: <code>ls -la</code> — broken links red color mein dikhte hain. Ya: <code>find /path -xtype l</code> — broken symlinks list. Fix: <code>ln -sf /new/target /path/to/symlink</code> — -f flag existing symlink replace karta hai. Laravel mein: <code>php artisan storage:link</code> storage symlink recreate karta hai.')}
+</div>
+
+<div class="tab-pane" id="iq-process">
+${iq('Process states kya hain Linux mein?','Process states: <strong>R (Running)</strong> — CPU pe actively execute ho raha hai. <strong>S (Sleeping)</strong> — event ka wait kar raha hai (most processes). <strong>D (Uninterruptible sleep)</strong> — I/O wait — kill bhi nahi hota. <strong>Z (Zombie)</strong> — dead lekin table mein hai. <strong>T (Stopped)</strong> — signal se stopped (Ctrl+Z). <strong>I (Idle)</strong> — kernel thread idle. <code>ps aux</code> STAT column mein dekho.')}
+${iq('Foreground aur background process mein kya fark hai?','<strong>Foreground process</strong>: Terminal se attached — terminal block ho jaata hai jab tak process complete na ho. <strong>Background process</strong>: Terminal free rehta hai. Background mein bhejne ke tarike: (1) <code>command &</code> — directly background mein start, (2) <code>Ctrl+Z</code> pause karo phir <code>bg</code> se background mein bhejo. <code>jobs</code> se background jobs dekho, <code>fg %1</code> se wapas foreground mein lao, <code>wait</code> se wait karo complete hone tak.')}
+${iq('nohup kya karta hai?','<code>nohup command &</code> — "no hang up" — process ko terminal close hone ke baad bhi chalaata rehta hai. Normally jab terminal close hota hai, SIGHUP signal sab processes ko milta hai aur woh terminate ho jaate hain. nohup SIGHUP ko ignore karta hai. Output <code>nohup.out</code> mein save hoti hai by default. Better alternative: <code>screen</code> ya <code>tmux</code> terminal multiplexers, ya <code>systemd</code> service.')}
+${iq('lsof command kya karta hai?','<code>lsof</code> (List Open Files) — sab open files aur network connections dikhata hai. Everything in Linux is a file. <code>lsof -p 1234</code> — specific process ki open files. <code>lsof -i :80</code> — port 80 use kar rahe processes. <code>lsof /var/log/nginx/error.log</code> — kaunsa process ye file open kiye hai. Useful: "Device or resource busy" error pe — <code>lsof +D /mount/point</code> se dekho kaunsa process filesystem use kar raha hai.')}
+${iq('crontab entry debug kaise karein?','Debugging steps: (1) Path issue — cron mein $PATH limited hota hai, full path use karo: <code>/usr/bin/php</code>. (2) Test manually: exact command terminal mein run karo. (3) Output log mein save karo: <code>command >> /tmp/cron.log 2>&1</code>. (4) Cron daemon check: <code>systemctl status cron</code>. (5) Syslog check: <code>grep CRON /var/log/syslog</code>. (6) Permissions check: script executable hai? <code>ls -l script.sh</code>. (7) Environment variables: cron environment minimal hai — explicitly set karo.')}
+</div>
+
+<div class="tab-pane" id="iq-network">
+${iq('OSI model ke 7 layers kya hain?','Layer 7: Application (HTTP, FTP, DNS). Layer 6: Presentation (SSL, encoding). Layer 5: Session (connection management). Layer 4: Transport (TCP, UDP — ports). Layer 3: Network (IP — routing). Layer 2: Data Link (MAC addresses, switches). Layer 1: Physical (cables, signals). Trick: "Please Do Not Throw Sausage Pizza Away" (7 se 1 tak).')}
+${iq('TCP aur UDP mein kya fark hai?','<strong>TCP</strong> (Transmission Control Protocol): Connection-oriented, reliable, ordered delivery guarantee karta hai, error checking hai, slower. Uses: HTTP/HTTPS, SSH, MySQL, FTP. <strong>UDP</strong> (User Datagram Protocol): Connectionless, no delivery guarantee, faster, no ordering. Uses: DNS, VoIP, streaming, gaming. Server monitoring: TCP ports <code>ss -tlnp</code> se dekho.')}
+${iq('/etc/hosts file kya karta hai?','<code>/etc/hosts</code> local DNS override karta hai. Format: <code>IP hostname</code>. DNS query hone se pehle system /etc/hosts check karta hai. Use cases: (1) Development — local domain map karo (<code>127.0.0.1 mysite.local</code>), (2) Internal servers — <code>192.168.1.10 db-server</code>, (3) Websites block karo (<code>0.0.0.0 malware-site.com</code>), (4) DNS down ho to critical domains map karo. /etc/nsswitch.conf se order control hota hai.')}
+${iq('curl aur wget mein kya fark hai?','<strong>curl</strong>: More versatile — various protocols support (HTTP, HTTPS, FTP, SFTP), custom headers, POST requests, REST API calls. Output stdout pe by default. <strong>wget</strong>: Download focused — recursive download, resume capability, background download. Files save karta hai by default. Linux server pe dono usually available hain. API testing ke liye curl, file download ke liye wget prefer karo.')}
+${iq('netstat -tulnp command explain karo?','<code>netstat</code> network statistics: <code>-t</code> = TCP connections, <code>-u</code> = UDP connections, <code>-l</code> = Listening sockets only, <code>-n</code> = Numeric (IP/port, hostname resolve mat karo — faster), <code>-p</code> = Process name/PID show karo. Modern alternative: <code>ss -tulnp</code> (faster). Output mein: Proto, Local Address, Foreign Address, State, PID/Program. Port 80 pe kaunsa process: <code>ss -tlnp | grep :80</code>.')}
+</div>
+
+<div class="tab-pane" id="iq-admin">
+${iq('Server reboot ke baad services automatically start nahi hote — kya karoge?','<code>systemctl enable service-name</code> se service boot pe automatically start hogi. Check: <code>systemctl is-enabled nginx</code>. Agar disabled hai: <code>sudo systemctl enable nginx</code>. <code>systemctl enable</code> ek symlink banata hai /etc/systemd/system/ mein. Manual override: <code>/etc/rc.local</code> mein commands daal sakte ho (legacy). Verify: server reboot karo aur <code>systemctl status nginx</code> check karo.')}
+${iq('Server slow hai — kaise diagnose karoge?','Systematic approach: (1) <code>top</code> ya <code>htop</code> — CPU aur memory dekho, high usage process identify karo. (2) <code>free -m</code> — RAM available hai? Swap use ho raha hai? (3) <code>df -h</code> — disk full to nahi? (4) <code>iostat</code> — disk I/O bottleneck? (5) <code>ss -tnp</code> — too many connections? (6) <code>tail -f /var/log/nginx/error.log</code> — errors? (7) Application-specific: Laravel log, MySQL slow query log. (8) <code>dmesg</code> — kernel level issues.')}
+${iq('Production database backup kaise lete hain?','<strong>mysqldump</strong>: <code>mysqldump -u root -p dbname > backup.sql</code>. Compressed: <code>mysqldump -u root -p dbname | gzip > backup_$(date +%Y%m%d).sql.gz</code>. All databases: <code>mysqldump -u root -p --all-databases > all_dbs.sql</code>. Best practices: (1) Regular automated backups via cron, (2) Remote storage mein copy karo (S3, remote server), (3) Backup integrity test karo regularly, (4) Point-in-time recovery ke liye binary logging enable karo, (5) Hot backup tools: Percona XtraBackup (no lock).')}
+${iq('Server pe kisi unknown process chal raha hai — kaise investigate karoge?','Steps: (1) <code>ps aux | grep [process-name]</code> — process details. (2) <code>ls -la /proc/[PID]/exe</code> — actual executable. (3) <code>lsof -p [PID]</code> — open files aur connections. (4) <code>ss -tnp | grep [PID]</code> — network connections. (5) <code>cat /proc/[PID]/cmdline</code> — command line. (6) <code>strace -p [PID]</code> — system calls monitor karo. (7) <code>/var/log/auth.log</code> — unauthorized access check. Suspicious process: <code>kill -9 [PID]</code> aur investigate karo incident ke liye.')}
+${iq('SSH brute force attack detect kaise karein?','<code>grep "Failed password" /var/log/auth.log | wc -l</code> — failed attempts count. <code>grep "Failed password" /var/log/auth.log | awk "{print $11}" | sort | uniq -c | sort -rn | head</code> — top attacking IPs. Prevention: (1) fail2ban install — automatically block IPs after X failed attempts, (2) SSH port change karo (2222, 22222), (3) PasswordAuthentication no — key only, (4) AllowUsers specify karo, (5) MaxAuthTries 3. Monitoring: <code>sudo fail2ban-client status sshd</code>.')}
+${iq('Load average kya hota hai — top mein kya dekha?','Load average 1, 5, 15 minute ke averages hain — CPU queue mein kitne processes wait kar rahe hain. Single CPU ke liye: load > 1.0 = overloaded. N CPUs ke liye: load > N = overloaded. <code>nproc</code> ya <code>lscpu</code> se CPU count. Healthy server pe load average CPU count se kam rehna chahiye. High load average but low CPU % = I/O wait (disk ya network bottleneck).')}
+${iq('Kernel parameters kaise tune karte hain?','<code>sysctl</code> se runtime kernel parameters dekh aur change kar sakte ho. Check: <code>sysctl -a | grep net.core</code>. Temporary change: <code>sudo sysctl -w net.core.somaxconn=1024</code>. Permanent: <code>/etc/sysctl.conf</code> ya <code>/etc/sysctl.d/</code> mein add karo. Apply: <code>sudo sysctl -p</code>. Common tuning: net.ipv4.tcp_keepalive, vm.swappiness (RAM vs swap preference), fs.file-max (max open files).')}
+</div>
+
+<div class="tab-pane" id="iq-scripting">
+${iq('Bash script mein exit codes ka kya use hai?','Every command ek exit code return karta hai. 0 = success, 1-255 = various errors. Script mein: <code>exit 0</code> success, <code>exit 1</code> failure. <code>$?</code> se previous command ka exit code milta hai. Use: <code>if [ $? -ne 0 ]; then echo "Failed"; exit 1; fi</code>. <code>set -e</code> se script any non-zero exit pe automatically stop ho jaata hai. CI/CD pipelines mein exit codes pe deployment decisions hote hain.')}
+${iq('Special variables $0, $1, $#, $@ kya hain?','<code>$0</code> = Script ka naam. <code>$1, $2...</code> = Positional arguments (1st, 2nd...). <code>$#</code> = Arguments ki count. <code>$@</code> = Saare arguments (individually). <code>$*</code> = Saare arguments (as one string). <code>$$</code> = Current script ka PID. <code>$!</code> = Last background process ka PID. <code>$?</code> = Last command exit code. Example: <code>./script.sh arg1 arg2</code> mein $0=./script.sh, $1=arg1, $2=arg2, $#=2.')}
+${iq('awk command ka basic use kya hai?','<code>awk</code> columnar data process karne ka powerful tool hai. <code>$1, $2...</code> columns hain. <code>awk "{print $1}" file</code> — pehla column print. <code>df -h | awk "NR==2{print $5}"</code> — 2nd row, 5th column (disk usage %). <code>awk -F: "{print $1}" /etc/passwd</code> — : delimiter se split karke 1st column. Common use: log parsing, column extraction, calculations. <code>awk "/pattern/{print $0}" file</code> — grep + print.')}
+${iq('Bash mein function kaise banate hain?','Syntax: <code>function_name() { commands; }</code> ya <code>function function_name { commands; }</code>. Return value: <code>return 0</code> (exit code). String return: echo se output capture karo. Arguments: function ke andar $1, $2 positional args. Example: <code>check_service() { systemctl is-active $1 || { echo "$1 down!"; return 1; } }</code>. Call: <code>check_service nginx</code>. Functions script mein reusability aur readability badhate hain.')}
+${iq('Here document (heredoc) kya hota hai?','Multi-line string bash mein: <code>cat << EOF ... EOF</code>. EOF ke beech sab kuch as-is treat hota hai. Variables expand hoti hain. Use case: Multi-line config file banana, SQL queries, documentation. Example: <code>cat << EOF > .env\nAPP_NAME=MyApp\nDB_HOST=127.0.0.1\nEOF</code>. Single quotes mein EOF: <code>cat << \'EOF\'</code> — variables expand nahi honge.')}
+${iq('sed command kya karta hai?','<code>sed</code> (Stream Editor) files mein find & replace, delete, insert karta hai bina editor khole. Basic: <code>sed "s/old/new/g" file</code> — replace all occurrences. In-place edit: <code>sed -i "s/old/new/g" file</code>. Specific line delete: <code>sed -i "5d" file</code>. Pattern match pe delete: <code>sed -i "/pattern/d" file</code>. .env update: <code>sed -i "s/APP_DEBUG=true/APP_DEBUG=false/" .env</code>. Very powerful for automated config changes in scripts.')}
+</div>
+</div>
+
+<div class="box purple" style="margin-top:24px"><div class="box-title">💼 Interview Tips</div>
+1. "Mujhe practically dikha sakte ho?" ke liye hamesha ready raho — commands practice karo<br>
+2. Har answer mein real example do — "Maine production pe ye issue solve kiya..."<br>
+3. Security implications hamesha mention karo — "Ye 777 kyun dangerous hai"<br>
+4. Monitoring approach batao — "Pehle logs check karta hun, phir..."<br>
+5. Troubleshooting systematic approach — step by step explain karo
+</div>
+</div>`,
+
+// ==================== CHEATSHEET ====================
+cheatsheet: `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Resources</div>
+  <h1>Linux <span>Cheat Sheet</span></h1>
+  <p class="desc">Sabse zyada use hone wale commands — ek jagah pe. Print karo aur paas rakho!</p>
+</div>
+
+<div class="cs-grid">
+  <div class="cs-card">
+    <div class="cs-card-hdr">🧭 Navigation</div>
+    <div class="cs-card-body">
+      ${[['pwd','Current directory'],['ls -la','Files + permissions'],['cd /path','Directory change'],['cd ~','Home directory'],['cd -','Previous directory'],['cd ..','Parent directory'],['tree','Directory tree'],['find / -name "*.php"','Files dhundho']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">✂️ File Operations</div>
+    <div class="cs-card-body">
+      ${[['mkdir -p /path','Nested folders create'],['touch file.txt','Empty file banana'],['cp -r src/ dst/','Folder copy'],['mv old new','Rename/move'],['rm -rf folder/','Force delete ⚠️'],['tar -czf bk.tar.gz dir/','Compressed archive'],['tar -xzf bk.tar.gz','Extract archive'],['unzip file.zip -d /path','Zip extract']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">👁️ File Viewing</div>
+    <div class="cs-card-body">
+      ${[['cat file.txt','Print file'],['less file.log','Scrollable view'],['head -20 file','Top 20 lines'],['tail -50 file','Last 50 lines'],['tail -f file.log','Live log watch'],['grep "ERROR" log','Pattern search'],['grep -r "text" dir/','Recursive search'],['wc -l file','Count lines']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">🔒 Permissions</div>
+    <div class="cs-card-body">
+      ${[['chmod 755 folder/','Standard folder perm'],['chmod 644 file.php','Standard file perm'],['chmod -R 775 storage/','Laravel storage'],['chmod 600 .env','Private .env'],['chown user:group file','Ownership change'],['chown -R www-data:www-data .','Web server owner'],['ls -la','Permissions dekho'],['id','Current user/groups']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">👥 Users</div>
+    <div class="cs-card-body">
+      ${[['whoami','Current user'],['sudo command','Root se run'],['su -','Root shell'],['useradd -m user','Naya user'],['usermod -aG grp user','Group add'],['passwd user','Password set'],['who','Logged in users'],['last | head -20','Login history']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">⚙️ Processes</div>
+    <div class="cs-card-body">
+      ${[['ps aux','All processes'],['ps aux | grep nginx','Process dhundho'],['top','Live monitor'],['htop','Better monitor'],['kill 1234','Process kill'],['kill -9 1234','Force kill'],['pkill nginx','Name se kill'],['jobs','Background jobs']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">💾 Disk & Memory</div>
+    <div class="cs-card-body">
+      ${[['df -h','Disk space'],['du -sh /var/log/*','Folder sizes'],['free -m','RAM check'],['lsof -i :80','Port 80 process'],['ss -tlnp','Open ports'],['iostat','Disk I/O'],['vmstat','Virtual memory'],['uptime','Load average']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">🔧 Services</div>
+    <div class="cs-card-body">
+      ${[['systemctl status nginx','Service status'],['systemctl start nginx','Start'],['systemctl stop nginx','Stop'],['systemctl restart nginx','Restart'],['systemctl reload nginx','Reload (no downtime)'],['systemctl enable nginx','Boot pe start'],['journalctl -u nginx -f','Service logs'],['systemctl list-units','All services']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">⚡ PHP / Laravel</div>
+    <div class="cs-card-body">
+      ${[['php -v','PHP version'],['php artisan migrate --force','Migrations'],['php artisan optimize:clear','All cache clear'],['php artisan config:cache','Config cache'],['php artisan route:cache','Route cache'],['php artisan storage:link','Storage symlink'],['php artisan queue:work','Queue worker'],['composer install --no-dev','Prod packages']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">🗃️ MySQL</div>
+    <div class="cs-card-body">
+      ${[['mysql -u root -p','Login'],['SHOW DATABASES;','All databases'],['USE mydb;','Database select'],['SHOW TABLES;','Tables list'],['DESCRIBE users;','Table structure'],['mysqldump -u root -p db > bk.sql','Export/backup'],['mysql -u root -p db < bk.sql','Import/restore'],['SELECT COUNT(*) FROM users;','Row count']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">🌿 Git</div>
+    <div class="cs-card-body">
+      ${[['git clone URL','Repository clone'],['git pull origin main','Latest code pull'],['git status','Changes check'],['git log --oneline','Commit history'],['git checkout -b branch','New branch'],['git stash','Changes stash'],['git reset --hard origin/main','Force reset'],['git diff','Changes dekho']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="cs-card">
+    <div class="cs-card-hdr">🛡️ Security</div>
+    <div class="cs-card-body">
+      ${[['sudo ufw status','Firewall status'],['sudo ufw allow 80','Port allow'],['sudo ufw deny 3306','Port block'],['sudo ufw enable','Firewall on'],['sudo certbot --nginx -d domain','SSL setup'],['grep "Failed" /var/log/auth.log','Failed logins'],['sudo fail2ban-client status sshd','Fail2Ban status'],['sudo ufw status numbered','Rules numbered']].map(([c,d])=>`<div class="cs-row"><span class="c">${c}</span><span class="d">${d}</span></div>`).join('')}
+    </div>
+  </div>
+</div>
+</div>`,
+
+// ==================== ROADMAP ====================
+roadmap: `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Resources</div>
+  <h1>30-Day <span>Learning Roadmap</span></h1>
+  <p class="desc">Ek structured plan — roz thoda thoda seekho aur 30 din mein Linux expert ban jao.</p>
+</div>
+
+<div class="chapter-divider"><div class="num">Week 1</div><div class="line"></div><h2>Foundation — Basics</h2><div class="line"></div></div>
+
+${[
+  ['Day 1','Linux kya hai, Distros samjho, VPS setup karo','Ubuntu 22.04 VPS spin up karo (DigitalOcean $6/month), PuTTY se connect karo'],
+  ['Day 2','pwd, ls, cd — Navigation master karo','30 min sirf navigate karo — tab autocomplete practice karo'],
+  ['Day 3','mkdir, touch, cp, mv — File operations','Project folder structure banao manually'],
+  ['Day 4','cat, less, head, tail, grep — File viewing','Log files padhna practice karo'],
+  ['Day 5','nano editor — .env files edit karna','Actually .env edit karo server pe'],
+  ['Day 6','chmod, chown — Permissions','Laravel project permissions correctly set karo'],
+  ['Day 7','Review + Mini Project 1','Manually ek static HTML site deploy karo on nginx'],
+].map(([d,t,p])=>`<div class="roadmap-item"><div class="roadmap-day">${d}</div><div class="roadmap-content"><h6>${t}</h6><p>📝 ${p}</p></div></div>`).join('')}
+
+<div class="chapter-divider"><div class="num">Week 2</div><div class="line"></div><h2>Intermediate — Server Management</h2><div class="line"></div></div>
+
+${[
+  ['Day 8','Users, groups, sudo — User management','Deploy user banao, www-data group add karo'],
+  ['Day 9','ps, top, htop, kill — Process management','High CPU process identify aur kill karo'],
+  ['Day 10','Nginx install aur configure — Web server','Laravel ke liye virtual host setup karo'],
+  ['Day 11','PHP-FPM install, php.ini configure','upload_max_filesize change karo'],
+  ['Day 12','MySQL install, database create, import/export','Laravel database setup karo'],
+  ['Day 13','systemctl — Service management','Services stop/start/enable/disable practice'],
+  ['Day 14','Mini Project 2 — Full Laravel Deploy','Pehla Laravel project completely deploy karo!'],
+].map(([d,t,p])=>`<div class="roadmap-item"><div class="roadmap-day">${d}</div><div class="roadmap-content"><h6>${t}</h6><p>📝 ${p}</p></div></div>`).join('')}
+
+<div class="chapter-divider"><div class="num">Week 3</div><div class="line"></div><h2>Advanced — Automation & Security</h2><div class="line"></div></div>
+
+${[
+  ['Day 15','df, du, free — Disk & memory monitoring','Disk usage report script banao'],
+  ['Day 16','tail -f, grep — Logs analysis','500 error simulate karo aur debug karo'],
+  ['Day 17','scp, rsync — File transfer','Rsync deployment setup karo'],
+  ['Day 18','Cron jobs — Scheduled tasks','Laravel scheduler aur daily backup cron setup'],
+  ['Day 19','Bash scripting basics','Deployment script likhna'],
+  ['Day 20','UFW firewall + SSH hardening','Server security harden karo'],
+  ['Day 21','Mini Project 3 — Backup System','Automated daily backup + remote storage setup'],
+].map(([d,t,p])=>`<div class="roadmap-item"><div class="roadmap-day">${d}</div><div class="roadmap-content"><h6>${t}</h6><p>📝 ${p}</p></div></div>`).join('')}
+
+<div class="chapter-divider"><div class="num">Week 4</div><div class="line"></div><h2>Production — Real World</h2><div class="line"></div></div>
+
+${[
+  ['Day 22','Let\'s Encrypt SSL — HTTPS setup','certbot se free SSL certificate install karo'],
+  ['Day 23','Queue Worker + Supervisor setup','Laravel jobs production pe setup karo'],
+  ['Day 24','Troubleshooting — 500 errors, permission issues','Intentionally errors create karo aur fix karo'],
+  ['Day 25','Git deployment workflow','Zero-downtime deployment script finalize karo'],
+  ['Day 26','Monitoring — disk alerts, memory alerts','Health monitoring script banao'],
+  ['Day 27','Shell scripting advanced','Advanced deployment automation'],
+  ['Day 28','Security audit — auth.log, fail2ban','Server security audit complete karo'],
+  ['Day 29','Performance tuning — php.ini, nginx.conf','Server optimize karo real traffic ke liye'],
+  ['Day 30','Final Project — Complete Production Setup','Complete production server: SSL + nginx + PHP + MySQL + Laravel + queue + cron + backup + monitoring'],
+].map(([d,t,p])=>`<div class="roadmap-item"><div class="roadmap-day">${d}</div><div class="roadmap-content"><h6>${t}</h6><p>📝 ${p}</p></div></div>`).join('')}
+
+<div class="box tip" style="margin-top:24px"><div class="box-title">💡 Daily Routine (30 min minimum)</div>
+1. SSH se server connect karo<br>
+2. <code>df -h && free -m</code> — server health check<br>
+3. <code>tail -20 /var/log/nginx/error.log</code> — errors check<br>
+4. Aaj ke chapter ka ek new command try karo<br>
+5. Interview question yaad karo
+</div>
+</div>`,
+
+// ==================== CHECKLIST ====================
+checklist: `<div class="content-wrap">
+<div class="page-hdr">
+  <div class="chapter">Resources</div>
+  <h1>Production <span>Checklists</span></h1>
+  <p class="desc">Deploy karne se pehle aur baad mein — ye sab verify karo.</p>
+</div>
+
+<div class="tab-wrap">
+<div class="tab-row">
+  <button class="tab-btn active" onclick="switchTab(this,'cl-deploy')">Deploy Checklist</button>
+  <button class="tab-btn" onclick="switchTab(this,'cl-security')">Security</button>
+  <button class="tab-btn" onclick="switchTab(this,'cl-troubleshoot')">Troubleshoot</button>
+</div>
+
+<div class="tab-pane active" id="cl-deploy">
+  <h4>🚀 Laravel Deployment Checklist</h4>
+  ${[
+    ['SSH se server connect ho gaya','ssh ubuntu@server'],
+    ['Project directory mein gaye','cd /var/www/html/myproject'],
+    ['git pull successfully hua','git pull origin main'],
+    ['.env file exist karti hai','ls -la .env'],
+    ['composer install --no-dev run kiya','composer install --no-dev --optimize-autoloader'],
+    ['php artisan migrate --force run kiya','Database migrations'],
+    ['php artisan optimize:clear run kiya','Purani cache clear'],
+    ['php artisan config:cache run kiya','Config cache rebuild'],
+    ['php artisan route:cache run kiya','Route cache rebuild'],
+    ['php artisan view:cache run kiya','View cache rebuild'],
+    ['php artisan storage:link run kiya','Storage symlink exist karta hai'],
+    ['storage/ permissions 775 hain','chmod -R 775 storage/'],
+    ['bootstrap/cache/ permissions 775 hain','chmod -R 775 bootstrap/cache/'],
+    ['.env file ka permission 600 hai','chmod 600 .env'],
+    ['nginx ya apache reload/restart kiya','systemctl reload nginx'],
+    ['Laravel log mein koi error nahi','tail -20 storage/logs/laravel.log'],
+    ['Site browser mein open ho rahi hai','curl -I https://mysite.com'],
+    ['Login aur basic features work kar rahe hain','Manual testing'],
+    ['File upload work kar raha hai','Test upload'],
+    ['Queue worker running hai','supervisorctl status'],
+  ].map(([t,d])=>`<div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">${t} <span style="color:var(--muted);font-size:12px;font-family:'Space Mono',monospace"> — ${d}</span></div></div>`).join('')}
+</div>
+
+<div class="tab-pane" id="cl-security">
+  <h4>🛡️ Security Hardening Checklist</h4>
+  ${[
+    ['APP_DEBUG=false production .env mein','Laravel error details hide'],
+    ['APP_KEY set hai aur secret hai','php artisan key:generate'],
+    ['.env file publicly accessible nahi','Web root public/ hai, .env upar hai'],
+    ['Root SSH login disabled hai','PermitRootLogin no in sshd_config'],
+    ['SSH key authentication use ho raha hai','PasswordAuthentication no'],
+    ['SSH port change kiya (default 22 nahi)','Port 2222 ya custom'],
+    ['UFW firewall active hai','sudo ufw status'],
+    ['Sirf required ports open hain (22/80/443)','MySQL 3306 public nahi'],
+    ['Fail2Ban install aur active hai','sudo fail2ban-client status'],
+    ['SSL/HTTPS enabled hai','certbot certificates check'],
+    ['Database user limited permissions hai','Sirf specific DB ka access'],
+    ['MySQL bind-address = 127.0.0.1','Only local access'],
+    ['Regular backups cron mein set hain','crontab -l check'],
+    ['Backup offsite store ho raha hai','S3/remote server'],
+    ['PHP display_errors = Off hai','php.ini check'],
+    ['Web server version hide hai','server_tokens off nginx mein'],
+    ['Files/folders 777 permission nahi hain','find / -perm 777 -type f check'],
+  ].map(([t,d])=>`<div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">${t} <span style="color:var(--muted);font-size:12px;font-family:'Space Mono',monospace"> — ${d}</span></div></div>`).join('')}
+</div>
+
+<div class="tab-pane" id="cl-troubleshoot">
+  <h4>🔧 Troubleshooting Decision Tree</h4>
+  
+  <div style="margin:16px 0">
+    <div style="font-size:14px;font-weight:600;color:white;margin-bottom:10px">🔴 500 Error</div>
+    ${['tail -100 storage/logs/laravel.log — Laravel error','sudo tail -50 /var/log/nginx/error.log — Web server error','APP_DEBUG=true temporarily set karo browser mein dekho','ls -la storage/ bootstrap/cache/ — Permissions check','php artisan config:clear && php artisan config:cache — Cache refresh','sudo systemctl status php8.2-fpm — PHP running hai?','php -l public/index.php — PHP syntax check'].map(d=>`<div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text" style="font-family:'Space Mono',monospace;font-size:12px">${d}</div></div>`).join('')}
+  </div>
+  
+  <div style="margin:16px 0">
+    <div style="font-size:14px;font-weight:600;color:white;margin-bottom:10px">🟡 Permission Denied</div>
+    ${['ls -la storage/ bootstrap/cache/ — Current permissions dekho','sudo chmod -R 775 storage/ bootstrap/cache/','sudo chown -R www-data:www-data . — Ownership fix','sudo chmod 600 .env — .env permissions','sudo usermod -aG www-data ubuntu — User ko group add karo','logout aur login karo group changes apply hone ke liye'].map(d=>`<div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text" style="font-family:'Space Mono',monospace;font-size:12px">${d}</div></div>`).join('')}
+  </div>
+  
+  <div style="margin:16px 0">
+    <div style="font-size:14px;font-weight:600;color:white;margin-bottom:10px">🔴 Disk Full</div>
+    ${['df -h — Disk usage confirm karo','sudo du -sh /var/log/* | sort -rh | head — Log files check','sudo journalctl --vacuum-time=3d — Journal logs clear','sudo apt clean && sudo apt autoremove — APT cache','sudo truncate -s 0 /var/log/nginx/access.log — Log truncate','echo "" > storage/logs/laravel.log — App log clear','find /tmp -type f -atime +7 -delete — Temp files'].map(d=>`<div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text" style="font-family:'Space Mono',monospace;font-size:12px">${d}</div></div>`).join('')}
+  </div>
+</div>
+</div>
+</div>`,
+};
+
+// ==================== PERMISSION CALCULATOR ====================
+function calcPerm() {
+  const checks = { ur:4, uw:2, ux:1, gr:4, gw:2, gx:1, or2:4, ow:2, ox:1 };
+  let u=0, g=0, o=0;
+  if(document.getElementById('ur')?.checked) u+=4;
+  if(document.getElementById('uw')?.checked) u+=2;
+  if(document.getElementById('ux')?.checked) u+=1;
+  if(document.getElementById('gr')?.checked) g+=4;
+  if(document.getElementById('gw')?.checked) g+=2;
+  if(document.getElementById('gx')?.checked) g+=1;
+  if(document.getElementById('or2')?.checked) o+=4;
+  if(document.getElementById('ow')?.checked) o+=2;
+  if(document.getElementById('ox')?.checked) o+=1;
+  
+  const num = `${u}${g}${o}`;
+  const sym = (n) => (n&4?'r':'-')+(n&2?'w':'-')+(n&1?'x':'-');
+  const symStr = sym(u)+sym(g)+sym(o);
+  const desc = `Owner: ${(u&4?'read ':'')+(u&4?'':'')}${sym(u).replace(/-/g,'')||'none'} | Group: ${sym(g).replace(/-/g,'')||'none'} | Others: ${sym(o).replace(/-/g,'')||'none'}`;
+  
+  const el = document.getElementById('perm-result');
+  const del = document.getElementById('perm-desc');
+  if(el) el.textContent = `${num} — ${symStr}`;
+  if(del) del.textContent = desc;
+}
+
+// ==================== SCROLL BEHAVIOR ====================
+document.getElementById('main').addEventListener('scroll', function() {
+  const btn = document.getElementById('scrolltop');
+  if(this.scrollTop > 400) btn.classList.add('show');
+  else btn.classList.remove('show');
+});
+
+// ==================== INIT ====================
+buildNav();
+loadPage('home');
+</script>
+</body>
+</html>

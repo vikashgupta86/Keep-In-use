@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Mastermind — Complete Interview Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f14; --bg2:#13161e; --card:#181c27; --card2:#1e2330;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.04);
+  --text:#e8eaf0; --text2:#8b90a8; --text3:#555a6e;
+  --mono:'JetBrains Mono',monospace; --sans:'Sora',sans-serif;
+  --blue:#4d9fff; --blue-bg:rgba(77,159,255,0.1); --blue-dk:#a8d0ff;
+  --teal:#00d4aa; --teal-bg:rgba(0,212,170,0.1); --teal-dk:#7eeedd;
+  --amber:#ffb347; --amber-bg:rgba(255,179,71,0.1); --amber-dk:#ffd49a;
+  --red:#ff5757; --red-bg:rgba(255,87,87,0.1); --red-dk:#ffaaaa;
+  --purple:#a78bfa; --purple-bg:rgba(167,139,250,0.1); --purple-dk:#d4c7fe;
+  --coral:#ff7c5c; --coral-bg:rgba(255,124,92,0.1); --coral-dk:#ffbbaa;
+  --green:#4ade80; --green-bg:rgba(74,222,128,0.1); --green-dk:#a7f3c4;
+  --gray:#888ea8; --gray-bg:rgba(136,142,168,0.1); --gray-dk:#b8bdd0;
+  --pink:#f472b6; --pink-bg:rgba(244,114,182,0.1); --pink-dk:#fbbcd8;
+  --r:10px; --rlg:14px;
+  --glow-blue:0 0 20px rgba(77,159,255,0.2);
+  --glow-teal:0 0 20px rgba(0,212,170,0.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;overflow-x:hidden;}
+
+/* ── NOISE TEXTURE ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5;}
+
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-columns:248px 1fr;min-height:100vh;position:relative;z-index:1;}
+@media(max-width:768px){.shell{grid-template-columns:1fr;}}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.logo-text{font-size:13px;font-weight:600;color:var(--text);letter-spacing:.01em;}
+.logo-sub{font-size:10px;color:var(--text3);margin-top:1px;}
+.search-wrap{padding:10px 12px;border-bottom:1px solid var(--border);}
+.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px 6px 28px;font-size:12px;color:var(--text);font-family:var(--sans);outline:none;position:relative;}
+.search-wrap{position:relative;}
+.search-wrap::before{content:'⌕';position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none;z-index:1;}
+.search-input:focus{border-color:var(--blue);box-shadow:var(--glow-blue);}
+.cat-label{padding:10px 16px 4px;font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:12px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:all .15s;user-select:none;line-height:1.3;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.nav-item.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-bg);}
+.nav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;opacity:.7;}
+.diff-badge{font-size:9px;padding:1px 5px;border-radius:6px;margin-left:auto;font-weight:600;letter-spacing:.02em;}
+.diff-e{background:var(--teal-bg);color:var(--teal);}
+.diff-m{background:var(--amber-bg);color:var(--amber);}
+.diff-h{background:var(--red-bg);color:var(--red);}
+.nav-count{font-size:9px;color:var(--text3);padding:0 10px 8px;margin-top:4px;}
+
+/* ── MAIN ── */
+.main{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;max-width:960px;}
+.concept-header{display:flex;align-items:center;gap:10px;margin-bottom:.1rem;}
+.concept-title{font-size:22px;font-weight:600;color:var(--text);letter-spacing:-.02em;}
+.concept-tag{font-size:10px;padding:3px 9px;border-radius:8px;font-weight:600;letter-spacing:.04em;}
+.concept-desc{font-size:13px;color:var(--text2);line-height:1.65;}
+
+/* ── TOP GRID ── */
+.top-grid{display:grid;grid-template-columns:280px 1fr;gap:1rem;}
+@media(max-width:700px){.top-grid{grid-template-columns:1fr;}}
+
+/* ── PANEL ── */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;}
+.panel-hd{padding:8px 14px;border-bottom:1px solid var(--border2);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;}
+.panel-hd-dot{width:6px;height:6px;border-radius:50%;}
+
+/* ── CODE ── */
+.code-wrap{padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:2;}
+.cl{padding:2px 6px;border-radius:4px;transition:all .2s;color:var(--text2);white-space:pre;display:block;}
+.cl.lit{background:var(--blue-bg);color:var(--blue-dk);font-weight:500;border-left:2px solid var(--blue);padding-left:8px;}
+.kw{color:var(--blue);font-weight:600;} .fn{color:var(--teal);font-weight:500;} .cm{color:var(--text3);font-style:italic;}
+.str{color:var(--coral);} .num{color:var(--purple);} .op{color:var(--amber);}
+
+/* ── CPP ── */
+.cpp-wrap{padding:12px 14px;font-family:var(--mono);font-size:11.5px;line-height:1.9;white-space:pre-wrap;color:var(--text2);}
+.ck{color:var(--blue);font-weight:600;}.ct{color:var(--teal);font-weight:500;}.cc{color:var(--text3);font-style:italic;}
+
+/* ── STEP BAR ── */
+.step-bar{display:flex;gap:4px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border2);}
+.sp{padding:4px 12px;border-radius:12px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .15s;font-family:var(--sans);font-weight:500;}
+.sp:hover{border-color:var(--blue);color:var(--blue);}
+.sp.active{background:var(--blue);color:var(--bg);border-color:var(--blue);box-shadow:var(--glow-blue);}
+
+/* ── VIZ ── */
+.viz{padding:14px;min-height:200px;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.anim{animation:fi .2s ease;}
+
+/* ── EXPLAIN ── */
+.explain{padding:14px 16px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);}
+.explain-lbl{font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.explain-txt{font-size:13px;color:var(--text);line-height:1.7;}
+.explain-txt code{font-family:var(--mono);background:var(--card);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--blue);}
+.explain-txt b{font-weight:600;color:var(--text);}
+
+/* ── NAV ── */
+.nav-row{display:flex;align-items:center;justify-content:space-between;}
+.nb{padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:12px;transition:all .15s;font-family:var(--sans);font-weight:500;}
+.nb:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+.nb:disabled{opacity:.25;cursor:not-allowed;}
+.sc{font-size:11px;color:var(--text3);background:var(--card);padding:4px 12px;border-radius:6px;border:1px solid var(--border);}
+
+/* ── ROW BOXES ── */
+.rb{display:flex;align-items:flex-start;gap:6px;padding:5px 10px;border-radius:7px;font-size:11.5px;font-family:var(--mono);margin:2px 0;border:1px solid var(--border2);background:var(--card);color:var(--text);transition:all .2s;flex-wrap:wrap;}
+.rb.hi{background:var(--blue-bg);border-color:rgba(77,159,255,0.2);color:var(--blue-dk);}
+.rb.pass{background:var(--teal-bg);border-color:rgba(0,212,170,0.2);color:var(--teal-dk);}
+.rb.fail{opacity:.25;}
+.rb.am{background:var(--amber-bg);border-color:rgba(255,179,71,0.2);color:var(--amber-dk);}
+.rb.pu{background:var(--purple-bg);border-color:rgba(167,139,250,0.2);color:var(--purple-dk);}
+.rb.gr{background:var(--gray-bg);border-color:rgba(136,142,168,0.2);color:var(--gray-dk);}
+.rb.re{background:var(--red-bg);border-color:rgba(255,87,87,0.2);color:var(--red-dk);}
+.rb.te{background:var(--teal-bg);border-color:rgba(0,212,170,0.2);color:var(--teal-dk);}
+.rb.bl{background:var(--blue-bg);border-color:rgba(77,159,255,0.2);color:var(--blue-dk);}
+
+/* ── TABLE ── */
+.st{width:100%;border-collapse:collapse;font-size:12px;}
+.st th{background:var(--card2);padding:6px 10px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em;}
+.st td{padding:6px 10px;border-bottom:1px solid var(--border2);font-family:var(--mono);color:var(--text2);}
+.st tr.hi td{background:var(--blue-bg);color:var(--blue-dk);}
+.st tr.am td{background:var(--amber-bg);color:var(--amber-dk);}
+.st tr.gr td{background:var(--gray-bg);color:var(--gray-dk);opacity:.4;}
+.st tr.te td{background:var(--teal-bg);color:var(--teal-dk);}
+.st tr.re td{background:var(--red-bg);color:var(--red-dk);}
+.st tr:last-child td{border-bottom:none;}
+.nc{color:var(--teal);font-weight:600;}
+.null-val{color:var(--text3);font-style:italic;}
+
+/* ── GROUP CARDS ── */
+.gc-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.gc{border-radius:var(--r);padding:10px 12px;flex:1;min-width:80px;border:1px solid;}
+.dl{font-size:10px;color:var(--text3);margin:6px 0 4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+
+/* ── JOIN VIZ ── */
+.jrow{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;margin:2px 0;}
+.jc{padding:4px 10px;border-radius:6px;border:1px solid var(--border);min-width:85px;text-align:center;}
+.jc.m{background:var(--teal-bg);border-color:rgba(0,212,170,0.3);color:var(--teal-dk);}
+.jc.n{background:var(--gray-bg);border-color:rgba(136,142,168,0.2);color:var(--text3);font-style:italic;}
+.jc.a{background:var(--blue-bg);border-color:rgba(77,159,255,0.2);color:var(--blue-dk);}
+.jc.b{background:var(--purple-bg);border-color:rgba(167,139,250,0.2);color:var(--purple-dk);}
+.jc.r{background:var(--red-bg);border-color:rgba(255,87,87,0.2);color:var(--red-dk);}
+
+/* ── CTE ── */
+.cte-box{border:1px solid var(--border);border-radius:var(--r);padding:10px;margin:4px 0;background:var(--card2);}
+.cte-label{font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* ── ACID ── */
+.acid-card{border-radius:var(--r);padding:10px 12px;border:1px solid;margin:3px 0;}
+.acid-prop{font-size:13px;font-weight:600;margin-bottom:3px;}
+.acid-def{font-size:12px;line-height:1.5;opacity:.85;}
+
+/* ── NORM ── */
+.norm-table{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);margin:4px 0;}
+.norm-table table{width:100%;border-collapse:collapse;font-size:12px;}
+.norm-table th{background:var(--card2);padding:5px 9px;text-align:left;font-size:10px;color:var(--text3);border-bottom:1px solid var(--border);}
+.norm-table td{padding:5px 9px;border-bottom:1px solid var(--border2);font-family:var(--mono);color:var(--text2);}
+.norm-table td.bad{background:var(--red-bg);color:var(--red-dk);}
+.norm-table td.good{background:var(--teal-bg);color:var(--teal-dk);}
+.norm-table tr:last-child td{border-bottom:none;}
+
+/* ── TAG ── */
+.tag{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:600;display:inline-block;}
+.tag.bl{background:var(--blue-bg);color:var(--blue-dk);}
+.tag.te{background:var(--teal-bg);color:var(--teal-dk);}
+.tag.am{background:var(--amber-bg);color:var(--amber-dk);}
+.tag.re{background:var(--red-bg);color:var(--red-dk);}
+.tag.pu{background:var(--purple-bg);color:var(--purple-dk);}
+.tag.gr{background:var(--gray-bg);color:var(--gray-dk);}
+.tag.pk{background:var(--pink-bg);color:var(--pink-dk);}
+
+/* ── INFO BOX ── */
+.info-box{padding:10px 12px;border-radius:var(--r);border:1px solid;margin:4px 0;font-size:12px;line-height:1.6;}
+.info-box.warn{background:var(--amber-bg);border-color:rgba(255,179,71,0.3);color:var(--amber-dk);}
+.info-box.ok{background:var(--teal-bg);border-color:rgba(0,212,170,0.3);color:var(--teal-dk);}
+.info-box.err{background:var(--red-bg);border-color:rgba(255,87,87,0.3);color:var(--red-dk);}
+.info-box.info{background:var(--blue-bg);border-color:rgba(77,159,255,0.3);color:var(--blue-dk);}
+.info-box.pu{background:var(--purple-bg);border-color:rgba(167,139,250,0.3);color:var(--purple-dk);}
+
+/* ── PROGRESS TRACK ── */
+.progress-row{display:flex;align-items:center;gap:4px;}
+.progress-seg{height:3px;flex:1;border-radius:2px;background:var(--border);}
+.progress-seg.done{background:var(--blue);}
+.progress-seg.cur{background:var(--teal);}
+
+/* ── MOBILE ── */
+.mobile-nav{display:none;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);align-items:center;gap:12px;}
+@media(max-width:768px){.mobile-nav{display:flex;}.sidebar{display:none;position:fixed;top:0;left:0;width:270px;z-index:100;height:100vh;}.sidebar.open{display:flex;}.shell{grid-template-columns:1fr;}}
+.menu-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:var(--sans);}
+.mobile-title{font-size:14px;font-weight:600;color:var(--text);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+
+/* ── VENN SVG ── */
+.venn-svg{width:100%;max-width:300px;margin:auto;display:block;}
+
+/* ── SQL Q BOX ── */
+.q-box{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin:4px 0;}
+.q-num{font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.05em;margin-bottom:4px;}
+.q-text{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.q-ans{font-size:12px;color:var(--text2);line-height:1.6;}
+.q-ans code{font-family:var(--mono);background:var(--card);padding:1px 5px;border-radius:4px;font-size:11px;color:var(--teal);}
+
+/* ── GLOW BG BLOBS ── */
+.blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:.06;}
+.blob-1{width:400px;height:400px;background:var(--blue);top:-100px;left:-100px;}
+.blob-2{width:300px;height:300px;background:var(--teal);bottom:0;right:0;}
+</style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="mobile-nav">
+  <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <div class="mobile-title" id="mobileTitle">SQL Mastermind</div>
+</div>
+
+<div class="shell">
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⚡</div>
+    <div>
+      <div class="logo-text">SQL Mastermind</div>
+      <div class="logo-sub">Complete Interview Prep</div>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" id="searchInput" placeholder="Concept dhundho..." oninput="filterConcepts(this.value)">
+  </div>
+  <div id="navContent" style="overflow-y:auto;flex:1;padding-bottom:20px;"></div>
+  <div class="nav-count" id="navCount"></div>
+</nav>
+
+<div class="main" id="main">
+  <div class="concept-header">
+    <div class="concept-title" id="ctitle"></div>
+    <span class="concept-tag" id="ctag"></span>
+  </div>
+  <div class="concept-desc" id="cdesc"></div>
+  <div class="progress-row" id="progressRow"></div>
+
+  <div class="top-grid">
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-hd-dot" style="background:var(--blue)"></span>SQL Query</div>
+        <div class="code-wrap" id="sqlCode"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><span class="panel-hd-dot" style="background:var(--purple)"></span>C++ Analogy</div>
+        <div class="cpp-wrap" id="cppHint"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+      <div class="panel">
+        <div class="step-bar" id="stepBar"></div>
+        <div class="viz anim" id="vizArea"></div>
+      </div>
+      <div class="explain" id="explainBox">
+        <div class="explain-lbl">💡 Kya ho raha hai</div>
+        <div class="explain-txt" id="explainTxt"></div>
+      </div>
+      <div class="nav-row">
+        <button class="nb" id="prevBtn" onclick="prevStep()">← Pichla</button>
+        <span class="sc" id="sc"></span>
+        <button class="nb" id="nextBtn" onclick="nextStep()">Agla →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const EMP=[
+  {id:1,name:'Raj',  dept:'Eng',  sal:90000,mgr:3,city:'Delhi', age:28,exp:5},
+  {id:2,name:'Priya',dept:'Eng',  sal:85000,mgr:3,city:'Mumbai',age:26,exp:3},
+  {id:3,name:'Amit', dept:'Eng',  sal:120000,mgr:null,city:'Pune',age:35,exp:12},
+  {id:4,name:'Neha', dept:'Sales',sal:70000,mgr:5,city:'Delhi', age:24,exp:2},
+  {id:5,name:'Rohit',dept:'Sales',sal:95000,mgr:null,city:'Hyd',  age:32,exp:9},
+  {id:6,name:'Sara', dept:'HR',   sal:65000,mgr:null,city:'Delhi',age:29,exp:6},
+];
+const ORD=[
+  {id:1,cust:'Raj',  amt:500, prod:'Laptop', dt:'2024-01-10'},
+  {id:2,cust:'Priya',amt:300, prod:'Phone',  dt:'2024-01-15'},
+  {id:3,cust:'Raj',  amt:200, prod:'Mouse',  dt:'2024-02-01'},
+  {id:4,cust:'Priya',amt:700, prod:'Tablet', dt:'2024-02-10'},
+  {id:5,cust:'Amit', amt:100, prod:'Cable',  dt:'2024-02-15'},
+  {id:6,cust:'Neha', amt:450, prod:'Monitor',dt:'2024-03-01'},
+];
+const CUST=[
+  {id:1,name:'Raj',  city:'Delhi'},
+  {id:2,name:'Priya',city:'Mumbai'},
+  {id:3,name:'Amit', city:'Pune'},
+  {id:4,name:'Neha', city:'Delhi'},
+  {id:5,name:'Rohan',city:'Chennai'},
+];
+const C={
+  Raj:  {bg:'var(--blue-bg)',  bd:'rgba(77,159,255,0.3)',  tx:'var(--blue-dk)'},
+  Priya:{bg:'var(--teal-bg)', bd:'rgba(0,212,170,0.3)',  tx:'var(--teal-dk)'},
+  Amit: {bg:'var(--amber-bg)',bd:'rgba(255,179,71,0.3)',  tx:'var(--amber-dk)'},
+  Neha: {bg:'var(--purple-bg)',bd:'rgba(167,139,250,0.3)',tx:'var(--purple-dk)'},
+  Rohit:{bg:'var(--coral-bg)',bd:'rgba(255,124,92,0.3)',  tx:'var(--coral-dk)'},
+  Sara: {bg:'var(--pink-bg)', bd:'rgba(244,114,182,0.3)', tx:'var(--pink-dk)'},
+  Rohan:{bg:'var(--gray-bg)', bd:'rgba(136,142,168,0.3)', tx:'var(--gray-dk)'},
+  Eng:  {bg:'var(--blue-bg)', bd:'rgba(77,159,255,0.3)',  tx:'var(--blue-dk)'},
+  Sales:{bg:'var(--amber-bg)',bd:'rgba(255,179,71,0.3)',  tx:'var(--amber-dk)'},
+  HR:   {bg:'var(--teal-bg)', bd:'rgba(0,212,170,0.3)',  tx:'var(--teal-dk)'},
+};
+function fmt(n){return n>=1000?'₹'+Math.round(n/1000)+'k':'₹'+n;}
+function rb(cls,txt){return `<div class="rb ${cls}">${txt}</div>`;}
+function tbl(heads,rows,rowCls='hi'){
+  let h=`<table class="st"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+  rows.forEach((r,i)=>{h+=`<tr class="${Array.isArray(rowCls)?rowCls[i]:rowCls}">${r.map(c=>`<td>${c}</td>`).join('')}</tr>`;});
+  return h+`</tbody></table>`;
+}
+
+// ─── CONCEPTS ─────────────────────────────────────────────────────────────────
+const concepts=[
+
+// ──────────────────────────────────────────────────────────────────────────────
+// FOUNDATIONS
+// ──────────────────────────────────────────────────────────────────────────────
+
+{cat:'Foundations',name:'Query Execution Order',diff:'e',
+ desc:'SQL likhne ka order aur execute hone ka order ALAG hota hai. Yeh sabse common interview trick question hai — "WHERE mein AVG() kyun nahi likh sakte?"',
+ query:[
+  {t:`<span class="kw">SELECT</span>   dept, <span class="fn">AVG</span>(sal)`,l:[0]},
+  {t:`<span class="kw">FROM</span>     employees`,l:[1]},
+  {t:`<span class="kw">WHERE</span>    sal <span class="op">&gt;</span> <span class="num">70000</span>`,l:[2]},
+  {t:`<span class="kw">GROUP BY</span> dept`,l:[3]},
+  {t:`<span class="kw">HAVING</span>   <span class="fn">AVG</span>(sal) <span class="op">&gt;</span> <span class="num">80000</span>`,l:[4]},
+  {t:`<span class="kw">ORDER BY</span> <span class="fn">AVG</span>(sal) <span class="kw">DESC</span>`,l:[5]},
+  {t:`<span class="kw">LIMIT</span>    <span class="num">5</span>;`,l:[6]},
+ ],
+ steps:[
+  {label:'FROM',qL:[1],cpp:`<span class="cc">// Step 1: Table load karo</span>\n<span class="ck">vector</span>&lt;Row&gt; t = <span class="ct">readFromDisk</span>();`,
+   explain:`<b>Step 1 — FROM</b> sabse pehle chalta hai. Disk se poori table RAM mein aati hai. Koi filter nahi abhi.`,
+   render(){return`<div class="dl">1. FROM — sab 6 rows load:</div>${EMP.map(r=>rb('hi',`{name:"${r.name}", dept:"${r.dept}", sal:${r.sal}}`)).join('')}`;}},
+  {label:'WHERE',qL:[2],cpp:`<span class="cc">// Step 2: Row-level filter</span>\n<span class="ck">if</span>(row.sal <span class="op">&gt;</span> <span class="num">70000</span>) keep;`,
+   explain:`<b>Step 2 — WHERE</b> individual rows filter karta hai. <b>WHY aggregate nahi?</b> Groups abhi bane hi nahi — SUM/AVG ka koi matlab nahi abhi.`,
+   render(){return`<div class="dl">2. WHERE sal > 70000:</div>${EMP.map(r=>rb(r.sal>70000?'pass':'fail',`${r.sal>70000?'✓':'✗'} ${r.name} — sal:${r.sal}`)).join('')}`;}},
+  {label:'GROUP BY',qL:[3],cpp:`<span class="cc">// Step 3: Buckets</span>\n<span class="ck">map</span>&lt;<span class="ck">string</span>,<span class="ck">vector</span>&lt;<span class="ck">int</span>&gt;&gt; g;`,
+   explain:`<b>Step 3 — GROUP BY</b>. Filter ke baad rows groups mein. Har unique dept ek bucket.`,
+   render(){const f=EMP.filter(r=>r.sal>70000);const g={};f.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.sal);});return`<div class="dl">3. Buckets by dept:</div><div class="gc-row">${Object.entries(g).map(([k,v])=>`<div class="gc" style="background:${C[k].bg};border-color:${C[k].bd}"><div style="font-size:12px;font-weight:600;color:${C[k].tx}">${k}</div><div style="font-family:var(--mono);font-size:11px;color:${C[k].tx}">[${v.join(', ')}]</div></div>`).join('')}</div>`;}},
+  {label:'HAVING',qL:[4],cpp:`<span class="cc">// Step 4: Group filter</span>\n<span class="ck">if</span>(avg(g[dept]) <span class="op">&gt;</span> <span class="num">80000</span>) keep;`,
+   explain:`<b>Step 4 — HAVING</b> groups filter karta hai. Aggregate yahan allowed hai kyunki groups ban chuke. <b>Rule: WHERE=rows, HAVING=groups.</b>`,
+   render(){const f=EMP.filter(r=>r.sal>70000);const g={};f.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.sal);});return`<div class="dl">4. HAVING AVG(sal) > 80000:</div><div class="gc-row">${Object.entries(g).map(([k,v])=>{const avg=Math.round(v.reduce((a,b)=>a+b,0)/v.length);const p=avg>80000;return`<div class="gc" style="background:${p?C[k].bg:'var(--gray-bg)'};border-color:${p?C[k].bd:'rgba(136,142,168,0.2)'};opacity:${p?1:0.3}"><div style="font-size:12px;font-weight:600;color:${p?C[k].tx:'var(--text3)'}">${p?'✓':'✗'} ${k}</div><div style="font-size:13px;color:${p?C[k].tx:'var(--text3)'};font-weight:600">avg=${fmt(avg)}</div></div>`;}).join('')}</div>`;}},
+  {label:'SELECT',qL:[0],cpp:`<span class="cc">// Step 5: Columns choose</span>\n<span class="ct">project</span>(dept, avg_sal);`,
+   explain:`<b>Step 5 — SELECT</b>. Columns decide hote hain. Aliases (AS) yahan bante hain — isiliye WHERE mein alias use NAHI kar sakte (SELECT baad mein chalta hai).`,
+   render(){const f=EMP.filter(r=>r.sal>70000);const g={};f.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.sal);});const rows=Object.entries(g).map(([k,v])=>({dept:k,avg:Math.round(v.reduce((a,b)=>a+b,0)/v.length)})).filter(r=>r.avg>80000).sort((a,b)=>b.avg-a.avg);return tbl(['dept','AVG(sal)'],rows.map(r=>[r.dept,`<span class="nc">${fmt(r.avg)}</span>`]));}},
+  {label:'ORDER+LIMIT',qL:[5,6],cpp:`<span class="cc">// Step 6+7: Sort + Slice</span>\n<span class="ct">sort</span>(desc); <span class="ct">take</span>(<span class="num">5</span>);`,
+   explain:`<b>Final Order:</b> <b>FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</b>. Yeh yaad karo: "For When Girls Have Secrets Over Large Limits"`,
+   render(){const order=['FROM','WHERE','GROUP BY','HAVING','SELECT','ORDER BY','LIMIT'];const clrs=['bl','te','am','re','bl','gr','gr'];return order.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:var(--card2);border:1px solid var(--border);margin:2px 0"><span style="font-size:10px;color:var(--text3);min-width:18px;text-align:right;font-weight:600">${i+1}.</span><span class="tag ${clrs[i]}">${s}</span></div>`).join('');}},
+ ]},
+
+{cat:'Foundations',name:'SELECT & WHERE Operators',diff:'e',
+ desc:'SQL ke WHERE mein operators: =, !=, >, <, BETWEEN, LIKE, IN, IS NULL. C++ ke if conditions jaisa.',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, sal, dept`,l:[0]},
+  {t:`<span class="kw">FROM</span>   employees`,l:[1]},
+  {t:`<span class="kw">WHERE</span>  sal <span class="kw">BETWEEN</span> <span class="num">70000</span> <span class="kw">AND</span> <span class="num">100000</span>`,l:[2]},
+  {t:`  <span class="kw">AND</span>  dept <span class="kw">IN</span> (<span class="str">'Eng'</span>, <span class="str">'Sales'</span>)`,l:[3]},
+  {t:`  <span class="kw">AND</span>  name <span class="kw">LIKE</span> <span class="str">'R%'</span>;`,l:[4]},
+ ],
+ steps:[
+  {label:'BETWEEN',qL:[2],cpp:`<span class="cc">// BETWEEN inclusive hai dono ends</span>\n<span class="ck">if</span>(sal >= <span class="num">70000</span> && sal <= <span class="num">100000</span>)`,
+   explain:`<b>BETWEEN a AND b</b> = a >= x >= b. Dono ends inclusive. Numbers, dates, strings — sab pe kaam karta hai.`,
+   render(){return`<div class="dl">BETWEEN 70000 AND 100000:</div>${EMP.map(r=>{const p=r.sal>=70000&&r.sal<=100000;return rb(p?'pass':'fail',`${p?'✓':'✗'} ${r.name}: ₹${r.sal}`);}).join('')}`;}},
+  {label:'IN',qL:[3],cpp:`<span class="cc">// IN = set membership</span>\nset&lt;string&gt; s{"Eng","Sales"};\n<span class="ck">if</span>(s.count(dept)) keep;`,
+   explain:`<b>IN (val1, val2)</b> = list mein se koi bhi match. <code>NOT IN</code> use karte waqt NULL trap — agar list mein NULL ho toh NOT IN sab fail karta hai! EXISTS prefer karo.`,
+   render(){const f=EMP.filter(r=>r.sal>=70000&&r.sal<=100000);return`<div class="dl">AND dept IN ('Eng', 'Sales'):</div>${f.map(r=>{const p=['Eng','Sales'].includes(r.dept);return rb(p?'pass':'fail',`${p?'✓':'✗'} ${r.name}: dept=${r.dept}`);}).join('')}`;}},
+  {label:'LIKE',qL:[4],cpp:`<span class="cc">// LIKE = pattern match</span>\n<span class="cc">// % = wildcard (.*)</span>\n<span class="cc">// _ = single char (.)</span>\nregex r("^R.*");`,
+   explain:`<b>LIKE 'R%'</b> = 'R' se shuru hone wale. <b>%</b> = koi bhi chars (zero ya zyada). <b>_</b> = exactly ek char. Case-insensitive ILIKE bhi hota hai PostgreSQL mein.`,
+   render(){const f=EMP.filter(r=>r.sal>=70000&&r.sal<=100000&&['Eng','Sales'].includes(r.dept));return`<div class="dl">AND name LIKE 'R%':</div>${f.map(r=>{const p=r.name.startsWith('R');return rb(p?'pass':'fail',`${p?'✓':'✗'} name="${r.name}" ${p?'← R se shuru':''}`);}).join('')}<div class="info-box info" style="margin-top:6px">Final: ${f.filter(r=>r.name.startsWith('R')).map(r=>r.name).join(', ')}</div>`;}},
+  {label:'Operators',qL:[0,1,2,3,4],cpp:`<span class="cc">// Sab WHERE operators:</span>`,
+   explain:`<b>All WHERE operators summary</b> — yeh sab frequently use hote hain.`,
+   render(){const ops=[['=','Equality','sal = 90000'],['!= or <>','Not equal','dept != \'HR\''],['> >= < <=','Comparison','sal >= 80000'],['BETWEEN a AND b','Inclusive range','sal BETWEEN 70k AND 100k'],['LIKE \'%pat%\'','Pattern match','name LIKE \'%iya\''],['IN (list)','Set membership','dept IN (\'Eng\',\'HR\')'],['IS NULL','NULL check','mgr IS NULL'],['NOT IN/LIKE/BETWEEN','Negation','sal NOT BETWEEN...'],['AND OR NOT','Boolean logic','A AND (B OR C)']];return tbl(['Operator','Meaning','Example'],ops.map(o=>[`<span style="font-family:var(--mono);color:var(--blue)">${o[0]}</span>`,o[1],`<span style="font-family:var(--mono);color:var(--teal);font-size:11px">${o[2]}</span>`]));}},
+ ]},
+
+{cat:'Foundations',name:'GROUP BY + Aggregates',diff:'e',
+ desc:'GROUP BY = map<key,vector<vals>>. Phir har vector pe COUNT, SUM, AVG, MIN, MAX.',
+ query:[
+  {t:`<span class="kw">SELECT</span>   dept,`,l:[0]},
+  {t:`  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> headcount,`,l:[1]},
+  {t:`  <span class="fn">SUM</span>(sal)  <span class="kw">AS</span> total_cost,`,l:[2]},
+  {t:`  <span class="fn">AVG</span>(sal)  <span class="kw">AS</span> avg_sal,`,l:[3]},
+  {t:`  <span class="fn">MIN</span>(sal)  <span class="kw">AS</span> min_sal,`,l:[4]},
+  {t:`  <span class="fn">MAX</span>(sal)  <span class="kw">AS</span> max_sal`,l:[5]},
+  {t:`<span class="kw">FROM</span>     employees`,l:[6]},
+  {t:`<span class="kw">GROUP BY</span> dept;`,l:[7]},
+ ],
+ steps:[
+  {label:'Bucket',qL:[7],cpp:`<span class="ck">map</span>&lt;<span class="ck">string</span>,<span class="ck">vector</span>&lt;<span class="ck">int</span>&gt;&gt; g;\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:t) g[r.dept].push_back(r.sal);`,
+   explain:`<b>GROUP BY dept</b> — har unique dept ek key ban jaata hai. Values ek vector mein. Abhi tak koi calculation nahi.`,
+   render(){const g={};EMP.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push({n:r.name,s:r.sal});});return`<div class="gc-row">${Object.entries(g).map(([k,v])=>`<div class="gc" style="background:${C[k].bg};border-color:${C[k].bd}"><div style="font-size:12px;font-weight:600;color:${C[k].tx};margin-bottom:4px">${k}</div>${v.map(x=>`<div style="font-size:11px;font-family:var(--mono);color:${C[k].tx}">${x.n}: ${x.s}</div>`).join('')}</div>`).join('')}</div>`;}},
+  {label:'Aggregates',qL:[1,2,3,4,5],cpp:`<span class="ck">for</span>(<span class="ck">auto</span>&amp; [dept,vals]:g){\n  cnt = vals.size(); sum = accumulate();\n  avg = sum/cnt; mn = min(); mx = max();\n}`,
+   explain:`<b>5 aggregate functions:</b> COUNT=size(), SUM=accumulate(), AVG=sum/count, MIN=min_element(), MAX=max_element(). COUNT(*) = sab rows. COUNT(col) = non-NULL rows.`,
+   render(){const g={};EMP.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.sal);});return tbl(['dept','COUNT(*)','SUM(sal)','AVG(sal)','MIN','MAX'],Object.entries(g).map(([k,v])=>{const cnt=v.length,sum=v.reduce((a,b)=>a+b,0),avg=Math.round(sum/cnt),mn=Math.min(...v),mx=Math.max(...v);return[k,cnt,fmt(sum),`<span class="nc">${fmt(avg)}</span>`,fmt(mn),fmt(mx)];}));}},
+ ]},
+
+{cat:'Foundations',name:'HAVING vs WHERE',diff:'e',
+ desc:'Interview mein 90% log yeh confuse karte hain. WHERE=row level, HAVING=group level. Simple rule!',
+ query:[
+  {t:`<span class="kw">SELECT</span>   dept, <span class="fn">COUNT</span>(*) cnt`,l:[0]},
+  {t:`<span class="kw">FROM</span>     employees`,l:[1]},
+  {t:`<span class="kw">WHERE</span>    sal <span class="op">&gt;</span> <span class="num">60000</span>   <span class="cm">-- row filter</span>`,l:[2]},
+  {t:`<span class="kw">GROUP BY</span> dept`,l:[3]},
+  {t:`<span class="kw">HAVING</span>   <span class="fn">COUNT</span>(*) <span class="op">&gt;=</span> <span class="num">2</span>; <span class="cm">-- group filter</span>`,l:[4]},
+ ],
+ steps:[
+  {label:'WHERE',qL:[2],cpp:`<span class="cc">// Row pe individually</span>\n<span class="ck">if</span>(r.sal > <span class="num">60000</span>) keep;`,
+   explain:`<b>WHERE</b> GROUP BY se PEHLE chalta hai. Individual row check hoti hai. Aggregate function use NAHI kar sakte.`,
+   render(){return`<div class="dl">WHERE sal > 60000:</div>${EMP.map(r=>rb(r.sal>60000?'pass':'fail',`${r.sal>60000?'✓':'✗'} ${r.name} ₹${r.sal}`)).join('')}`;}},
+  {label:'GROUP BY',qL:[3],cpp:`<span class="cc">// Filtered rows ke groups</span>`,
+   explain:`<b>GROUP BY</b> filtered rows ke groups banata hai. WHERE ke baad aata hai — sirf pass hui rows group mein jaati hain.`,
+   render(){const f=EMP.filter(r=>r.sal>60000);const g={};f.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.name);});return`<div class="gc-row">${Object.entries(g).map(([k,v])=>`<div class="gc" style="background:${C[k].bg};border-color:${C[k].bd}"><div style="font-size:12px;font-weight:600;color:${C[k].tx}">${k} (${v.length})</div>${v.map(n=>`<div style="font-size:11px;color:${C[k].tx}">${n}</div>`).join('')}</div>`).join('')}</div>`;}},
+  {label:'HAVING',qL:[4],cpp:`<span class="cc">// Group pe filter</span>\n<span class="ck">if</span>(count(g[dept]) >= <span class="num">2</span>) keep;`,
+   explain:`<b>HAVING COUNT(*) >= 2</b> — sirf woh groups jisme 2+ rows hain. Aggregate yahan allowed kyunki groups ready hain.`,
+   render(){const f=EMP.filter(r=>r.sal>60000);const g={};f.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.name);});return`<div class="dl">HAVING COUNT(*) >= 2:</div><div class="gc-row">${Object.entries(g).map(([k,v])=>{const p=v.length>=2;return`<div class="gc" style="background:${p?C[k].bg:'var(--gray-bg)'};border-color:${p?C[k].bd:'rgba(136,142,168,0.2)'};opacity:${p?1:0.3}"><div style="font-size:12px;font-weight:600;color:${p?C[k].tx:'var(--text3)'}">${p?'✓':'✗'} ${k}</div><div style="color:${p?C[k].tx:'var(--text3)'};font-weight:600">${v.length} rows</div></div>`;}).join('')}</div>`;}},
+ ]},
+
+{cat:'Foundations',name:'ORDER BY / LIMIT / OFFSET',diff:'e',
+ desc:'Sort karo, top-N lo, pagination karo. Simple lekin OFFSET large tables pe slow hota hai — important!',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, sal`,l:[0]},
+  {t:`<span class="kw">FROM</span>   employees`,l:[1]},
+  {t:`<span class="kw">ORDER BY</span> sal <span class="kw">DESC</span>, name <span class="kw">ASC</span>`,l:[2]},
+  {t:`<span class="kw">LIMIT</span>  <span class="num">3</span>`,l:[3]},
+  {t:`<span class="kw">OFFSET</span> <span class="num">1</span>;`,l:[4]},
+ ],
+ steps:[
+  {label:'ORDER BY',qL:[2],cpp:`<span class="ct">sort</span>(begin,end,\n  [](a,b){ <span class="ck">return</span> a.sal>b.sal; });`,
+   explain:`<b>ORDER BY sal DESC</b> = descending (bada se chota). Multiple columns: pehla primary sort, doosra tiebreaker. NULL = default first (DESC pe) ya last (ASC pe).`,
+   render(){const s=[...EMP].sort((a,b)=>b.sal-a.sal||a.name.localeCompare(b.name));return`<div class="dl">Sorted DESC by sal:</div>${s.map((r,i)=>rb('hi',`#${i+1} ${r.name}: ₹${r.sal}`)).join('')}`;}},
+  {label:'OFFSET',qL:[4],cpp:`<span class="cc">// OFFSET = pehle N rows skip</span>\ndata = data.slice(<span class="num">1</span>);`,
+   explain:`<b>OFFSET 1</b> = pehli row skip. Warning: OFFSET 1,000,000 = 1M rows scan karke discard! Production mein keyset pagination prefer karo.`,
+   render(){const s=[...EMP].sort((a,b)=>b.sal-a.sal);return`<div class="dl">OFFSET 1 (skip 1st):</div>${s.map((r,i)=>rb(i===0?'fail':'hi',`${i===0?'✗ SKIP':'✓'} #${i+1} ${r.name}: ₹${r.sal}`)).join('')}`;}},
+  {label:'LIMIT',qL:[3,4],cpp:`<span class="cc">// LIMIT = first N results</span>\ndata.resize(<span class="num">3</span>);`,
+   explain:`<b>LIMIT 3 OFFSET 1</b> = skip 1, next 3 lo. Pagination: Page N = LIMIT pageSize OFFSET (N-1)*pageSize.`,
+   render(){const s=[...EMP].sort((a,b)=>b.sal-a.sal).slice(1,4);return tbl(['#','name','sal'],s.map((r,i)=>[(i+2),r.name,`<span class="nc">₹${r.sal}</span>`]))+`<div class="info-box info" style="margin-top:6px">Pagination: Page N → OFFSET (N-1)×pageSize LIMIT pageSize</div>`;}},
+ ]},
+
+{cat:'Foundations',name:'DISTINCT & COUNT',diff:'e',
+ desc:'DISTINCT=std::set (dups out). COUNT(*) vs COUNT(col) — NULL ka fark yaad rakho!',
+ query:[
+  {t:`<span class="kw">SELECT</span>`,l:[0]},
+  {t:`  <span class="fn">COUNT</span>(*)                <span class="kw">AS</span> total,`,l:[1]},
+  {t:`  <span class="fn">COUNT</span>(mgr)             <span class="kw">AS</span> has_mgr,`,l:[2]},
+  {t:`  <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> dept)  <span class="kw">AS</span> depts`,l:[3]},
+  {t:`<span class="kw">FROM</span> employees;`,l:[4]},
+ ],
+ steps:[
+  {label:'COUNT(*)',qL:[1],cpp:`<span class="cc">// COUNT(*) = vector.size()</span>\n<span class="ck">int</span> n = table.size(); <span class="cc">// ${EMP.length}</span>`,
+   explain:`<b>COUNT(*)</b> = sab rows count karo, NULL bhi. Sirf row existence matter karta hai.`,
+   render(){return`<div class="dl">COUNT(*) = ${EMP.length} (NULL bhi count):</div>${EMP.map(r=>rb('hi',`✓ ${r.name} (mgr: ${r.mgr===null?'NULL':r.mgr})`)).join('')}`;}},
+  {label:'COUNT(col)',qL:[2],cpp:`<span class="ck">int</span> n=0;\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:t)\n  <span class="ck">if</span>(r.mgr != nullptr) n++;`,
+   explain:`<b>COUNT(mgr)</b> = sirf non-NULL values count. Yahi interview trap hai! COUNT(*) vs COUNT(col) alag ho sakte hain.`,
+   render(){return`<div class="dl">COUNT(mgr) — NULLs skip:</div>${EMP.map(r=>rb(r.mgr!==null?'pass':'fail',`${r.mgr!==null?'✓ counted':'✗ NULL skip'} ${r.name}: mgr=${r.mgr===null?'NULL':r.mgr}`)).join('')}<div class="info-box warn" style="margin-top:6px">COUNT(*) = ${EMP.length} vs COUNT(mgr) = ${EMP.filter(r=>r.mgr!==null).length}</div>`;}},
+  {label:'DISTINCT',qL:[3],cpp:`<span class="cc">// COUNT(DISTINCT col)</span>\nset&lt;string&gt; s;\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:t) s.insert(r.dept);\n<span class="cc">// s.size() = result</span>`,
+   explain:`<b>COUNT(DISTINCT dept)</b> = unique departments. std::set mein insert karo — dups automatic reject. ${new Set(EMP.map(r=>r.dept)).size} unique departments.`,
+   render(){const seen=new Set();return`<div class="dl">DISTINCT dept (set insertion):</div>${EMP.map(r=>{const isNew=!seen.has(r.dept);seen.add(r.dept);return rb(isNew?'pass':'fail',`${isNew?'✓ added':'✗ dup skip'} "${r.dept}" (${r.name})`);}).join('')}<div class="info-box ok" style="margin-top:6px">COUNT(DISTINCT dept) = ${seen.size}</div>`;}},
+ ]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// JOINs
+// ──────────────────────────────────────────────────────────────────────────────
+
+{cat:'JOINs',name:'INNER JOIN',diff:'e',
+ desc:'Sirf matching rows dono tables se. Nested loop jaisa — dono sides match hona chahiye.',
+ query:[
+  {t:`<span class="kw">SELECT</span> c.name, o.prod, o.amt`,l:[0]},
+  {t:`<span class="kw">FROM</span>   customers c`,l:[1]},
+  {t:`<span class="kw">INNER JOIN</span> orders o`,l:[2]},
+  {t:`  <span class="kw">ON</span> c.name <span class="op">=</span> o.cust;`,l:[3]},
+ ],
+ steps:[
+  {label:'Tables',qL:[1,2],cpp:`<span class="ck">vector</span>&lt;Customer&gt; A = load();\n<span class="ck">vector</span>&lt;Order&gt; B = load();`,
+   explain:`<b>Two tables</b> — customers (5 rows, Rohan bhi jiska order nahi) aur orders (6 rows). INNER JOIN sirf matches return karega.`,
+   render(){return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><div class="dl">customers (5):</div>${CUST.map(r=>rb('am',`${r.name}`)).join('')}</div><div><div class="dl">orders (6):</div>${ORD.map(r=>rb('pu',`${r.cust}: ₹${r.amt}`)).join('')}</div></div>`;}},
+  {label:'Nested Loop',qL:[3],cpp:`<span class="ck">for</span>(<span class="ck">auto</span>&amp; c:A)\n  <span class="ck">for</span>(<span class="ck">auto</span>&amp; o:B)\n    <span class="ck">if</span>(c.name==o.cust)\n      result.push_back({c,o});`,
+   explain:`<b>ON c.name = o.cust</b> — nested loop. Match mila? Combine. Rohan ka match nahi — INNER JOIN mein woh skip.`,
+   render(){return`<div class="dl">Matches:</div>${CUST.map(c=>{const ms=ORD.filter(o=>o.cust===c.name);if(ms.length)return ms.map(o=>`<div class="jrow"><span class="jc a">${c.name}</span><span style="color:var(--teal)">⟶</span><span class="jc m">${o.prod} ₹${o.amt}</span></div>`).join('');return`<div class="jrow"><span class="jc a">${c.name}</span><span style="color:var(--text3);font-size:12px">✗</span><span class="jc n">no match</span></div>`;}).join('')}`;}},
+  {label:'Result',qL:[0,1,2,3],cpp:`<span class="cc">// Rohan missing!</span>`,
+   explain:`<b>INNER JOIN</b> = intersection. Rohan result mein nahi. Sab customers chahiye? LEFT JOIN use karo.`,
+   render(){return tbl(['name','product','amount'],CUST.flatMap(c=>ORD.filter(o=>o.cust===c.name).map(o=>[c.name,o.prod,`<span class="nc">₹${o.amt}</span>`])));}},
+ ]},
+
+{cat:'JOINs',name:'LEFT / RIGHT / FULL JOIN',diff:'m',
+ desc:'LEFT=sab left+NULL, RIGHT=sab right+NULL, FULL=dono ke sab. Venn diagram se sochna easy hai.',
+ query:[
+  {t:`<span class="kw">SELECT</span> c.name, o.prod, o.amt`,l:[0]},
+  {t:`<span class="kw">FROM</span>   customers c`,l:[1]},
+  {t:`<span class="kw">LEFT JOIN</span> orders o`,l:[2]},
+  {t:`  <span class="kw">ON</span> c.name <span class="op">=</span> o.cust;`,l:[3]},
+ ],
+ steps:[
+  {label:'LEFT JOIN',qL:[1,2,3],cpp:`<span class="ck">for</span>(<span class="ck">auto</span>&amp; c:customers){\n  bool found=false;\n  <span class="ck">for</span>(<span class="ck">auto</span>&amp; o:orders)\n    <span class="ck">if</span>(match){push({c,o});found=true;}\n  <span class="ck">if</span>(!found) push({c,NULL});\n}`,
+   explain:`<b>LEFT JOIN</b> — LEFT table (customers) ki sab rows aayengi. Match nahi mila? NULL aayega. Rohan aayega NULL ke saath.`,
+   render(){return`<div class="dl">LEFT JOIN (Rohan bhi):</div>${CUST.map(c=>{const ms=ORD.filter(o=>o.cust===c.name);if(ms.length)return ms.map(o=>`<div class="jrow"><span class="jc m">${c.name}</span><span style="color:var(--teal)">→</span><span class="jc m">₹${o.amt}</span></div>`).join('');return`<div class="jrow"><span class="jc a">${c.name}</span><span style="color:var(--amber)">→</span><span class="jc n">NULL</span></div>`;}).join('')}`;}},
+  {label:'Venn Diagram',qL:[0,1,2,3],cpp:`<span class="cc">// INNER: A ∩ B</span>\n<span class="cc">// LEFT:  A ∪ (A∩B)</span>\n<span class="cc">// RIGHT: B ∪ (A∩B)</span>\n<span class="cc">// FULL:  A ∪ B</span>`,
+   explain:`<b>JOIN types:</b> INNER=common only, LEFT=left circle full, RIGHT=right circle full, FULL=dono circles. NULL aata hai jahan match nahi.`,
+   render(){return`<svg class="venn-svg" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg"><circle cx="110" cy="80" r="65" fill="rgba(77,159,255,0.15)" stroke="rgba(77,159,255,0.5)" stroke-width="1.5"/><circle cx="190" cy="80" r="65" fill="rgba(0,212,170,0.15)" stroke="rgba(0,212,170,0.5)" stroke-width="1.5"/><text x="80" y="76" fill="#a8d0ff" font-size="11" text-anchor="middle" font-family="JetBrains Mono">Customers</text><text x="80" y="90" fill="#a8d0ff" font-size="10" text-anchor="middle" font-family="JetBrains Mono">(LEFT)</text><text x="220" y="76" fill="#7eeedd" font-size="11" text-anchor="middle" font-family="JetBrains Mono">Orders</text><text x="220" y="90" fill="#7eeedd" font-size="10" text-anchor="middle" font-family="JetBrains Mono">(RIGHT)</text><text x="150" y="76" fill="#e8eaf0" font-size="10" text-anchor="middle" font-family="JetBrains Mono">INNER</text><text x="150" y="90" fill="#e8eaf0" font-size="10" text-anchor="middle" font-family="JetBrains Mono">JOIN</text></svg><div style="display:flex;flex-direction:column;gap:4px">${[{n:'INNER JOIN',d:'Sirf common rows',c:'te'},{n:'LEFT JOIN',d:'Sab left + matched right (NULL baaki)',c:'bl'},{n:'RIGHT JOIN',d:'Sab right + matched left (NULL baaki)',c:'am'},{n:'FULL OUTER JOIN',d:'Dono ki sab rows (NULL jahan match nahi)',c:'pu'}].map(t=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:var(--card)"><span class="tag ${t.c}" style="min-width:130px;text-align:center">${t.n}</span><span style="font-size:11px;color:var(--text2)">${t.d}</span></div>`).join('')}</div>`;}},
+ ]},
+
+{cat:'JOINs',name:'SELF JOIN',diff:'m',
+ desc:'Ek table khud se join karo. Employee-Manager hierarchy, consecutive rows compare karna.',
+ query:[
+  {t:`<span class="kw">SELECT</span>`,l:[0]},
+  {t:`  e.name  <span class="kw">AS</span> employee,`,l:[1]},
+  {t:`  m.name  <span class="kw">AS</span> manager`,l:[2]},
+  {t:`<span class="kw">FROM</span>   employees e`,l:[3]},
+  {t:`<span class="kw">LEFT JOIN</span> employees m`,l:[4]},
+  {t:`  <span class="kw">ON</span> e.mgr <span class="op">=</span> m.id;`,l:[5]},
+ ],
+ steps:[
+  {label:'Same table 2x',qL:[3,4],cpp:`<span class="cc">// Same vector, 2 aliases</span>\nauto& e = employees; <span class="cc">// as "e"</span>\nauto& m = employees; <span class="cc">// as "m"</span>`,
+   explain:`<b>SELF JOIN</b> — same table do alag aliases se. 'e' = employee, 'm' = manager (same table). Hierarchy, consecutive rows — yahan use hota hai.`,
+   render(){return`<div class="dl">employees (mgr = manager's id):</div>${EMP.map(r=>rb('hi',`id:${r.id} ${r.name} — mgr:${r.mgr===null?'NULL':r.mgr}`)).join('')}`;}},
+  {label:'Match mgr',qL:[5],cpp:`<span class="ck">for</span>(<span class="ck">auto</span>&amp; emp:e)\n  <span class="ck">for</span>(<span class="ck">auto</span>&amp; mgr:m)\n    <span class="ck">if</span>(emp.mgr==mgr.id)\n      push({emp.name,mgr.name});`,
+   explain:`<b>ON e.mgr = m.id</b> — employee ka manager_id match ho raha doosre alias mein. NULL wale (Amit, Rohit, Sara) = top-level = NULL manager mein aayenge.`,
+   render(){return`<div class="dl">Employee → Manager:</div>${EMP.map(emp=>{const mgr=EMP.find(m=>m.id===emp.mgr);return`<div class="jrow"><span class="jc a">${emp.name}</span><span style="color:var(--text3)">mgr→</span><span class="${mgr?'jc m':'jc n'}">${mgr?mgr.name:'NULL (boss!)'}</span></div>`;}).join('')}`;}},
+ ]},
+
+{cat:'JOINs',name:'CROSS JOIN + Multiple JOINs',diff:'m',
+ desc:'CROSS JOIN=cartesian product (M×N rows). Multiple JOINs = chain karo.',
+ query:[
+  {t:`<span class="cm">-- CROSS JOIN:</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> a.name, b.name`,l:[1]},
+  {t:`<span class="kw">FROM</span> emp a <span class="kw">CROSS JOIN</span> emp b`,l:[2]},
+  {t:`<span class="kw">WHERE</span> a.id <span class="op">&lt;</span> b.id;`,l:[3]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Multiple JOINs:</span>`,l:[]},
+  {t:`<span class="kw">FROM</span> emp e`,l:[6]},
+  {t:`<span class="kw">JOIN</span> dept d <span class="kw">ON</span> e.dept=d.code`,l:[7]},
+  {t:`<span class="kw">JOIN</span> proj p <span class="kw">ON</span> e.id=p.emp_id;`,l:[8]},
+ ],
+ steps:[
+  {label:'CROSS JOIN',qL:[1,2,3],cpp:`<span class="ck">for</span>(<span class="ck">auto</span>&amp; a:A)\n  <span class="ck">for</span>(<span class="ck">auto</span>&amp; b:B)\n    result.push_back({a,b});\n<span class="cc">// N×N rows!</span>`,
+   explain:`<b>CROSS JOIN</b> = koi ON condition nahi. Har row × har row. 6×6=36 combinations! Pairs nikalne ke liye WHERE a.id < b.id se unique pairs lo.`,
+   render(){const c=EMP.slice(0,4);return`<div class="dl">Unique pairs (id < id, first 4 emp):</div>${c.flatMap(a=>c.map(b=>a.id<b.id?`<div class="jrow"><span class="jc a">${a.name}</span><span style="color:var(--text3)">↔</span><span class="jc b">${b.name}</span></div>`:null)).filter(Boolean).join('')}<div class="info-box warn" style="margin-top:6px">Use: pair generation, calendar, all combinations.</div>`;}},
+  {label:'Multiple JOINs',qL:[6,7,8],cpp:`<span class="cc">// Chain JOINs left to right</span>\nresult = A.join(B).join(C);`,
+   explain:`<b>Multiple JOINs</b> — pehle emp+dept join → intermediate. Phir woh + projects. Har JOIN ek naya intermediate table banata hai. Performance ke liye chhote tables pehle filter karo.`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:6px">${[{s:'employees',d:'Base table (6 rows)',c:'bl'},{s:'JOIN departments',d:'Intermediate: 6 rows + dept_name',c:'te'},{s:'JOIN projects',d:'Final: employee + dept + project',c:'am'}].map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card)"><span style="font-size:10px;color:var(--text3);min-width:18px;font-weight:600">${i+1}.</span><span class="tag ${s.c}">${s.s}</span><span style="font-size:12px;color:var(--text2)">${s.d}</span></div>`).join('')}</div>`;}},
+ ]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ADVANCED
+// ──────────────────────────────────────────────────────────────────────────────
+
+{cat:'Advanced',name:'Window Functions — OVER()',diff:'h',
+ desc:'Window functions rows collapse NAHI karte (GROUP BY karta hai). Extra column add hoti hai. Most powerful SQL feature!',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, dept, sal,`,l:[0]},
+  {t:`  <span class="fn">RANK</span>() <span class="kw">OVER</span> (`,l:[1]},
+  {t:`    <span class="kw">PARTITION BY</span> dept`,l:[2]},
+  {t:`    <span class="kw">ORDER BY</span> sal <span class="kw">DESC</span>`,l:[3]},
+  {t:`  ) <span class="kw">AS</span> dept_rank`,l:[4]},
+  {t:`<span class="kw">FROM</span> employees;`,l:[5]},
+ ],
+ steps:[
+  {label:'No collapse!',qL:[0,5],cpp:`<span class="cc">// GROUP BY = rows collapse</span>\n<span class="cc">// WINDOW  = rows RAKHTA HAI</span>\n<span class="cc">// Sirf extra column add</span>`,
+   explain:`<b>Window function magic</b> — 6 employees → 6 rows (collapse nahi!). bas ek extra column "dept_rank" aati hai. GROUP BY mein 6→3 rows ho jaate.`,
+   render(){return`<div class="dl">Saari rows intact:</div>${EMP.map(r=>rb('hi',`${r.name} dept=${r.dept} sal=${r.sal} rank=?`)).join('')}`;}},
+  {label:'PARTITION BY',qL:[2],cpp:`<span class="cc">// PARTITION BY = reset window</span>\nmap&lt;string,vector&lt;Row&gt;&gt; parts;`,
+   explain:`<b>PARTITION BY dept</b> — data dept ke andar windows mein. Har dept apna window. RANK() har window independently calculate hoti hai.`,
+   render(){const g={};EMP.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r);});return`<div class="gc-row">${Object.entries(g).map(([k,v])=>`<div class="gc" style="background:${C[k].bg};border-color:${C[k].bd}"><div style="font-size:12px;font-weight:600;color:${C[k].tx}">Partition: ${k}</div>${v.map(r=>`<div style="font-size:11px;font-family:var(--mono);color:${C[k].tx}">${r.name}: ₹${r.sal}</div>`).join('')}</div>`).join('')}</div>`;}},
+  {label:'RANK()',qL:[1,3,4],cpp:`<span class="ck">for</span>(<span class="ck">auto</span>&amp; [dept,rows]:parts){\n  sort(rows, by sal DESC);\n  <span class="ck">for</span>(<span class="ck">int</span> i=0;i&lt;rows.size();i++)\n    rows[i].rank = i+1;\n}`,
+   explain:`<b>RANK ORDER BY sal DESC</b> = har partition ke andar salary rank. RANK=ties ke baad gap (1,2,2,4). DENSE_RANK=no gap (1,2,2,3). ROW_NUMBER=always unique (1,2,3,4).`,
+   render(){const g={};EMP.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push({...r});});Object.values(g).forEach(arr=>{arr.sort((a,b)=>b.sal-a.sal);arr.forEach((r,i)=>r.rank=i+1);});const all=Object.values(g).flat().sort((a,b)=>a.id-b.id);return tbl(['name','dept','sal','dept_rank'],all.map(r=>[r.name,r.dept,`₹${r.sal}`,`<span class="nc">#${r.rank}</span>`]));}},
+  {label:'LAG/LEAD',qL:[0,1],cpp:`<span class="cc">// LAG = pichli row</span>\nrows[i-1].sal;\n<span class="cc">// LEAD = agli row</span>\nrows[i+1].sal;`,
+   explain:`<b>LAG(sal,1)</b> = pichle ki salary. <b>LEAD(sal,1)</b> = agle ki. MoM growth: sal - LAG(sal) OVER (ORDER BY month). Time series ke liye perfect.`,
+   render(){return tbl(['name','sal','LAG(sal)','diff'],EMP.map((r,i)=>{const lag=i>0?EMP[i-1].sal:null;const diff=lag?r.sal-lag:null;return[r.name,`₹${r.sal}`,lag?`₹${lag}`:`<span class="null-val">NULL</span>`,diff===null?'—':`<span style="color:${diff>0?'var(--teal)':'var(--red)'}">${diff>0?'+':''} ${diff}</span>`];}));}},
+ ]},
+
+{cat:'Advanced',name:'RANK vs DENSE_RANK vs ROW_NUMBER',diff:'h',
+ desc:'Teeno ranking dete hain — ties (same values) pe alag behave. Interview classic! Top-N per group bhi yahan.',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, sal,`,l:[0]},
+  {t:`  <span class="fn">RANK</span>()       <span class="kw">OVER</span>(w) <span class="kw">AS</span> rnk,`,l:[1]},
+  {t:`  <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span>(w) <span class="kw">AS</span> dense,`,l:[2]},
+  {t:`  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span>(w) <span class="kw">AS</span> rownum`,l:[3]},
+  {t:`<span class="kw">FROM</span> employees`,l:[4]},
+  {t:`<span class="kw">WINDOW</span> w <span class="kw">AS</span> (<span class="kw">ORDER BY</span> sal <span class="kw">DESC</span>);`,l:[5]},
+ ],
+ steps:[
+  {label:'Tie data',qL:[4,5],cpp:`<span class="cc">// Raj & Priya same sal — tie!</span>`,
+   explain:`Tie scenario: 2 employees ko same salary do. Teeno functions alag behave karenge.`,
+   render(){const demo=[{name:'Amit',sal:120000},{name:'Raj',sal:90000},{name:'Priya',sal:90000},{name:'Rohit',sal:85000},{name:'Neha',sal:70000},{name:'Sara',sal:65000}];return`<div class="dl">Data (Raj & Priya: same sal tie):</div>${demo.map(r=>rb('hi',`${r.name}: ₹${r.sal}${r.sal===90000?' ← TIE!':''}`)).join('')}`;}},
+  {label:'All 3 ranks',qL:[1,2,3],cpp:`<span class="cc">// RANK:       1,2,2,4 (gap!)</span>\n<span class="cc">// DENSE_RANK: 1,2,2,3 (no gap)</span>\n<span class="cc">// ROW_NUMBER: 1,2,3,4 (unique)</span>`,
+   explain:`<b>RANK</b> gap aata hai ties ke baad. <b>DENSE_RANK</b> gap nahi. <b>ROW_NUMBER</b> hamesha unique. <b>Top-N per group ke liye ROW_NUMBER use karo!</b>`,
+   render(){const demo=[{name:'Amit',sal:120000},{name:'Raj',sal:90000},{name:'Priya',sal:90000},{name:'Rohit',sal:85000},{name:'Neha',sal:70000},{name:'Sara',sal:65000}];let rnk=1,drnk=1,prevSal=null,skipped=0;const rows=demo.map((r,i)=>{if(prevSal!==null&&r.sal===prevSal){skipped++;return{...r,rnk:rnk,drnk,rownum:i+1};}else{if(prevSal!==null){rnk+=skipped+1;drnk+=1;skipped=0;}else{rnk=1;drnk=1;}prevSal=r.sal;return{...r,rnk,drnk,rownum:i+1};}});return tbl(['name','sal','RANK','DENSE_RANK','ROW_NUMBER'],rows.map(r=>[r.name,`₹${r.sal}`,r.rnk,`<span class="nc">${r.drnk}</span>`,r.rownum]))+`<div class="info-box info" style="margin-top:6px">⚡ Top-N per group → ROW_NUMBER() + WHERE rn ≤ N</div>`;}},
+  {label:'Top-N Pattern',qL:[1,2,3,4,5],cpp:`<span class="cc">// CTE + ROW_NUMBER + WHERE</span>`,
+   explain:`<b>Top 2 per department</b> — most common interview question. Pattern: CTE mein ROW_NUMBER() OVER (PARTITION BY dept ORDER BY sal DESC) AS rn, phir WHERE rn <= 2.`,
+   render(){const g={};EMP.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push({...r});});const result=[];Object.entries(g).forEach(([dept,rows])=>{rows.sort((a,b)=>b.sal-a.sal);rows.slice(0,2).forEach((r,i)=>result.push({...r,rn:i+1}));});return tbl(['dept','name','sal','rn'],result.map(r=>[r.dept,r.name,`₹${r.sal}`,`<span class="nc">#${r.rn}</span>`]));}},
+ ]},
+
+{cat:'Advanced',name:'Running Total & Moving Avg',diff:'h',
+ desc:'ROWS BETWEEN clause se running totals, cumulative sums, moving averages. Time series analysis ke liye essential.',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, sal,`,l:[0]},
+  {t:`  <span class="fn">SUM</span>(sal) <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> sal`,l:[1]},
+  {t:`    <span class="kw">ROWS BETWEEN</span>`,l:[2]},
+  {t:`    <span class="kw">UNBOUNDED PRECEDING</span>`,l:[3]},
+  {t:`    <span class="kw">AND CURRENT ROW</span>`,l:[4]},
+  {t:`  ) <span class="kw">AS</span> running_total,`,l:[5]},
+  {t:`  <span class="fn">AVG</span>(sal) <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> sal`,l:[6]},
+  {t:`    <span class="kw">ROWS BETWEEN</span> <span class="num">1</span> <span class="kw">PRECEDING</span>`,l:[7]},
+  {t:`    <span class="kw">AND</span> <span class="num">1</span> <span class="kw">FOLLOWING</span>) <span class="kw">AS</span> mov_avg`,l:[8]},
+ ],
+ steps:[
+  {label:'Running Total',qL:[1,2,3,4,5],cpp:`<span class="cc">// Cumulative sum</span>\nint running = 0;\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:sorted)\n  running += r.sal;`,
+   explain:`<b>UNBOUNDED PRECEDING AND CURRENT ROW</b> = pehli row se current tak ka sum. Yahi running total / cumulative sum hai.`,
+   render(){const sorted=[...EMP].sort((a,b)=>a.sal-b.sal);let run=0;return tbl(['name','sal','running_total'],sorted.map(r=>{run+=r.sal;return[r.name,`₹${r.sal}`,`<span class="nc">₹${run}</span>`];}));}},
+  {label:'Moving Avg',qL:[6,7,8],cpp:`<span class="cc">// 3-row moving window</span>\n<span class="cc">// [i-1, i, i+1]</span>\navg(rows.slice(i-1,i+2));`,
+   explain:`<b>1 PRECEDING AND 1 FOLLOWING</b> = 3-row sliding window. Center row + ek pehle + ek baad. Pehli aur aakhri row mein window chhoti hoti hai (NULL se handle hoti hai).`,
+   render(){const sorted=[...EMP].sort((a,b)=>a.sal-b.sal);return tbl(['name','sal','3-row MovAvg'],sorted.map((r,i)=>{const slice=[i>0?sorted[i-1].sal:null,r.sal,i<sorted.length-1?sorted[i+1].sal:null].filter(x=>x!==null);const avg=Math.round(slice.reduce((a,b)=>a+b,0)/slice.length);return[r.name,`₹${r.sal}`,`<span class="nc">₹${avg}</span>`];}));}},
+  {label:'Frame Types',qL:[2,3,4,7,8],cpp:`<span class="cc">// Frame options:</span>\n<span class="cc">// UNBOUNDED PRECEDING</span>\n<span class="cc">// N PRECEDING</span>\n<span class="cc">// CURRENT ROW</span>\n<span class="cc">// N FOLLOWING</span>\n<span class="cc">// UNBOUNDED FOLLOWING</span>`,
+   explain:`<b>Window frame cheatsheet</b> — ROWS = physical row count. RANGE = value range. Running total, cumulative %, 7-day MA — sab frame types se banao.`,
+   render(){const frames=[['UNBOUNDED PRECEDING AND CURRENT ROW','Running total / cumulative sum','te'],['1 PRECEDING AND 1 FOLLOWING','3-row moving average','bl'],['UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING','Poori partition (khaali OVER jaisa)','am'],['CURRENT ROW AND UNBOUNDED FOLLOWING','Reverse running total','pu']];return frames.map(([f,d,c])=>`<div class="rb ${c}" style="flex-direction:column;align-items:flex-start;margin-bottom:3px"><div style="font-family:var(--mono);font-size:10.5px;font-weight:600">${f}</div><div style="font-size:11px;margin-top:2px;opacity:.8">${d}</div></div>`).join('');}},
+ ]},
+
+{cat:'Advanced',name:'CTE (WITH Clause)',diff:'m',
+ desc:'CTE = Common Table Expression. Named temporary result. Complex queries readable banao. Recursive CTE se tree data!',
+ query:[
+  {t:`<span class="kw">WITH</span> high_earners <span class="kw">AS</span> (`,l:[0]},
+  {t:`  <span class="kw">SELECT</span> name,dept,sal <span class="kw">FROM</span> emp`,l:[1]},
+  {t:`  <span class="kw">WHERE</span> sal <span class="op">&gt;</span> <span class="num">80000</span>`,l:[2]},
+  {t:`),`,l:[3]},
+  {t:`dept_avg <span class="kw">AS</span> (`,l:[4]},
+  {t:`  <span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(sal) avg`,l:[5]},
+  {t:`  <span class="kw">FROM</span>   high_earners`,l:[6]},
+  {t:`  <span class="kw">GROUP BY</span> dept`,l:[7]},
+  {t:`)`,l:[8]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> dept_avg;`,l:[9]},
+ ],
+ steps:[
+  {label:'CTE 1',qL:[0,1,2,3],cpp:`<span class="cc">// CTE = named temp variable</span>\nauto high_earners = emp\n  .filter(sal > 80000);`,
+   explain:`<b>WITH high_earners AS (...)</b> — ek temporary named table. Subquery ki tarah lekin naam milta hai. Aage ke CTEs aur final SELECT mein use karo.`,
+   render(){return`<div class="cte-box"><div class="cte-label">CTE 1: high_earners (sal > 80000)</div>${EMP.filter(r=>r.sal>80000).map(r=>rb('pass',`{name:"${r.name}", dept:"${r.dept}", sal:${r.sal}}`)).join('')}</div>`;}},
+  {label:'CTE 2',qL:[4,5,6,7,8],cpp:`<span class="cc">// CTE 2 uses CTE 1!</span>\nauto dept_avg = high_earners\n  .groupBy(dept).avg(sal);`,
+   explain:`<b>dept_avg</b> CTE — high_earners ka use kar raha hai! CTEs ek doosre ko reference kar sakte hain (upar wale ko).`,
+   render(){const he=EMP.filter(r=>r.sal>80000);const g={};he.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.sal);});return`<div class="cte-box"><div class="cte-label">CTE 2: dept_avg (high_earners se)</div>${tbl(['dept','avg_sal'],Object.entries(g).map(([k,v])=>[k,`<span class="nc">${fmt(Math.round(v.reduce((a,b)=>a+b,0)/v.length))}</span>`]))}</div>`;}},
+  {label:'Final',qL:[9],cpp:`<span class="cc">// CTE = normal table ki tarah</span>\nSELECT * FROM dept_avg;`,
+   explain:`<b>CTE vs Subquery:</b> CTE = readable, reusable, multiple reference. Subquery = inline, one-time. <b>Recursive CTE</b> se tree/hierarchy data traverse karo.`,
+   render(){const he=EMP.filter(r=>r.sal>80000);const g={};he.forEach(r=>{if(!g[r.dept])g[r.dept]=[];g[r.dept].push(r.sal);});return tbl(['dept','avg (high earners only)'],Object.entries(g).map(([k,v])=>[k,`<span class="nc">${fmt(Math.round(v.reduce((a,b)=>a+b,0)/v.length))}</span>`]))+`<div class="info-box info" style="margin-top:6px">💡 CTE = WITH clause = temporary named result = readable subquery</div>`;}},
+ ]},
+
+{cat:'Advanced',name:'Recursive CTE',diff:'h',
+ desc:'Tree aur hierarchy traverse karna. Employee→Manager chain, folder structure, graph traversal.',
+ query:[
+  {t:`<span class="kw">WITH RECURSIVE</span> org <span class="kw">AS</span> (`,l:[0]},
+  {t:`  <span class="cm">-- Base: root nodes</span>`,l:[]},
+  {t:`  <span class="kw">SELECT</span> id,name,mgr,<span class="num">0</span> lvl`,l:[2]},
+  {t:`  <span class="kw">FROM</span> emp <span class="kw">WHERE</span> mgr <span class="kw">IS NULL</span>`,l:[3]},
+  {t:`  <span class="kw">UNION ALL</span>`,l:[4]},
+  {t:`  <span class="cm">-- Recursive: children</span>`,l:[]},
+  {t:`  <span class="kw">SELECT</span> e.id,e.name,e.mgr,o.lvl+<span class="num">1</span>`,l:[6]},
+  {t:`  <span class="kw">FROM</span> emp e`,l:[7]},
+  {t:`  <span class="kw">JOIN</span> org o <span class="kw">ON</span> e.mgr=o.id`,l:[8]},
+  {t:`)`,l:[9]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> org;`,l:[10]},
+ ],
+ steps:[
+  {label:'Base case',qL:[2,3],cpp:`<span class="cc">// Recursion ka start</span>\n<span class="cc">// mgr IS NULL = roots</span>\nqueue.push(roots);`,
+   explain:`<b>Base case</b> — root nodes: mgr IS NULL. Amit aur Rohit top-level hain. Level=0.`,
+   render(){return`<div class="dl">Root nodes (mgr IS NULL):</div>${EMP.filter(r=>r.mgr===null).map(r=>rb('pass',`Level 0: ${r.name} (id:${r.id})`)).join('')}`;}},
+  {label:'Recursive',qL:[4,6,7,8],cpp:`<span class="cc">// BFS tree traversal</span>\nwhile(!queue.empty()) {\n  node = queue.front();\n  children = find(mgr==node.id);\n  queue.push(children);\n}`,
+   explain:`<b>UNION ALL + self-join</b> — har iteration mein next level ke children milte hain. BFS jaisa. Termination: jab koi naye rows na milein.`,
+   render(){function getLevel(emp,level=0){const children=EMP.filter(e=>e.mgr===emp.id);return[{...emp,level},...children.flatMap(c=>getLevel(c,level+1))];}const roots=EMP.filter(r=>r.mgr===null);const tree=roots.flatMap(r=>getLevel(r));return`<div class="dl">Full tree traversal:</div>${tree.map(r=>rb('hi','  '.repeat(r.level)+`${'└─'.repeat(r.level)} L${r.level}: ${r.name}`)).join('')}`;}},
+ ]},
+
+{cat:'Advanced',name:'Subquery / EXISTS / IN',diff:'m',
+ desc:'Subquery=query mein query. EXISTS aur IN dono membership check — performance alag hai.',
+ query:[
+  {t:`<span class="cm">-- Scalar subquery:</span>`,l:[]},
+  {t:`<span class="kw">WHERE</span> sal <span class="op">&gt;</span> (<span class="kw">SELECT</span> <span class="fn">AVG</span>(sal) <span class="kw">FROM</span> emp)`,l:[1]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Correlated subquery:</span>`,l:[]},
+  {t:`<span class="kw">WHERE EXISTS</span>`,l:[4]},
+  {t:`  (<span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> orders o`,l:[5]},
+  {t:`   <span class="kw">WHERE</span> o.cust <span class="op">=</span> e.name)`,l:[6]},
+ ],
+ steps:[
+  {label:'Scalar',qL:[1],cpp:`<span class="cc">// Inner pehle, outer baad</span>\ndouble avg = calcAvg(emp);\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:emp)\n  <span class="ck">if</span>(r.sal > avg) keep;`,
+   explain:`<b>Scalar subquery</b> — ek single value return. Inner pehle chalta hai (AVG), phir outer WHERE mein use. Nested function call jaisa.`,
+   render(){const avg=Math.round(EMP.reduce((s,r)=>s+r.sal,0)/EMP.length);return`<div class="cte-box"><div class="cte-label">Inner query result</div><div style="font-size:16px;color:var(--blue-dk);font-weight:600;font-family:var(--mono)">AVG(sal) = ₹${avg}</div></div><div class="dl">WHERE sal > ${avg}:</div>${EMP.map(r=>rb(r.sal>avg?'pass':'fail',`${r.sal>avg?'✓':'✗'} ${r.name}: ₹${r.sal}`)).join('')}`;}},
+  {label:'IN vs EXISTS',qL:[4,5,6],cpp:`<span class="cc">// IN: set mein hai?</span>\nset&lt;T&gt; s=subquery();\nif(s.count(val)) keep;\n\n<span class="cc">// EXISTS: row milti hai?</span>\nif(!subquery.empty()) keep;`,
+   explain:`<b>EXISTS</b> = koi bhi row milti hai (TRUE/FALSE, short-circuit). <b>IN</b> = value list mein. NOT IN NULL trap: list mein NULL ho toh sab fail! NOT EXISTS prefer karo.`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:6px">${[{t:'EXISTS',d:'Koi row milti hai? Short-circuits. NULL-safe.',c:'ok'},{t:'IN',d:'Value list mein. Small lists ok. NULL beware.',c:'info'},{t:'NOT IN ⚠',d:'NULL trap! Subquery mein NULL → empty result!',c:'warn'},{t:'NOT EXISTS',d:'NULL-safe alternative. Production mein prefer.',c:'ok'}].map(it=>`<div class="info-box ${it.c}"><b>${it.t}:</b> ${it.d}</div>`).join('')}</div>`;}},
+ ]},
+
+{cat:'Advanced',name:'NULL — Interview Traps',diff:'h',
+ desc:'NULL ≠ 0, NULL ≠ empty. NULL = "unknown". NULL comparisons always return NULL. Sabse common gotcha!',
+ query:[
+  {t:`<span class="kw">WHERE</span> mgr <span class="op">=</span> <span class="kw">NULL</span>    <span class="cm">-- WRONG! 0 rows</span>`,l:[0]},
+  {t:`<span class="kw">WHERE</span> mgr <span class="kw">IS NULL</span>  <span class="cm">-- CORRECT</span>`,l:[1]},
+  {t:``,l:[]},
+  {t:`<span class="fn">COALESCE</span>(mgr, <span class="num">-1</span>)   <span class="cm">-- NULL → -1</span>`,l:[3]},
+  {t:`<span class="fn">NULLIF</span>(sal, <span class="num">0</span>)       <span class="cm">-- 0 → NULL</span>`,l:[4]},
+  {t:`<span class="fn">ISNULL</span>/<span class="fn">NVL</span>(col, def) <span class="cm">-- vendor specific</span>`,l:[5]},
+ ],
+ steps:[
+  {label:'NULL = NULL?',qL:[0,1],cpp:`<span class="cc">// SQL mein: NULL != NULL</span>\n<span class="cc">// Like NaN in C++</span>\nbool x = (NaN == NaN); <span class="cc">// false!</span>\n<span class="cc">// NULL = NULL → NULL (not TRUE)</span>`,
+   explain:`<b>NULL = NULL → NULL (not TRUE!)</b>. NULL = "unknown value". Do unknown cheezein equal nahi hoti. Hamesha IS NULL / IS NOT NULL use karo.`,
+   render(){return`<div class="dl">mgr IS NULL wale (3 top-level):</div>${EMP.map(r=>rb(r.mgr===null?'pass':'fail',`${r.mgr===null?'✓ IS NULL':'✗ has mgr'} ${r.name}: mgr=${r.mgr===null?'NULL':r.mgr}`)).join('')}`;}},
+  {label:'Arithmetic',qL:[],cpp:`<span class="cc">// NULL + anything = NULL</span>\nNULL + 5   = NULL\nNULL * 0   = NULL\nNULL || 'x'= NULL`,
+   explain:`<b>NULL + kuch = NULL.</b> AVG/SUM NULLs ignore karte hain. COUNT(*) sab rows. COUNT(col) NULLs skip.`,
+   render(){return tbl(['Expression','Result','Note'],[['NULL + 5','NULL','Anything + NULL = NULL'],['NULL * 0','NULL','0 bhi NULL nahi karta'],["NULL || 'hello'",'NULL','String concat bhi NULL'],['AVG(sal) with NULLs',fmt(Math.round(EMP.reduce((s,r)=>s+r.sal,0)/EMP.length)),'NULLs ignored'],['COUNT(*)',EMP.length,'Sab rows count'],['COUNT(mgr)',EMP.filter(r=>r.mgr!==null).length,'NULLs skip']].map(r=>[`<span style="font-family:var(--mono);color:var(--blue)">${r[0]}</span>`,`<span style="color:${r[1]==='NULL'?'var(--amber)':'var(--teal)'}font-weight:600">${r[1]}</span>`,r[2]]));}},
+  {label:'COALESCE',qL:[3,4,5],cpp:`<span class="cc">// COALESCE = first non-NULL</span>\nval = (mgr != nullptr) ? mgr : -1;\n<span class="cc">// NULLIF = agar equal toh NULL</span>\nval = (sal==0) ? nullptr : sal;`,
+   explain:`<b>COALESCE(a,b,c)</b> = pehli non-NULL value. Division by zero safe: COALESCE(NULLIF(denominator,0), 1). <b>NULLIF(a,b)</b> = a==b toh NULL return.`,
+   render(){return tbl(['name','mgr (raw)','COALESCE(mgr,-1)'],EMP.map(r=>[r.name,r.mgr===null?`<span class="null-val">NULL</span>`:r.mgr,`<span class="nc">${r.mgr===null?-1:r.mgr}</span>`]));}},
+ ]},
+
+{cat:'Advanced',name:'UNION vs UNION ALL',diff:'m',
+ desc:'UNION=combine+DISTINCT (slower). UNION ALL=combine only (faster). Columns same hone chahiye.',
+ query:[
+  {t:`<span class="kw">SELECT</span> name <span class="kw">FROM</span> customers`,l:[0]},
+  {t:`<span class="kw">UNION</span>`,l:[1]},
+  {t:`<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees;`,l:[2]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- vs faster:</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> name <span class="kw">FROM</span> customers`,l:[5]},
+  {t:`<span class="kw">UNION ALL</span>`,l:[6]},
+  {t:`<span class="kw">SELECT</span> name <span class="kw">FROM</span> employees;`,l:[7]},
+ ],
+ steps:[
+  {label:'Input sets',qL:[0,2],cpp:`vector&lt;string&gt; a = cust_names;\nvector&lt;string&gt; b = emp_names;`,
+   explain:`Dono tables ke names — kuch common hain (Raj, Priya, Amit, Neha).`,
+   render(){const a=CUST.map(c=>c.name);const b=EMP.map(e=>e.name);return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><div class="dl">customers:</div>${a.map(n=>rb('am',`"${n}"`)).join('')}</div><div><div class="dl">employees:</div>${b.map(n=>rb('pu',`"${n}"`)).join('')}</div></div>`;}},
+  {label:'UNION',qL:[1],cpp:`<span class="cc">// UNION = UNION ALL + DISTINCT</span>\nset&lt;string&gt; result;\nfor(s:a) result.insert(s);\nfor(s:b) result.insert(s);\n<span class="cc">// O(n log n) — sort needed</span>`,
+   explain:`<b>UNION</b> = combine + DISTINCT. Duplicates nikal jaate hain. Extra sort operation — slower than UNION ALL.`,
+   render(){const a=new Set(CUST.map(c=>c.name));const b=new Set(EMP.map(e=>e.name));const both=new Set([...a,...b]);return`<div class="dl">UNION result (${both.size} unique):</div>${[...both].map(n=>{const dup=a.has(n)&&b.has(n);return rb(dup?'am':'pass',`${dup?'⚠ dup removed':'✓'} "${n}" ${dup?'(both tables)':a.has(n)?'(cust only)':'(emp only)'}`);}).join('')}`;}},
+  {label:'UNION ALL',qL:[6],cpp:`<span class="cc">// Just concatenate — O(n)</span>\nresult = a;\nresult.insert(end, b);`,
+   explain:`<b>UNION ALL</b> = duplicate nahi hatata. Faster (no sort). Jab sure ho duplicates nahi ya duplicates chahiye — UNION ALL.`,
+   render(){const a=CUST.map(c=>c.name);const b=EMP.map(e=>e.name);const all=[...a,...b];const dups=a.filter(n=>b.includes(n));return`<div class="dl">UNION ALL (${all.length} rows, dups intact):</div>${all.map((n,i)=>{const dup=dups.includes(n);return rb(dup?'am':'hi',`${i+1}. "${n}" ${dup?'← duplicate':''}`);}).join('')}`;}},
+ ]},
+
+{cat:'Advanced',name:'CASE WHEN',diff:'e',
+ desc:'SQL ka if-else. Conditional columns, categorization, pivot tables — bahut use hota hai.',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, sal,`,l:[0]},
+  {t:`  <span class="kw">CASE</span>`,l:[1]},
+  {t:`    <span class="kw">WHEN</span> sal <span class="op">&gt;</span> <span class="num">100000</span> <span class="kw">THEN</span> <span class="str">'Senior'</span>`,l:[2]},
+  {t:`    <span class="kw">WHEN</span> sal <span class="op">&gt;</span> <span class="num">80000</span>  <span class="kw">THEN</span> <span class="str">'Mid'</span>`,l:[3]},
+  {t:`    <span class="kw">ELSE</span> <span class="str">'Junior'</span>`,l:[4]},
+  {t:`  <span class="kw">END</span> <span class="kw">AS</span> level`,l:[5]},
+  {t:`<span class="kw">FROM</span> employees;`,l:[6]},
+ ],
+ steps:[
+  {label:'Basic CASE',qL:[1,2,3,4,5],cpp:`string level;\n<span class="ck">if</span>(r.sal > 100000) level = "Senior";\n<span class="ck">else if</span>(r.sal > 80000) level = "Mid";\n<span class="ck">else</span> level = "Junior";`,
+   explain:`<b>CASE WHEN THEN ELSE END</b> = if-else-if chain. First matching WHEN wins. No match + no ELSE = NULL.`,
+   render(){function lvl(s){return s>100000?'Senior':s>80000?'Mid':'Junior';}function lc(s){return s>100000?'am':s>80000?'bl':'gr';}return tbl(['name','sal','level'],EMP.map(r=>[r.name,`₹${r.sal}`,`<span class="tag ${lc(r.sal)}">${lvl(r.sal)}</span>`]));}},
+  {label:'Conditional Agg',qL:[0,1],cpp:`<span class="cc">// CASE inside aggregate!</span>\nCOUNT(CASE WHEN sal>80k THEN 1 END)`,
+   explain:`<b>CASE inside aggregate</b> — pivot tables yahan se! COUNT/SUM(CASE WHEN condition THEN 1 END) = conditional count.`,
+   render(){const hi=EMP.filter(r=>r.sal>80000).length;const lo=EMP.filter(r=>r.sal<=80000).length;return tbl(['metric','count'],[['COUNT(*) — sab',EMP.length],['COUNT(CASE WHEN sal > 80k THEN 1 END)',`<span class="nc">${hi}</span>`],['COUNT(CASE WHEN sal ≤ 80k THEN 1 END)',`<span class="nc">${lo}</span>`]])+`<div class="info-box info" style="margin-top:6px">💡 CASE inside SUM/COUNT = Conditional Aggregation = Pivot Tables</div>`;}},
+ ]},
+
+{cat:'Advanced',name:'String / Date Functions',diff:'e',
+ desc:'Built-in functions jo interviews mein common hain. CONCAT, UPPER, LENGTH, SUBSTRING, DATE arithmetic.',
+ query:[
+  {t:`<span class="kw">SELECT</span>`,l:[0]},
+  {t:`  <span class="fn">UPPER</span>(name),`,l:[1]},
+  {t:`  <span class="fn">LENGTH</span>(name),`,l:[2]},
+  {t:`  <span class="fn">SUBSTRING</span>(name,<span class="num">1</span>,<span class="num">3</span>),`,l:[3]},
+  {t:`  <span class="fn">CONCAT</span>(name,<span class="str">' ('</span>,dept,<span class="str">')'</span>),`,l:[4]},
+  {t:`  <span class="fn">YEAR</span>(<span class="fn">NOW</span>()) <span class="op">-</span> age`,l:[5]},
+  {t:`<span class="kw">FROM</span> employees;`,l:[6]},
+ ],
+ steps:[
+  {label:'String Fns',qL:[1,2,3,4],cpp:`toupper(str); <span class="cc">// UPPER()</span>\nstr.length(); <span class="cc">// LENGTH()</span>\nstr.substr(0,3); <span class="cc">// SUBSTR()</span>\ns1 + s2; <span class="cc">// CONCAT()</span>`,
+   explain:`<b>String functions</b> — C++ std::string ke methods jaisa. UPPER/LOWER, LENGTH, SUBSTR, CONCAT, TRIM, REPLACE, INSTR.`,
+   render(){return tbl(['name','UPPER','LEN','SUBSTR(1,3)','CONCAT'],EMP.map(r=>[r.name,r.name.toUpperCase(),r.name.length,r.name.substring(0,3),`${r.name} (${r.dept})`]));}},
+  {label:'Date Fns',qL:[5,6],cpp:`time(nullptr); <span class="cc">// NOW()</span>\ndifftime(d1,d2); <span class="cc">// DATEDIFF()</span>`,
+   explain:`<b>Date functions</b> — NOW(), CURDATE(), YEAR(), MONTH(), DAY(), DATEDIFF(), DATE_ADD(). "Last 30 days" queries mein common.`,
+   render(){const fns=[['NOW()','2024-01-15 10:30:00','Current datetime'],['YEAR(NOW())','2024','Year extract'],['DATE_FORMAT(d,"%d/%m/%Y")','15/01/2024','Custom format'],['DATEDIFF(d1, d2)','30','Days between'],['DATE_ADD(d, INTERVAL 7 DAY)','d + 7 days','Future date'],["d > NOW() - INTERVAL '30 DAY'",'Last 30 days filter','Common filter']];return tbl(['Function','Example','Use'],fns.map(f=>[`<span style="font-family:var(--mono);color:var(--blue);font-size:10.5px">${f[0]}</span>`,f[1],f[2]]));}},
+ ]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// PERFORMANCE
+// ──────────────────────────────────────────────────────────────────────────────
+
+{cat:'Performance',name:'Indexes & B-Tree',diff:'m',
+ desc:'Index = book ka index. Full scan O(n) → B-Tree O(log n). B-Tree, Hash, Composite, Covering, Partial — sab types.',
+ query:[
+  {t:`<span class="cm">-- Without index: O(n)</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> emp <span class="kw">WHERE</span> sal=<span class="num">90000</span>;`,l:[1]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Create B-Tree index: O(log n)</span>`,l:[]},
+  {t:`<span class="kw">CREATE INDEX</span> idx_sal <span class="kw">ON</span> emp(sal);`,l:[4]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Composite (left prefix rule):</span>`,l:[]},
+  {t:`<span class="kw">CREATE INDEX</span> idx_dc <span class="kw">ON</span> emp(dept,sal);`,l:[7]},
+ ],
+ steps:[
+  {label:'No Index',qL:[1],cpp:`<span class="cc">// Linear search O(n)</span>\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:table)\n  <span class="ck">if</span>(r.sal == 90000) found;`,
+   explain:`<b>Full table scan</b> — bina index ke har row check. 6 rows = theek. 6 million rows = slow. O(n).`,
+   render(){return`<div class="dl">Full scan — har row check:</div>${EMP.map((r,i)=>{const found=r.sal===90000;return rb(found?'pass':'fail',`${i+1}. checking ${r.name}... sal=${r.sal} ${found?'✓ FOUND!':'✗'}`);}).join('')}`;}},
+  {label:'B-Tree',qL:[4],cpp:`<span class="cc">// Index = sorted B-Tree</span>\n<span class="cc">// ≈ std::map&lt;sal, row_ptr&gt;</span>\nauto it = idx.find(90000);\n<span class="cc">// O(log n)!</span>`,
+   explain:`<b>B-Tree index</b> = sorted data. Binary search O(log n). 1M rows → ~20 comparisons. Range queries bhi fast (sorted order). std::map jaisa.`,
+   render(){const sorted=[...EMP].sort((a,b)=>a.sal-b.sal);return`<div class="dl">B-Tree (sorted by sal):</div>${sorted.map(r=>rb(r.sal===90000?'pass':'hi',`₹${r.sal} → ${r.name} ${r.sal===90000?'← target!':''}`)).join('')}<div class="info-box ok" style="margin-top:6px">Binary search: ₹90000 found in ~3 steps vs full scan 6 steps</div>`;}},
+  {label:'Composite',qL:[7],cpp:`<span class="cc">// (dept, sal) — LEFT PREFIX!</span>\n<span class="cc">// Works: dept, dept+sal</span>\n<span class="cc">// FAILS: sal alone</span>`,
+   explain:`<b>Composite Index (dept, sal)</b> — Left prefix rule! Index sirf tab use hoga jab query mein leftmost column (dept) ho.`,
+   render(){const cases=[['WHERE dept = "Eng"','✓ index use','Left prefix'],['WHERE dept = "Eng" AND sal > 80000','✓ index use','Both columns'],['WHERE sal > 80000','✗ index skip','dept missing!'],['ORDER BY dept, sal','✓ index use','Same order'],['ORDER BY sal, dept','✗ index skip','Wrong order']];return`<div class="dl">Index (dept, sal) kab use?</div>${cases.map(([q,r,w])=>`<div class="rb ${r.includes('✓')?'pass':'fail'}" style="flex-direction:column;align-items:flex-start"><div style="font-family:var(--mono);font-size:11px;font-weight:600">${q}</div><div style="font-size:11px;margin-top:2px">${r} — ${w}</div></div>`).join('')}`;}},
+  {label:'Index Types',qL:[],cpp:``,
+   explain:`<b>Index types summary</b> — har ka alag use case. Covering index = fastest.`,
+   render(){return[['B-Tree (default)','Range, ORDER BY, equality. Most common.','bl'],['Hash','Only equality = O(1). No range support.','am'],['Composite','Multiple columns. Left prefix rule!','te'],['Covering','All SELECT cols in index. No table lookup!','ok'],['Partial','WHERE clause se subset. Smaller+faster.','pu']].map(([t,d,c])=>`<div class="rb ${c}" style="flex-direction:column;align-items:flex-start;margin-bottom:3px"><div style="font-weight:600">${t}</div><div style="font-size:11px;opacity:.8">${d}</div></div>`).join('');}},
+ ]},
+
+{cat:'Performance',name:'EXPLAIN / Query Plan',diff:'h',
+ desc:'EXPLAIN batata hai SQL kaise query execute karta hai. Index use ho raha hai ya full scan — yahan se pata chalta hai.',
+ query:[
+  {t:`<span class="kw">EXPLAIN ANALYZE</span>`,l:[0]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> emp`,l:[1]},
+  {t:`<span class="kw">WHERE</span> sal <span class="op">&gt;</span> <span class="num">80000</span>;`,l:[2]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Output:</span>`,l:[]},
+  {t:`<span class="cm">-- Seq Scan / Index Scan</span>`,l:[]},
+  {t:`<span class="cm">-- cost=0.00..8.17 rows=3</span>`,l:[]},
+ ],
+ steps:[
+  {label:'Seq Scan',qL:[1,2],cpp:`<span class="cc">// Seq Scan = loop all rows</span>\n<span class="ck">for</span>(<span class="ck">auto</span>&amp; r:table) check(r);\n<span class="cc">// O(n)</span>`,
+   explain:`<b>Seq Scan</b> = koi index nahi, har row check. Large tables pe slow. EXPLAIN mein dikhna = problem.`,
+   render(){return`<div class="dl">EXPLAIN — Seq Scan:</div><div class="cte-box" style="font-family:var(--mono);font-size:12px;color:#c8c8c0;line-height:1.9"><div><span style="color:var(--red-dk)">Seq Scan</span> on emp  (cost=0.00..1.06 rows=6)</div><div>  Filter: (sal &gt; 80000)</div><div style="color:var(--text3)">  Rows Removed by Filter: 3</div></div><div class="info-box err" style="margin-top:6px">⚠ Large table pe Seq Scan = performance problem!</div>`;}},
+  {label:'Index Scan',qL:[0,1,2],cpp:`<span class="cc">// Index Scan = B-Tree</span>\nidx.lower_bound(80000);\n<span class="cc">// O(log n)</span>`,
+   explain:`<b>Index Scan</b> — index use ho raha hai! Cost kaafi kam. Yeh dikhna = query optimized.`,
+   render(){return`<div class="dl">EXPLAIN — Index Scan:</div><div class="cte-box" style="font-family:var(--mono);font-size:12px;color:#c8c8c0;line-height:1.9"><div><span style="color:var(--teal-dk)">Index Scan</span> using idx_sal on emp</div><div>  (cost=0.14..0.43 rows=3)</div><div>  Index Cond: (sal &gt; 80000)</div></div><div class="info-box ok" style="margin-top:6px">✓ Index Scan = optimized! Cost much lower.</div>`;}},
+  {label:'Plan Nodes',qL:[],cpp:`<span class="cc">// EXPLAIN ANALYZE = run + time</span>`,
+   explain:`<b>Plan nodes cheatsheet</b> — yeh sab EXPLAIN mein aate hain. Interview mein koi bhi pooch sakta hai.`,
+   render(){return[['Seq Scan','Full table, O(n)','re'],['Index Scan','B-Tree, O(log n)','te'],['Index Only Scan','Covering index, fastest','te'],['Bitmap Heap Scan','Multiple index lookups','bl'],['Hash Join','Hash table build + probe','am'],['Nested Loop Join','Classic nested for-loop','am'],['Merge Join','Both sorted, merge O(n)','pu']].map(([n,d,c])=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:var(--card);margin:2px 0"><span class="tag ${c}" style="min-width:130px">${n}</span><span style="font-size:11px;color:var(--text2)">${d}</span></div>`).join('');}},
+ ]},
+
+{cat:'Performance',name:'Transactions & ACID',diff:'m',
+ desc:'Transaction = atomic unit. Ya sab hoga, ya kuch nahi. Bank transfer = perfect example.',
+ query:[
+  {t:`<span class="kw">BEGIN</span>;`,l:[0]},
+  {t:`<span class="kw">UPDATE</span> accounts <span class="kw">SET</span>`,l:[1]},
+  {t:`  bal = bal - <span class="num">500</span>`,l:[2]},
+  {t:`  <span class="kw">WHERE</span> id = <span class="num">1</span>; <span class="cm">-- Raj</span>`,l:[3]},
+  {t:`<span class="kw">UPDATE</span> accounts <span class="kw">SET</span>`,l:[4]},
+  {t:`  bal = bal + <span class="num">500</span>`,l:[5]},
+  {t:`  <span class="kw">WHERE</span> id = <span class="num">2</span>; <span class="cm">-- Priya</span>`,l:[6]},
+  {t:`<span class="kw">COMMIT</span>; <span class="cm">-- ya ROLLBACK</span>`,l:[7]},
+ ],
+ steps:[
+  {label:'Problem',qL:[1,2,3,4,5,6],cpp:`<span class="cc">// Bina transaction:</span>\nraj.bal -= 500; <span class="cc">// SUCCESS</span>\n<span class="cc">// 💥 server crash!</span>\npriya.bal += 500; <span class="cc">// NEVER</span>\n<span class="cc">// ₹500 gum!</span>`,
+   explain:`<b>Problem</b>: Raj se ₹500 kat gaya, server crash, Priya ko nahi mila. Transaction ensure karta — ya dono operations honge ya koi nahi.`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:6px">${rb('hi','Raj balance: ₹5000')}${rb('am','UPDATE 1: Raj - ₹500 → ₹4500 ✓')}<div class="info-box err">💥 Server crash / network failure!</div>${rb('fail','UPDATE 2: Priya + ₹500 → NEVER RAN')}<div class="info-box err">Result: ₹500 gum! Raj ke paas bhi nahi, Priya ke paas bhi nahi.</div></div>`;}},
+  {label:'ACID',qL:[0,7],cpp:`<span class="cc">// A: Atomicity — all or nothing</span>\n<span class="cc">// C: Consistency — rules ok</span>\n<span class="cc">// I: Isolation — concurrent safe</span>\n<span class="cc">// D: Durability — disk pe save</span>`,
+   explain:`<b>ACID</b> — har production database mein. Atomicity=sab ya kuch nahi. Consistency=data valid. Isolation=concurrent safe. Durability=commit ke baad permanent.`,
+   render(){return[{p:'A — Atomicity',d:'Sab operations ya sab rollback. Half done nahi.',bg:'var(--blue-bg)',bd:'var(--blue)',tx:'var(--blue-dk)'},{p:'C — Consistency',d:'Database valid state mein. Constraints nahi tooti.',bg:'var(--teal-bg)',bd:'var(--teal)',tx:'var(--teal-dk)'},{p:'I — Isolation',d:'Concurrent transactions disturb nahi karte.',bg:'var(--amber-bg)',bd:'var(--amber)',tx:'var(--amber-dk)'},{p:'D — Durability',d:'Committed data crash ke baad bhi safe.',bg:'var(--purple-bg)',bd:'var(--purple)',tx:'var(--purple-dk)'}].map(a=>`<div class="acid-card" style="background:${a.bg};border-color:${a.bd}"><div class="acid-prop" style="color:${a.tx}">${a.p}</div><div class="acid-def" style="color:${a.tx}">${a.d}</div></div>`).join('');}},
+  {label:'Isolation Levels',qL:[],cpp:`<span class="cc">// Higher = safer, slower</span>\n<span class="cc">// 1. READ UNCOMMITTED</span>\n<span class="cc">// 2. READ COMMITTED (PG default)</span>\n<span class="cc">// 3. REPEATABLE READ (MySQL def)</span>\n<span class="cc">// 4. SERIALIZABLE (strictest)</span>`,
+   explain:`<b>4 Isolation Levels</b> — 3 problems prevent karte hain: Dirty Read, Non-Repeatable Read, Phantom Read. Higher level = zyada locking = slower.`,
+   render(){const lvls=[['READ UNCOMMITTED','✗','✗','✗','Fastest'],['READ COMMITTED','✓','✗','✗','Fast (PG default)'],['REPEATABLE READ','✓','✓','✗','Medium (MySQL def)'],['SERIALIZABLE','✓','✓','✓','Slowest']];return tbl(['Level','Dirty','Non-Rep','Phantom'],lvls.map(([l,d,n,p,spd])=>[l,d.includes('✓')?`<span style="color:var(--teal)">${d}</span>`:`<span style="color:var(--red)">${d}</span>`,n.includes('✓')?`<span style="color:var(--teal)">${n}</span>`:`<span style="color:var(--red)">${n}</span>`,p.includes('✓')?`<span style="color:var(--teal)">${p}</span>`:`<span style="color:var(--red)">${p}</span>`]));}},
+ ]},
+
+{cat:'Performance',name:'Pagination — OFFSET vs Keyset',diff:'m',
+ desc:'OFFSET large data pe slow. Production mein Keyset (Cursor) pagination use hoti hai.',
+ query:[
+  {t:`<span class="cm">-- OFFSET (simple but slow):</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> emp <span class="kw">ORDER BY</span> id`,l:[1]},
+  {t:`<span class="kw">LIMIT</span> <span class="num">2</span> <span class="kw">OFFSET</span> <span class="num">4</span>;`,l:[2]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Keyset (production fast):</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> emp`,l:[5]},
+  {t:`<span class="kw">WHERE</span> id <span class="op">&gt;</span> <span class="num">4</span>  <span class="cm">-- last seen id</span>`,l:[6]},
+  {t:`<span class="kw">ORDER BY</span> id <span class="kw">LIMIT</span> <span class="num">2</span>;`,l:[7]},
+ ],
+ steps:[
+  {label:'OFFSET problem',qL:[1,2],cpp:`<span class="cc">// OFFSET = scan + discard!</span>\n<span class="cc">// OFFSET 1M LIMIT 10</span>\n<span class="cc">// = read 1M+10, discard 1M</span>`,
+   explain:`<b>OFFSET problem</b> — OFFSET 4 = 4 rows scan karo, discard karo. OFFSET 1,000,000 = 1M wasted reads! Deep pages pe bahut slow.`,
+   render(){return`<div class="dl">LIMIT 2 OFFSET 4:</div>${EMP.map((r,i)=>{const skip=i<4;const keep=i>=4&&i<6;return rb(keep?'pass':skip?'fail':'gr',`${skip?'✗ scanned+discarded':keep?'✓ returned':'—'} Row ${i+1}: ${r.name}`)}).join('')}<div class="info-box err" style="margin-top:6px">⚠ 4 rows wasted. OFFSET 1M = 1M wasted reads!</div>`;}},
+  {label:'Keyset',qL:[5,6,7],cpp:`<span class="cc">// Keyset = index use!</span>\n<span class="cc">// WHERE id > last_id</span>\n<span class="cc">// O(log n) + O(limit) only</span>`,
+   explain:`<b>Keyset</b> = last seen id save karo. Next page: WHERE id > last_id. Index directly jump — koi wasted reads nahi. Instagram, Twitter yahi use karte hain.`,
+   render(){const lastId=2;return`<div class="dl">WHERE id > ${lastId} LIMIT 2:</div>${EMP.map(r=>{const include=r.id>lastId&&r.id<=lastId+2;return rb(include?'pass':r.id<=lastId?'gr':'fail',`${r.id<=lastId?'(cursor se pehle — index skip)':include?'✓ returned':'—'}: ${r.name}`);}).join('')}<div class="info-box ok" style="margin-top:6px">✓ Index jumps to id > 2. No wasted reads!</div>`;}},
+  {label:'Comparison',qL:[],cpp:``,
+   explain:`<b>Summary</b> — OFFSET simple lekin slow at depth. Keyset fast lekin no random page.`,
+   render(){return tbl(['Feature','OFFSET','Keyset'],[['Page access','Any page directly','Only sequential'],['Performance','O(offset) degrades','O(log n) always fast'],['Consistency','Rows skip if data changes','Stable cursor'],['Use case','Admin panels, small data','Feeds, APIs, large data']].map(r=>[`<b>${r[0]}</b>`,`<span style="color:var(--red-dk)">${r[1]}</span>`,`<span style="color:var(--teal-dk)">${r[2]}</span>`]));}},
+ ]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// DESIGN
+// ──────────────────────────────────────────────────────────────────────────────
+
+{cat:'Design',name:'Normalization 1NF → 3NF',diff:'m',
+ desc:'Data duplication hatao, anomalies prevent karo. 1NF=atomic, 2NF=no partial dep, 3NF=no transitive dep.',
+ query:[
+  {t:`<span class="cm">-- Unnormalized (bad):</span>`,l:[]},
+  {t:`<span class="kw">CREATE TABLE</span> orders (`,l:[1]},
+  {t:`  order_id, customer_name,`,l:[2]},
+  {t:`  customer_city, <span class="cm">-- repeated!</span>`,l:[3]},
+  {t:`  items   <span class="cm">-- multiple values!</span>`,l:[4]},
+  {t:`);`,l:[5]},
+ ],
+ steps:[
+  {label:'Problem',qL:[1,2,3,4],cpp:`struct Order {\n  string custName; <span class="cc">// repeated!</span>\n  string custCity; <span class="cc">// repeated!</span>\n  string items;    <span class="cc">// array in string!</span>\n};`,
+   explain:`<b>Unnormalized</b> — customer_city har order mein repeat. Raj ki city change = sab rows update. Multiple items ek field mein. Anomalies!`,
+   render(){const data=[{oid:1,cust:'Raj',city:'Delhi',items:'Laptop, Mouse'},{oid:2,cust:'Raj',city:'Delhi',items:'Keyboard'},{oid:3,cust:'Priya',city:'Mumbai',items:'Phone, Tablet'}];return`<div class="norm-table"><table><thead><tr><th>order_id</th><th>customer</th><th>city</th><th>items</th></tr></thead><tbody>${data.map(r=>`<tr><td>${r.oid}</td><td>${r.cust}</td><td class="bad">${r.city} ← dup!</td><td class="bad">${r.items} ← multi!</td></tr>`).join('')}</tbody></table></div><div class="info-box err" style="margin-top:6px">Delhi change = 2 rows update karo!</div>`;}},
+  {label:'1NF',qL:[],cpp:`<span class="cc">// 1NF: Atomic values only</span>\n<span class="cc">// No arrays, primary key honi</span>`,
+   explain:`<b>1NF</b> — har cell mein sirf ek value. "Laptop, Mouse" → do alag rows.`,
+   render(){const data=[{oid:1,cust:'Raj',city:'Delhi',item:'Laptop'},{oid:1,cust:'Raj',city:'Delhi',item:'Mouse'},{oid:2,cust:'Raj',city:'Delhi',item:'Keyboard'},{oid:3,cust:'Priya',city:'Mumbai',item:'Phone'},{oid:3,cust:'Priya',city:'Mumbai',item:'Tablet'}];return`<div class="dl">1NF — Atomic values:</div><div class="norm-table"><table><thead><tr><th>order_id</th><th>customer</th><th>city</th><th>item</th></tr></thead><tbody>${data.map(r=>`<tr><td>${r.oid}</td><td>${r.cust}</td><td class="bad">${r.city} ← still dup</td><td class="good">${r.item} ✓</td></tr>`).join('')}</tbody></table></div>`;}},
+  {label:'2NF → 3NF',qL:[],cpp:`<span class="cc">// 2NF: No partial dependency</span>\n<span class="cc">// 3NF: No transitive dep</span>`,
+   explain:`<b>2NF</b> — partial dependencies hatao (city sirf customer pe depend, order pe nahi). <b>3NF</b> — transitive dependencies hatao (zip → city → state = state alag table mein). Rule: "Key, whole key, nothing but key."`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:8px">${[{n:'1NF',r:'Atomic values, no arrays, primary key',c:'te'},{n:'2NF',r:'1NF + no partial dependency on composite key',c:'te'},{n:'3NF',r:'2NF + no transitive dependency',c:'te'},{n:'BCNF',r:'Every determinant is candidate key',c:'bl'},{n:'Denormalization',r:'Performance ke liye intentional rule break',c:'am'}].map(f=>`<div class="rb"><span class="tag ${f.c}" style="min-width:110px;text-align:center">${f.n}</span><span style="font-size:12px;color:var(--text2)">${f.r}</span></div>`).join('')}</div>`;}},
+ ]},
+
+{cat:'Design',name:'Views / Stored Procs / Triggers',diff:'m',
+ desc:'Database objects jo SQL reusable aur automated banate hain. Views, Procedures, Functions, Triggers.',
+ query:[
+  {t:`<span class="cm">-- VIEW:</span>`,l:[]},
+  {t:`<span class="kw">CREATE VIEW</span> high_earners <span class="kw">AS</span>`,l:[1]},
+  {t:`  <span class="kw">SELECT</span> * <span class="kw">FROM</span> emp <span class="kw">WHERE</span> sal><span class="num">80000</span>;`,l:[2]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- PROCEDURE:</span>`,l:[]},
+  {t:`<span class="kw">CREATE PROCEDURE</span> give_raise(dept,pct)`,l:[5]},
+  {t:`<span class="kw">BEGIN</span> <span class="kw">UPDATE</span>...; <span class="kw">COMMIT</span>; <span class="kw">END</span>;`,l:[6]},
+ ],
+ steps:[
+  {label:'VIEW',qL:[1,2],cpp:`<span class="cc">// VIEW = saved SELECT</span>\n<span class="cc">// Virtual table</span>\nauto view = []{\n  return emp.filter(sal>80000);\n};`,
+   explain:`<b>VIEW</b> — saved SELECT query. Virtual table. Fresh data har baar. Security ke liye users ko table nahi, view do. Materialized View = actual data store (fast but stale).`,
+   render(){const view=EMP.filter(r=>r.sal>80000);return tbl(['name','dept','sal'],view.map(r=>[r.name,r.dept,`<span class="nc">₹${r.sal}</span>`]))+`<div class="info-box info" style="margin-top:6px">SELECT * FROM high_earners — alag filter nahi likhna!</div>`;}},
+  {label:'Proc vs Func',qL:[5,6],cpp:`<span class="cc">// Procedure = void function</span>\nvoid giveRaise(dept, pct);\n<span class="cc">// Function = returns value</span>\nint calcBonus(sal);`,
+   explain:`<b>Procedure vs Function:</b> Procedure=side effects (UPDATE/INSERT), kuch return nahi. Function=value return karta hai, SELECT mein use. Trigger=event pe auto-fire.`,
+   render(){return[{t:'VIEW',d:'Saved SELECT. Virtual table. Read-only usually. Security layer.',c:'bl'},{t:'Stored Procedure',d:'CALL karo. DML operations. Transactions. No return (usually).',c:'te'},{t:'Function (UDF)',d:'SELECT mein use karo. Value return. No side effects ideally.',c:'am'},{t:'Trigger',d:'INSERT/UPDATE/DELETE pe auto-fire. Audit logs, validation.',c:'pu'},{t:'Materialized View',d:'Actual data store. Fast read. Manual/scheduled refresh.',c:'gr'}].map(it=>`<div style="display:flex;gap:8px;padding:8px;border-radius:7px;border:1px solid var(--border);background:var(--card);margin:3px 0"><span class="tag ${it.c}" style="min-width:110px;text-align:center;line-height:1.4">${it.t}</span><span style="font-size:12px;color:var(--text2)">${it.d}</span></div>`).join('');}},
+ ]},
+
+{cat:'Design',name:'Keys, Constraints & Relations',diff:'m',
+ desc:'PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, CHECK — data integrity ke liye. Database design ke foundation.',
+ query:[
+  {t:`<span class="kw">CREATE TABLE</span> employees (`,l:[0]},
+  {t:`  id    <span class="kw">INT PRIMARY KEY</span>,`,l:[1]},
+  {t:`  email <span class="kw">VARCHAR UNIQUE</span>,`,l:[2]},
+  {t:`  name  <span class="kw">VARCHAR NOT NULL</span>,`,l:[3]},
+  {t:`  sal   <span class="kw">INT CHECK</span>(sal > <span class="num">0</span>),`,l:[4]},
+  {t:`  dept  <span class="kw">VARCHAR</span>,`,l:[5]},
+  {t:`  mgr   <span class="kw">INT REFERENCES</span> emp(id)`,l:[6]},
+  {t:`);`,l:[7]},
+ ],
+ steps:[
+  {label:'Key Types',qL:[1,2],cpp:`<span class="cc">// PK = unique + not null</span>\n<span class="cc">// auto index banta hai</span>`,
+   explain:`<b>Key types:</b> PK = unique identifier, auto index, only one per table. UNIQUE = duplicate nahi lekin NULL allowed (multiple NULL ok in SQL). FOREIGN KEY = reference integrity.`,
+   render(){return[{t:'PRIMARY KEY',d:'Unique + NOT NULL. Auto index. Table per 1 hi.',c:'bl'},{t:'UNIQUE',d:'Duplicate nahi. NULL allowed (multiple). Secondary PK.',c:'te'},{t:'FOREIGN KEY',d:'Reference integrity. Parent row exist karna chahiye.',c:'am'},{t:'NOT NULL',d:'NULL allowed nahi. Default = NULL allowed.',c:'pu'},{t:'CHECK',d:'Custom validation: CHECK(sal > 0), CHECK(age >= 18).',c:'gr'},{t:'DEFAULT',d:'Value na do toh yeh lagta hai.',c:'pk'}].map(it=>`<div style="display:flex;gap:8px;padding:8px;border-radius:7px;border:1px solid var(--border);background:var(--card);margin:3px 0"><span class="tag ${it.c}" style="min-width:100px;text-align:center">${it.t}</span><span style="font-size:12px;color:var(--text2)">${it.d}</span></div>`).join('');}},
+  {label:'Relationships',qL:[6],cpp:`<span class="cc">// 1:1 — one-to-one</span>\n<span class="cc">// 1:N — one-to-many</span>\n<span class="cc">// M:N — many-to-many</span>`,
+   explain:`<b>Table relationships:</b> 1:1 = user-profile. 1:N = customer-orders (most common). M:N = students-courses (junction table chahiye).`,
+   render(){return[{t:'1:1 One-to-One',d:'User ←→ Profile. FK in either table with UNIQUE.',ex:'users.profile_id UNIQUE REFERENCES profiles(id)'},{t:'1:N One-to-Many',d:'Customer → Orders. Most common. FK in "many" table.',ex:'orders.customer_id REFERENCES customers(id)'},{t:'M:N Many-to-Many',d:'Student ↔ Course. Junction/Bridge table chahiye.',ex:'student_courses(student_id, course_id) — composite PK'}].map(r=>`<div class="cte-box"><div class="cte-label">${r.t}</div><div style="font-size:12px;color:var(--text2);margin-bottom:4px">${r.d}</div><div style="font-family:var(--mono);font-size:11px;color:var(--blue)">${r.ex}</div></div>`).join('');}},
+ ]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// INTERVIEW QUESTIONS
+// ──────────────────────────────────────────────────────────────────────────────
+
+{cat:'Interview Qs',name:'Classic Interview Queries',diff:'h',
+ desc:'Most asked SQL queries in interviews. Pattern yaad karo, data change karo. Step by step solve karo.',
+ query:[
+  {t:`<span class="cm">-- Q: 2nd highest salary?</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> <span class="fn">MAX</span>(sal)`,l:[1]},
+  {t:`<span class="kw">FROM</span> emp`,l:[2]},
+  {t:`<span class="kw">WHERE</span> sal <span class="op">&lt;</span>`,l:[3]},
+  {t:`  (<span class="kw">SELECT</span> <span class="fn">MAX</span>(sal) <span class="kw">FROM</span> emp);`,l:[4]},
+ ],
+ steps:[
+  {label:'2nd Highest',qL:[1,2,3,4],cpp:`<span class="cc">// Method 1: subquery</span>\n<span class="cc">// Inner: MAX = 120000</span>\n<span class="cc">// Outer: MAX where sal < 120000</span>`,
+   explain:`<b>2nd highest salary</b> — Inner query MAX nikalta hai (120000). Outer query woh remove karke MAX nikalta. Works but NULL if only 1 distinct value.`,
+   render(){const mx=Math.max(...EMP.map(r=>r.sal));const second=Math.max(...EMP.filter(r=>r.sal<mx).map(r=>r.sal));return`<div class="cte-box"><div class="cte-label">Inner MAX = ₹${mx}</div></div><div class="dl">sal < ${mx}:</div>${EMP.filter(r=>r.sal<mx).map(r=>rb('pass',`₹${r.sal} — ${r.name}`)).join('')}<div class="info-box ok" style="margin-top:6px">2nd Highest = ₹${second}</div>`;}},
+  {label:'Nth Highest',qL:[1,2,3,4],cpp:`<span class="cc">// Nth: DENSE_RANK approach</span>\n<span class="cc">// or LIMIT 1 OFFSET N-1</span>`,
+   explain:`<b>Nth highest — 3 methods:</b> 1. DENSE_RANK() = N. 2. LIMIT 1 OFFSET N-1. 3. Correlated subquery with N-1 distinct values above.`,
+   render(){const sorted=[...new Set(EMP.map(r=>r.sal))].sort((a,b)=>b-a);return`<div class="dl">All unique salaries ranked:</div>${sorted.map((s,i)=>rb('hi',`Rank ${i+1}: ₹${s} — ${EMP.filter(r=>r.sal===s).map(r=>r.name).join(', ')}`)).join('')}<div class="info-box info" style="margin-top:6px">LIMIT 1 OFFSET N-1 → Rank N ki salary</div>`;}},
+  {label:'Duplicate rows',qL:[],cpp:`<span class="cc">// Find: GROUP BY + HAVING COUNT > 1</span>\n<span class="cc">// Delete: keep MIN(id) per group</span>`,
+   explain:`<b>Duplicate find:</b> GROUP BY col HAVING COUNT(*) > 1. <b>Delete:</b> DELETE WHERE id NOT IN (SELECT MIN(id) FROM t GROUP BY dup_cols).`,
+   render(){const dupsDemo=[{id:1,name:'Raj',dept:'Eng'},{id:2,name:'Raj',dept:'Eng'},{id:3,name:'Priya',dept:'HR'},{id:4,name:'Priya',dept:'HR'}];return tbl(['id','name','dept','action'],dupsDemo.map((r,i)=>{const keep=i===0||i===2;return[r.id,r.name,r.dept,`<span style="color:${keep?'var(--teal)':'var(--red)'}">` +(keep?'✓ KEEP (MIN id)':'✗ DELETE')+`</span>`];}));}},
+  {label:'Patterns',qL:[],cpp:``,
+   explain:`<b>Top interview query patterns</b> — template yaad karo.`,
+   render(){return[{t:'2nd Highest Salary',q:'MAX(sal) WHERE sal < (SELECT MAX(sal))'},{t:'Nth Highest (clean)',q:'DENSE_RANK() OVER(ORDER BY sal DESC) = N'},{t:'Top N per group',q:'ROW_NUMBER() OVER(PARTITION BY g ORDER BY val) ≤ N'},{t:'Find duplicates',q:'GROUP BY cols HAVING COUNT(*) > 1'},{t:'Delete duplicates',q:'DELETE WHERE id NOT IN (SELECT MIN(id) GROUP BY cols)'},{t:'Running total',q:'SUM(col) OVER(ORDER BY date ROWS UNBOUNDED PRECEDING)'},{t:'Employees no manager',q:'LEFT JOIN + WHERE mgr.id IS NULL'},{t:'Salary > dept avg',q:'AVG(sal) OVER(PARTITION BY dept)'},{t:'Consecutive records',q:'LAG()/LEAD() ya self-join ON id = id+1'},{t:'Pivot table',q:'SUM(CASE WHEN col=val THEN 1 END) per category'},{t:'YoY / MoM growth',q:'(cur - LAG(cur)) / LAG(cur) * 100'},{t:'Customers no orders',q:'LEFT JOIN orders WHERE orders.id IS NULL'}].map((p,i)=>`<div class="q-box"><div class="q-num">Q${i+1}</div><div class="q-text">${p.t}</div><div class="q-ans"><code>${p.q}</code></div></div>`).join('');}},
+ ]},
+
+{cat:'Interview Qs',name:'DELETE vs TRUNCATE vs DROP',diff:'m',
+ desc:'Interview mein 80% log yeh question poochhte hain. Ek line mein alag karo: DML vs DDL, rollback, triggers.',
+ query:[
+  {t:`<span class="kw">DELETE FROM</span> t <span class="kw">WHERE</span> ...;  <span class="cm">-- DML</span>`,l:[0]},
+  {t:`<span class="kw">TRUNCATE TABLE</span> t;         <span class="cm">-- DDL</span>`,l:[1]},
+  {t:`<span class="kw">DROP TABLE</span> t;              <span class="cm">-- DDL</span>`,l:[2]},
+ ],
+ steps:[
+  {label:'Comparison',qL:[0,1,2],cpp:`<span class="cc">// DELETE = row by row (log)</span>\n<span class="cc">// TRUNCATE = bulk delete (fast)</span>\n<span class="cc">// DROP = table structure bhi</span>`,
+   explain:`<b>DELETE vs TRUNCATE vs DROP</b> — sabse common interview question.`,
+   render(){return tbl(['Feature','DELETE','TRUNCATE','DROP'],[['Type','DML','DDL','DDL'],['Rollback','✓ YES','✗ NO (usually)','✗ NO'],['WHERE clause','✓ YES','✗ NO','✗ NO'],['Triggers fire','✓ YES','✗ NO','N/A'],['Auto-increment reset','✗ NO','✓ YES (usually)','N/A'],['Speed','Slow (logged)','Fast (bulk)','Instant'],['Structure deleted','✗ NO','✗ NO','✓ YES']].map(r=>[`<b>${r[0]}</b>`,r[1].includes('✓')?`<span style="color:var(--teal)">${r[1]}</span>`:r[1].includes('✗')?`<span style="color:var(--red)">${r[1]}</span>`:r[1],r[2].includes('✓')?`<span style="color:var(--teal)">${r[2]}</span>`:r[2].includes('✗')?`<span style="color:var(--red)">${r[2]}</span>`:r[2],r[3].includes('✓')?`<span style="color:var(--teal)">${r[3]}</span>`:r[3].includes('✗')?`<span style="color:var(--red)">${r[3]}</span>`:r[3]]));}},
+  {label:'Quick Qs',qL:[],cpp:``,
+   explain:`<b>Common variations aur quick answers</b>.`,
+   render(){const qs=[{q:'WHERE vs HAVING?',a:'WHERE=row filter (GROUP BY se pehle). HAVING=group filter. WHERE mein aggregate nahi.'},{q:'RANK vs DENSE_RANK?',a:'RANK: gaps with ties (1,2,2,4). DENSE_RANK: no gaps (1,2,2,3). ROW_NUMBER: always unique.'},{q:'IN vs EXISTS performance?',a:'EXISTS: large datasets pe fast (short-circuits). IN: small lists ok. NOT IN: NULL trap!'},{q:'Clustered vs Non-clustered index?',a:'Clustered: actual rows sorted by index (1 per table). Non-clustered: separate pointer structure.'},{q:'NULL = NULL kya hai?',a:'NULL! Koi bhi comparison NULL return karta. IS NULL / IS NOT NULL use karo.'},{q:'VIEW vs Materialized VIEW?',a:'VIEW: fresh data every time, slow. Materialized VIEW: stored, fast, stale (needs refresh).'},{q:'OLTP vs OLAP?',a:'OLTP: transactions, normalized, fast writes. OLAP: analytics, denormalized, fast reads.'}];return qs.map((q,i)=>`<div class="q-box"><div class="q-num">Q${i+1}</div><div class="q-text">${q.q}</div><div class="q-ans">${q.a}</div></div>`).join('');}},
+ ]},
+
+{cat:'Interview Qs',name:'SQL vs NoSQL',diff:'m',
+ desc:'Kab SQL, kab NoSQL? System design interviews mein yeh bahut aata hai.',
+ query:[
+  {t:`<span class="cm">-- SQL: structured, relations</span>`,l:[]},
+  {t:`<span class="cm">-- NoSQL: flexible, scale</span>`,l:[]},
+  {t:`<span class="cm">-- CAP theorem tradeoffs</span>`,l:[]},
+ ],
+ steps:[
+  {label:'SQL (RDBMS)',qL:[],cpp:`<span class="cc">// ACID + Schema + Joins</span>\nmap&lt;key, structured_row&gt;`,
+   explain:`<b>SQL databases</b> — structured data, ACID, joins, fixed schema. PostgreSQL, MySQL, SQLite. Kab use: transactions, relations, consistency critical.`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:6px">${[['✓ ACID transactions','Bank, e-commerce, ERP','te'],['✓ Complex queries + JOINs','Analytics, reporting','te'],['✓ Data integrity (constraints)','Medical records','te'],['✓ Mature ecosystem','Production-proven','te'],['✗ Horizontal scale hard','Sharding complex','re'],['✗ Fixed schema','Schema changes = migrations','re']].map(([f,ex,c])=>`<div class="rb ${c}">${f}<span style="font-size:11px;margin-left:auto;opacity:.7">${ex}</span></div>`).join('')}</div>`;}},
+  {label:'NoSQL Types',qL:[],cpp:`<span class="cc">// Different data models</span>`,
+   explain:`<b>4 NoSQL types</b> — har ek alag problem solve karta hai.`,
+   render(){return[{t:'Document (MongoDB)',d:'JSON-like docs. Flexible schema. Content, profiles.',c:'bl'},{t:'Key-Value (Redis)',d:'Cache, sessions, counters. Ultra-fast O(1).',c:'te'},{t:'Wide Column (Cassandra)',d:'Time series, logs. Massive scale. AP system.',c:'am'},{t:'Graph (Neo4j)',d:'Relationships, social networks, recommendations.',c:'pu'}].map(it=>`<div class="acid-card" style="background:var(--${it.c==='bl'?'blue':it.c==='te'?'teal':it.c==='am'?'amber':'purple'}-bg);border-color:var(--${it.c==='bl'?'blue':it.c==='te'?'teal':it.c==='am'?'amber':'purple'});margin:3px 0"><div class="acid-prop" style="color:var(--${it.c==='bl'?'blue':it.c==='te'?'teal':it.c==='am'?'amber':'purple'}-dk)">${it.t}</div><div class="acid-def" style="color:var(--${it.c==='bl'?'blue':it.c==='te'?'teal':it.c==='am'?'amber':'purple'}-dk)">${it.d}</div></div>`).join('');}},
+  {label:'CAP Theorem',qL:[],cpp:`<span class="cc">// Consistency + Availability</span>\n<span class="cc">// + Partition Tolerance</span>\n<span class="cc">// Pick only 2!</span>`,
+   explain:`<b>CAP Theorem</b> — distributed systems mein 3 mein se sirf 2 guarantee kar sakte ho. SQL = CP. Cassandra = AP. Network partitions real life mein hote hain.`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:6px">${[{p:'C — Consistency',d:'Sab nodes same data dekhte hain. Read always latest write.',c:'te'},{p:'A — Availability',d:'Har request ko response milega. Kabhi down nahi.',c:'am'},{p:'P — Partition Tolerance',d:'Network split hone pe bhi system kaam karta hai.',c:'bl'}].map(a=>`<div class="acid-card" style="background:${a.c==='te'?'var(--teal-bg)':a.c==='am'?'var(--amber-bg)':'var(--blue-bg)'};border-color:var(--${a.c==='te'?'teal':a.c==='am'?'amber':'blue'})"><div class="acid-prop" style="color:var(--${a.c==='te'?'teal':a.c==='am'?'amber':'blue'}-dk)">${a.p}</div><div class="acid-def" style="color:var(--${a.c==='te'?'teal':a.c==='am'?'amber':'blue'}-dk)">${a.d}</div></div>`).join('')}<div class="info-box info" style="margin-top:6px">SQL (CP): Consistency + Partition Tolerance<br>Cassandra (AP): Availability + Partition Tolerance<br>Traditional RDBMS (CA): Consistency + Availability (no partition)</div>`;}},
+ ]},
+
+{cat:'Interview Qs',name:'Query Optimization Tips',diff:'h',
+ desc:'Slow queries ko fast karna. Index, query rewriting, avoid full scans — practical tips.',
+ query:[
+  {t:`<span class="cm">-- SLOW:</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> t <span class="kw">WHERE</span> <span class="fn">YEAR</span>(dt)=<span class="num">2024</span>`,l:[1]},
+  {t:`<span class="cm">-- FAST:</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> t <span class="kw">WHERE</span>`,l:[3]},
+  {t:`  dt <span class="kw">BETWEEN</span> <span class="str">'2024-01-01'</span>`,l:[4]},
+  {t:`  <span class="kw">AND</span> <span class="str">'2024-12-31'</span>;`,l:[5]},
+ ],
+ steps:[
+  {label:'Index Killers',qL:[1],cpp:`<span class="cc">// Index pe function = SLOW</span>\nYEAR(dt) = 2024  <span class="cc">// no index!</span>\n<span class="cc">// Range instead:</span>\ndt BETWEEN 2024-01-01 AND 2024-12-31`,
+   explain:`<b>Index killers</b> — column pe function use karna index invalidate karta hai. YEAR(dt)=2024 = full scan. dt BETWEEN range = index use.`,
+   render(){return[['YEAR(date_col) = 2024','Index bypass! Full scan','err'],['UPPER(name) = "RAJ"','Index bypass!','err'],['sal * 1.1 > 100000','Function on column','err'],['sal > 90909','Rewrite — index use','ok'],['date_col BETWEEN d1 AND d2','Range query — fast','ok'],['name LIKE "Raj%"','Prefix match — index ok','ok'],["name LIKE '%aj%'",'Contains — NO index (% left)','warn']].map(([q,d,c])=>`<div class="info-box ${c}" style="margin-bottom:3px"><span style="font-family:var(--mono);font-size:11px">${q}</span><br><span style="font-size:11px">${d}</span></div>`).join('');}},
+  {label:'SELECT *',qL:[3,4,5],cpp:`<span class="cc">// SELECT * = sab columns fetch</span>\n<span class="cc">// Covering index bypass</span>\n<span class="cc">// SELECT only needed cols</span>`,
+   explain:`<b>SELECT * avoid karo production mein</b> — zyada data transfer, covering index nahi use hota, schema change pe breakage. Sirf needed columns select karo.`,
+   render(){return`<div style="display:flex;flex-direction:column;gap:6px">${[{t:'❌ SELECT *',d:'Sab columns fetch. Covering index bypass. Schema fragile.',c:'err'},{t:'✓ SELECT name, sal',d:'Only needed. Covering index possible. Less network.',c:'ok'},{t:'❌ SELECT DISTINCT *',d:'Full scan + sort. Avoid on large tables.',c:'warn'},{t:'✓ Specific columns',d:'Query planner ko help karo.',c:'ok'}].map(it=>`<div class="info-box ${it.c}"><b>${it.t}</b> — ${it.d}</div>`).join('')}</div>`;}},
+  {label:'Tips Checklist',qL:[],cpp:``,
+   explain:`<b>Query optimization checklist</b> — slow query mile toh yeh dekho.`,
+   render(){return[['Add index on WHERE/JOIN/ORDER BY cols','Most impactful fix','te'],['Use covering index for hot queries','Fastest — no table lookup','te'],['Avoid functions on indexed cols','Index killer!','re'],['SELECT specific cols (not *)','Less I/O, covering index','am'],['Use LIMIT for sampling/testing','Avoid full scans','am'],['Use EXISTS instead of COUNT > 0','Short-circuits faster','te'],['Check EXPLAIN ANALYZE output','Find Seq Scans','bl'],['Partition large tables by date','Time-series performance','bl'],['VACUUM/ANALYZE for stale stats','Query planner accuracy','gr'],['Avoid OFFSET for pagination','Use keyset instead','re']].map(([t,d,c])=>`<div class="rb ${c}" style="flex-direction:column;align-items:flex-start;margin-bottom:2px"><div style="font-weight:600;font-size:12px">${t}</div><div style="font-size:11px;opacity:.75">${d}</div></div>`).join('');}},
+ ]}
+
+// ─── NEW CONCEPTS (added clean) ───────────────────────────────────────────────
+
+,{cat:'Stored & Triggers',name:'Stored Procedures',diff:'m',
+ desc:'Stored procedures = database mein store SQL code. Reusable, secure, compiled once. IN/OUT parameters, IF/WHILE logic sab available.',
+ query:[
+  {t:`<span class="kw">CREATE PROCEDURE</span> give_raise(`,l:[0]},
+  {t:`  IN  dept_name <span class="kw">VARCHAR</span>,`,l:[1]},
+  {t:`  IN  pct       <span class="kw">DECIMAL</span>,`,l:[2]},
+  {t:`  OUT affected  <span class="kw">INT</span>`,l:[3]},
+  {t:`)`,l:[4]},
+  {t:`<span class="kw">BEGIN</span>`,l:[5]},
+  {t:`  <span class="kw">UPDATE</span> employees`,l:[6]},
+  {t:`  <span class="kw">SET</span> sal = sal * (<span class="num">1</span> + pct/<span class="num">100</span>)`,l:[7]},
+  {t:`  <span class="kw">WHERE</span> dept = dept_name;`,l:[8]},
+  {t:`  <span class="kw">SET</span> affected = ROW_COUNT();`,l:[9]},
+  {t:`<span class="kw">END</span>;`,l:[10]},
+ ],
+ steps:[
+  {label:'Parameters',qL:[1,2,3],
+   cpp:`// IN = read-only input\n// OUT = output (like ref param)\n// INOUT = read + write\nvoid give_raise(string dept,\n  double pct, int& affected);`,
+   explain:`<b>IN/OUT/INOUT:</b> IN = readonly input. OUT = output value (caller gets it). INOUT = both. C++ mein IN = const ref, OUT = reference. CALL give_raise('Eng', 10, @count);`,
+   render(){
+     var rows = [['IN','Read-only input. Caller value pass karta hai.','IN dept VARCHAR'],['OUT','Output. Procedure set karta hai.','OUT affected INT'],['INOUT','Input + output both.','INOUT counter INT']];
+     return tbl(['Mode','Meaning','Example'],rows.map(function(r){return[('<span class="tag bl">'+r[0]+'</span>'),r[1],('<span style="font-family:var(--mono);color:var(--teal);font-size:11px">'+r[2]+'</span>')]}));
+   }},
+  {label:'Body logic',qL:[5,6,7,8,9,10],
+   cpp:`// SQL procedure body:\nDECLARE v_count INT;\nIF condition THEN\n  UPDATE...;\nELSEIF ... THEN ...\nELSE ...\nEND IF;`,
+   explain:`<b>Procedure body</b> — DECLARE variables, IF/ELSEIF/ELSE/END IF, WHILE/LOOP/REPEAT available. ROW_COUNT() = rows affected by last DML. C++ functions jaisa lekin SQL syntax.`,
+   render(){
+     var h = '<div class="cte-box"><div class="cte-label">Procedure Control Flow</div>';
+     h += '<div style="font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.9">';
+     h += '<span style="color:var(--blue)">DECLARE</span> v INT DEFAULT 0;<br>';
+     h += '<span style="color:var(--blue)">IF</span> v > 0 <span style="color:var(--blue)">THEN</span><br>';
+     h += '&nbsp;&nbsp;<span style="color:var(--blue)">UPDATE</span>...; <span style="color:var(--blue)">COMMIT</span>;<br>';
+     h += '<span style="color:var(--blue)">ELSEIF</span> v < 0 <span style="color:var(--blue)">THEN</span> ...<br>';
+     h += '<span style="color:var(--blue)">ELSE SET</span> status = <span style="color:var(--coral)">\'FAILED\'</span>;<br>';
+     h += '<span style="color:var(--blue)">END IF</span>;</div></div>';
+     return h;
+   }},
+  {label:'Proc vs Func',qL:[0,10],
+   cpp:`// Procedure = void + side effects\nvoid proc();\n// Function = returns value\nint udf();`,
+   explain:`<b>Procedure vs Function:</b> Procedure = side effects (UPDATE/INSERT), kuch return nahi. Function = value return karta hai, SELECT mein use kar sakte. Trigger = event pe auto-fire.`,
+   render(){
+     return tbl(['Feature','Procedure','Function (UDF)'],[
+       ['Returns','Nothing / OUT params','Single value'],
+       ['In SELECT','Cannot','Can use'],
+       ['DML inside','Yes (UPDATE etc)','Usually not'],
+       ['COMMIT/ROLLBACK','Yes','No'],
+       ['Call syntax','CALL proc(...)','SELECT func(...)']
+     ].map(function(r){return['<b>'+r[0]+'</b>',r[1],r[2]]}));
+   }},
+ ]},
+
+{cat:'Stored & Triggers',name:'Triggers',diff:'m',
+ desc:'Trigger = INSERT/UPDATE/DELETE pe automatically chalti hai. BEFORE/AFTER. OLD/NEW pseudorecords. Audit logs, validation.',
+ query:[
+  {t:`<span class="kw">CREATE TRIGGER</span> salary_audit`,l:[0]},
+  {t:`<span class="kw">AFTER UPDATE ON</span> employees`,l:[1]},
+  {t:`<span class="kw">FOR EACH ROW</span>`,l:[2]},
+  {t:`<span class="kw">BEGIN</span>`,l:[3]},
+  {t:`  <span class="kw">INSERT INTO</span> audit_log`,l:[4]},
+  {t:`  <span class="kw">VALUES</span>(OLD.sal, NEW.sal, NOW());`,l:[5]},
+  {t:`<span class="kw">END</span>;`,l:[6]},
+ ],
+ steps:[
+  {label:'BEFORE vs AFTER',qL:[0,1,2],
+   cpp:`// BEFORE: validate/modify NEW\n// AFTER: audit, side effects`,
+   explain:`<b>BEFORE trigger</b> = data change se pehle. Validation, NEW values modify karo. <b>AFTER trigger</b> = baad mein. Audit logs, notifications ke liye.`,
+   render(){
+     var items = [
+       ['BEFORE INSERT','Validate, set defaults, modify NEW','bl'],
+       ['BEFORE UPDATE','Check business rules, prevent bad updates','bl'],
+       ['AFTER INSERT','Audit log, notification, cascade','te'],
+       ['AFTER UPDATE','Log OLD+NEW values, sync tables','te'],
+       ['AFTER DELETE','Archive, soft delete, cascade','am']
+     ];
+     var h = '';
+     items.forEach(function(t){
+       h += '<div class="rb '+t[2]+'" style="flex-direction:column;align-items:flex-start;margin-bottom:3px">';
+       h += '<div style="font-weight:600;font-size:12px">'+t[0]+'</div>';
+       h += '<div style="font-size:11px;opacity:.8">'+t[1]+'</div></div>';
+     });
+     return h;
+   }},
+  {label:'OLD / NEW',qL:[4,5],
+   cpp:`// OLD = values before change\n// NEW = values after change\nOLD.sal; // before\nNEW.sal; // after`,
+   explain:`<b>OLD aur NEW</b> — trigger ke andar pseudorecords. OLD = pehle ki values (UPDATE/DELETE). NEW = nayi values (INSERT/UPDATE). BEFORE mein NEW modify bhi kar sakte.`,
+   render(){
+     var before = {name:'Raj',sal:85000,dept:'Eng'};
+     var after = {name:'Raj',sal:90000,dept:'Eng'};
+     var h = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+     h += '<div class="cte-box"><div class="cte-label">OLD (before UPDATE)</div>';
+     Object.keys(before).forEach(function(k){h += '<div class="rb fail">'+k+': '+before[k]+'</div>';});
+     h += '</div><div class="cte-box"><div class="cte-label">NEW (after UPDATE)</div>';
+     Object.keys(after).forEach(function(k){h += '<div class="rb pass">'+k+': '+after[k]+(k==='sal'?' ← changed':'')+'</div>';});
+     h += '</div></div>';
+     h += '<div class="info-box info" style="margin-top:6px">Audit: OLD.sal=85000, NEW.sal=90000, diff=+5000</div>';
+     return h;
+   }},
+ ]},
+
+{cat:'Window Advanced',name:'NTILE / PERCENT_RANK / CUME_DIST',diff:'h',
+ desc:'Percentile aur distribution functions. Marketing segmentation, statistical analysis ke liye.',
+ query:[
+  {t:`<span class="kw">SELECT</span> name, sal,`,l:[0]},
+  {t:`  <span class="fn">NTILE</span>(<span class="num">4</span>)        <span class="kw">OVER</span>(w) <span class="kw">AS</span> quartile,`,l:[1]},
+  {t:`  <span class="fn">PERCENT_RANK</span>() <span class="kw">OVER</span>(w) <span class="kw">AS</span> pct_rank,`,l:[2]},
+  {t:`  <span class="fn">CUME_DIST</span>()    <span class="kw">OVER</span>(w) <span class="kw">AS</span> cume`,l:[3]},
+  {t:`<span class="kw">FROM</span> employees`,l:[4]},
+  {t:`<span class="kw">WINDOW</span> w <span class="kw">AS</span> (<span class="kw">ORDER BY</span> sal);`,l:[5]},
+ ],
+ steps:[
+  {label:'NTILE',qL:[1],
+   cpp:`// NTILE(4) = quartiles\nint q = floor(i*4/total)+1;`,
+   explain:`<b>NTILE(N)</b> — rows ko N equal buckets. NTILE(4)=quartiles, NTILE(10)=deciles. Customer segmentation ke liye perfect.`,
+   render(){
+     var sorted = EMP.slice().sort(function(a,b){return a.sal-b.sal;});
+     var n=4, total=sorted.length;
+     var clss = ['re','am','bl','te'];
+     var segs = ['Bottom','Lower-Mid','Upper-Mid','Top'];
+     return tbl(['name','sal','NTILE(4)','segment'],sorted.map(function(r,i){
+       var q = Math.floor(i*n/total)+1;
+       return [r.name,'₹'+r.sal,'<span class="tag '+clss[q-1]+'">Q'+q+'</span>',segs[q-1]+' 25%'];
+     }));
+   }},
+  {label:'PERCENT_RANK',qL:[2],
+   cpp:`// (rank-1)/(total-1)\n// Range: 0.0 to 1.0`,
+   explain:`<b>PERCENT_RANK()</b> = (rank-1)/(n-1). 0.0=lowest, 1.0=highest. "Tum kitne percent se zyada kamate ho."`,
+   render(){
+     var sorted = EMP.slice().sort(function(a,b){return a.sal-b.sal;});
+     var n = sorted.length;
+     return tbl(['name','sal','PERCENT_RANK'],sorted.map(function(r,i){
+       var pct = n>1 ? (i/(n-1)*100).toFixed(0) : 100;
+       return [r.name,'₹'+r.sal,'<span class="nc">'+pct+'%</span>'];
+     }));
+   }},
+  {label:'CUME_DIST',qL:[3],
+   cpp:`// rows_up_to / total\n// Range: 1/N to 1.0\n// Never 0!`,
+   explain:`<b>CUME_DIST()</b> = fraction of rows ≤ current. Never 0 (minimum 1/N). PERCENT_RANK starts at 0, CUME_DIST starts at 1/N.`,
+   render(){
+     var sorted = EMP.slice().sort(function(a,b){return a.sal-b.sal;});
+     var n = sorted.length;
+     return tbl(['name','sal','PERCENT_RANK','CUME_DIST'],sorted.map(function(r,i){
+       var pr = n>1 ? (i/(n-1)).toFixed(2) : '1.00';
+       var cd = ((i+1)/n).toFixed(2);
+       return [r.name,'₹'+r.sal,pr,'<span class="nc">'+cd+'</span>'];
+     }));
+   }},
+ ]},
+
+{cat:'SQL Patterns',name:'Pivot Table',diff:'h',
+ desc:'Rows ko columns mein convert karo. CASE WHEN mein SUM/COUNT se manual pivot — interviews mein common.',
+ query:[
+  {t:`<span class="kw">SELECT</span> city,`,l:[0]},
+  {t:`  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> dept=<span class="str">'Eng'</span>`,l:[1]},
+  {t:`       <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) Eng,`,l:[2]},
+  {t:`  <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> dept=<span class="str">'Sales'</span>`,l:[3]},
+  {t:`       <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) Sales`,l:[4]},
+  {t:`<span class="kw">FROM</span> employees <span class="kw">GROUP BY</span> city;`,l:[5]},
+ ],
+ steps:[
+  {label:'Before Pivot',qL:[],
+   cpp:`// Original: rows with dept\n// Want: dept as columns`,
+   explain:`<b>Problem</b> — har row mein dept hai. Report mein depts columns mein chahiye, cities rows mein.`,
+   render(){return tbl(['name','city','dept'],EMP.map(function(r){return[r.name,r.city,r.dept]}));}},
+  {label:'CASE trick',qL:[1,2,3,4,5],
+   cpp:`// Conditional count per dept\nSUM(CASE WHEN dept='Eng'\n  THEN 1 ELSE 0 END)`,
+   explain:`<b>Pivot trick</b> — CASE WHEN dept='Eng' THEN 1 ELSE 0 mein SUM. Sirf Eng employees count. Har dept ke liye alag CASE.`,
+   render(){
+     var cities = [...new Set(EMP.map(function(r){return r.city}))];
+     var depts = ['Eng','Sales','HR'];
+     return tbl(['city'].concat(depts), cities.map(function(city){
+       var row = [city];
+       depts.forEach(function(d){
+         row.push('<span class="nc">'+EMP.filter(function(r){return r.city===city&&r.dept===d}).length+'</span>');
+       });
+       return row;
+     }));
+   }},
+ ]},
+
+{cat:'SQL Patterns',name:'Gap & Island Problems',diff:'h',
+ desc:'Consecutive sequences mein gaps dhundho ya consecutive islands nikalo. Data quality, attendance tracking.',
+ query:[
+  {t:`<span class="cm">-- Gaps in IDs:</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> id+<span class="num">1</span> gap_start,`,l:[1]},
+  {t:`  next_id-<span class="num">1</span> gap_end`,l:[2]},
+  {t:`<span class="kw">FROM</span> (`,l:[3]},
+  {t:`  <span class="kw">SELECT</span> id,`,l:[4]},
+  {t:`    <span class="fn">LEAD</span>(id) <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> id) next_id`,l:[5]},
+  {t:`  <span class="kw">FROM</span> emp) t`,l:[6]},
+  {t:`<span class="kw">WHERE</span> next_id - id > <span class="num">1</span>;`,l:[7]},
+ ],
+ steps:[
+  {label:'Gap Problem',qL:[1,2,3,4,5,6,7],
+   cpp:`// IDs: 1,2,3,5,6,8\n// Gaps: 4,7 missing`,
+   explain:`<b>LEAD trick</b> — LEAD(id) = next row ka ID. next - current > 1 mein gap hai. current+1 se next-1 tak missing.`,
+   render(){
+     var ids = [1,2,3,5,6,8,10];
+     var h = '<div class="dl">IDs with gaps:</div>';
+     ids.forEach(function(id,i){
+       var next = ids[i+1];
+       var gap = next && next-id>1;
+       h += '<div class="rb '+(gap?'re':'hi')+'">ID: '+id+(gap?' → GAP! '+(id+1)+' to '+(next-1)+' missing':'')+'</div>';
+     });
+     return h;
+   }},
+  {label:'Island Pattern',qL:[],
+   cpp:`// Island = consecutive group\n// date - row_number = constant\n// for consecutive rows`,
+   explain:`<b>Island trick</b> — consecutive rows ke liye date - ROW_NUMBER() = same constant. Non-consecutive pe yeh change hota hai. Island ki "group key" yahi hai!`,
+   render(){
+     var data = [{id:1,val:1},{id:2,val:1},{id:3,val:1},{id:4,val:0},{id:5,val:1},{id:6,val:1}];
+     return tbl(['id','val','row_num','id - rn (island key)'], data.map(function(r,i){
+       var rn = i+1;
+       var key = r.val ? (r.id - rn) : null;
+       return [r.id, r.val, rn, key!==null ? '<span class="nc">'+key+'</span>' : '<span class="null-val">—</span>'];
+     })) + '<div class="info-box info" style="margin-top:6px">Same key = same island! GROUP BY that key to get island ranges.</div>';
+   }},
+ ]},
+
+{cat:'SQL Patterns',name:'Slowly Changing Dimensions',diff:'h',
+ desc:'Historical data track karna. SCD Type 1 (overwrite), Type 2 (new row), Type 3 (extra column). Data warehouse essential.',
+ query:[
+  {t:`<span class="cm">-- SCD Type 2: Full history</span>`,l:[]},
+  {t:`<span class="kw">CREATE TABLE</span> emp_history (`,l:[1]},
+  {t:`  id         <span class="kw">INT</span>,`,l:[2]},
+  {t:`  dept       <span class="kw">VARCHAR</span>,`,l:[3]},
+  {t:`  valid_from <span class="kw">DATE</span>,`,l:[4]},
+  {t:`  valid_to   <span class="kw">DATE</span>,   <span class="cm">-- NULL=current</span>`,l:[5]},
+  {t:`  is_current <span class="kw">BOOLEAN</span>`,l:[6]},
+  {t:`);`,l:[7]},
+ ],
+ steps:[
+  {label:'SCD Types',qL:[],
+   cpp:`// Type 1: Overwrite (no history)\n// Type 2: New row (full history)\n// Type 3: Extra column (1 prev)`,
+   explain:`<b>3 SCD types</b> — Type 1 = simple overwrite (history lost). Type 2 = most common, full history with date ranges. Type 3 = only 1 previous value stored.`,
+   render(){
+     var items = [
+       ['Type 1 — Overwrite','Purani value replace. No history. Simple.','UPDATE emp SET dept=...','am'],
+       ['Type 2 — New Row','Nayi row + date range. Full history. Most used.','INSERT new, UPDATE old valid_to','te'],
+       ['Type 3 — Extra Col','Ek column prev value ke liye. Sirf 1 history.','ALTER TABLE ADD prev_dept','bl']
+     ];
+     var h = '';
+     items.forEach(function(t){
+       h += '<div class="acid-card" style="background:var(--'+{'am':'amber','te':'teal','bl':'blue'}[t[3]]+'-bg);border-color:var(--'+{'am':'amber','te':'teal','bl':'blue'}[t[3]]+');margin:3px 0">';
+       h += '<div class="acid-prop" style="color:var(--'+{'am':'amber','te':'teal','bl':'blue'}[t[3]]+'-dk)">'+t[0]+'</div>';
+       h += '<div class="acid-def" style="color:var(--'+{'am':'amber','te':'teal','bl':'blue'}[t[3]]+'-dk)">'+t[1]+'<br><span style="font-family:var(--mono);font-size:11px">'+t[2]+'</span></div></div>';
+     });
+     return h;
+   }},
+  {label:'Type 2 History',qL:[1,2,3,4,5,6,7],
+   cpp:`// On dept change:\n// 1. UPDATE old: valid_to=today\n// 2. INSERT new: valid_from=today`,
+   explain:`<b>SCD Type 2</b> — valid_from, valid_to date range. is_current flag. Current = valid_to IS NULL ya is_current=TRUE. Point-in-time query = WHERE date BETWEEN valid_from AND COALESCE(valid_to,'9999-12-31').`,
+   render(){
+     var history = [
+       {id:1,dept:'Eng',from:'2020-01-01',to:'2022-06-30',cur:false},
+       {id:1,dept:'Sales',from:'2022-07-01',to:'2023-12-31',cur:false},
+       {id:1,dept:'Eng',from:'2024-01-01',to:null,cur:true}
+     ];
+     return tbl(['id','dept','valid_from','valid_to','is_current'], history.map(function(r){
+       return [r.id, r.dept, r.from,
+         r.to ? r.to : '<span class="null-val">NULL</span>',
+         r.cur ? '<span class="tag te">✓ YES</span>' : '<span class="tag gr">No</span>'];
+     }), history.map(function(r){return r.cur?'pass':'hi'}));
+   }},
+ ]},
+
+{cat:'Real Problems',name:'Consecutive Login Streak',diff:'h',
+ desc:'Max consecutive login days per user. Amazon, Google, Flipkart interviews mein classic question. Island problem variant.',
+ query:[
+  {t:`<span class="kw">WITH</span> numbered <span class="kw">AS</span> (`,l:[0]},
+  {t:`  <span class="kw">SELECT</span> user_id, login_date,`,l:[1]},
+  {t:`    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span>(`,l:[2]},
+  {t:`      <span class="kw">PARTITION BY</span> user_id`,l:[3]},
+  {t:`      <span class="kw">ORDER BY</span> login_date) rn`,l:[4]},
+  {t:`  <span class="kw">FROM</span> logins),`,l:[5]},
+  {t:`grp <span class="kw">AS</span> (`,l:[6]},
+  {t:`  <span class="kw">SELECT</span> user_id,`,l:[7]},
+  {t:`    login_date - rn <span class="kw">AS</span> grp_key`,l:[8]},
+  {t:`  <span class="kw">FROM</span> numbered)`,l:[9]},
+  {t:`<span class="kw">SELECT</span> user_id, <span class="fn">MAX</span>(<span class="fn">COUNT</span>(*))`,l:[10]},
+  {t:`<span class="kw">FROM</span> grp <span class="kw">GROUP BY</span> user_id, grp_key;`,l:[11]},
+ ],
+ steps:[
+  {label:'ROW_NUMBER trick',qL:[1,2,3,4,5],
+   cpp:`// Key insight:\n// consecutive dates:\n// date - row_num = SAME\n// Jan1-1=0, Jan2-2=0\n// Jan5-4=1, Jan6-5=1`,
+   explain:`<b>Key insight</b> — consecutive dates pe date - row_number = same constant. Gap hone pe constant change hota hai. Yahi island group key hai!`,
+   render(){
+     var rows = [{d:1,rn:1,key:0},{d:2,rn:2,key:0},{d:3,rn:3,key:0},{d:5,rn:4,key:1},{d:6,rn:5,key:1}];
+     return tbl(['login_day','row_num','day - rn = group_key'], rows.map(function(r){
+       return ['Jan '+r.d, r.rn, r.d+' - '+r.rn+' = <span class="'+(r.key===0?'nc':'')+'" style="font-weight:600">'+r.key+'</span>'];
+     })) + '<div class="info-box ok" style="margin-top:6px">Same group_key = consecutive streak! COUNT per group = streak length</div>';
+   }},
+  {label:'Final result',qL:[6,7,8,9,10,11],
+   cpp:`// GROUP BY user + grp_key\n// COUNT = streak length\n// MAX = longest streak`,
+   explain:`<b>Final step</b> — GROUP BY user_id + grp_key. COUNT(*)=streak length. MAX of that = max streak. Clean 2-CTE solution.`,
+   render(){
+     return tbl(['user_id','streak_group','streak_len','is_max'],[
+       ['Raj','Jan 1-3 (key=0)','3','<span class="tag te">MAX ✓</span>'],
+       ['Raj','Jan 5-6 (key=1)','2','No'],
+       ['Priya','Jan 1-2 (key=0)','2','No'],
+       ['Priya','Jan 4-6 (key=1)','3','<span class="tag te">MAX ✓</span>']
+     ]) + '<div class="info-box info" style="margin-top:6px">Raj max=3, Priya max=3</div>';
+   }},
+ ]},
+
+{cat:'Real Problems',name:'MoM / YoY Growth Rate',diff:'h',
+ desc:'Month-over-month ya Year-over-year growth. Time series analysis — data analyst interviews mein zaroori.',
+ query:[
+  {t:`<span class="kw">SELECT</span> month, revenue,`,l:[0]},
+  {t:`  <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span>`,l:[1]},
+  {t:`    (<span class="kw">ORDER BY</span> month) prev_rev,`,l:[2]},
+  {t:`  (revenue - <span class="fn">LAG</span>(revenue)`,l:[3]},
+  {t:`    <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month))`,l:[4]},
+  {t:`  * <span class="num">100.0</span> / <span class="fn">NULLIF</span>(<span class="fn">LAG</span>(revenue)`,l:[5]},
+  {t:`    <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> month), <span class="num">0</span>)`,l:[6]},
+  {t:`  <span class="kw">AS</span> mom_pct`,l:[7]},
+  {t:`<span class="kw">FROM</span> monthly_revenue;`,l:[8]},
+ ],
+ steps:[
+  {label:'LAG for prev',qL:[1,2],
+   cpp:`// LAG = previous row\nLAG(revenue) OVER(ORDER BY month)`,
+   explain:`<b>LAG(revenue)</b> = pichle month ki revenue. First month = NULL. NULLIF(LAG(...),0) = division by zero se bachao.`,
+   render(){
+     var data = [{m:'Jan',rev:100000},{m:'Feb',rev:120000},{m:'Mar',rev:115000},{m:'Apr',rev:140000},{m:'May',rev:135000},{m:'Jun',rev:160000}];
+     return tbl(['month','revenue','LAG (prev)'],data.map(function(d,i){
+       return [d.m, fmt(d.rev), i===0?'<span class="null-val">NULL</span>':fmt(data[i-1].rev)];
+     }));
+   }},
+  {label:'Growth %',qL:[3,4,5,6,7],
+   cpp:`// MoM% = (cur-prev)/prev*100\ngrowth = (cur-prev)/prev*100.0`,
+   explain:`<b>MoM Growth %</b> = (current - previous) / previous × 100. NULLIF(prev,0) se division by zero safe. Negative = decline.`,
+   render(){
+     var data = [{m:'Jan',rev:100000},{m:'Feb',rev:120000},{m:'Mar',rev:115000},{m:'Apr',rev:140000},{m:'May',rev:135000},{m:'Jun',rev:160000}];
+     return tbl(['month','revenue','prev','MoM %'],data.map(function(d,i){
+       var prev = i>0?data[i-1].rev:null;
+       var g = prev ? ((d.rev-prev)/prev*100).toFixed(1) : null;
+       return [d.m, fmt(d.rev),
+         prev?fmt(prev):'<span class="null-val">NULL</span>',
+         g===null?'—':'<span style="color:'+(g>0?'var(--teal)':'var(--red)')+'font-weight:600">'+(g>0?'+':'')+g+'%</span>'
+       ];
+     }));
+   }},
+ ]},
+
+{cat:'Real Problems',name:'Top N per Group',diff:'m',
+ desc:'Har department mein top 2 highest paid employees. ROW_NUMBER pattern — most asked interview query.',
+ query:[
+  {t:`<span class="kw">WITH</span> ranked <span class="kw">AS</span> (`,l:[0]},
+  {t:`  <span class="kw">SELECT</span> name, dept, sal,`,l:[1]},
+  {t:`    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span>(`,l:[2]},
+  {t:`      <span class="kw">PARTITION BY</span> dept`,l:[3]},
+  {t:`      <span class="kw">ORDER BY</span> sal <span class="kw">DESC</span>`,l:[4]},
+  {t:`    ) <span class="kw">AS</span> rn`,l:[5]},
+  {t:`  <span class="kw">FROM</span> employees`,l:[6]},
+  {t:`)`,l:[7]},
+  {t:`<span class="kw">SELECT</span> * <span class="kw">FROM</span> ranked`,l:[8]},
+  {t:`<span class="kw">WHERE</span> rn <= <span class="num">2</span>;`,l:[9]},
+ ],
+ steps:[
+  {label:'ROW_NUMBER',qL:[2,3,4,5],
+   cpp:`// PARTITION BY dept ORDER BY sal DESC\n// rn=1 = top earner per dept`,
+   explain:`<b>ROW_NUMBER() OVER(PARTITION BY dept ORDER BY sal DESC)</b> — har dept ke andar rank. rn=1 = highest paid, rn=2 = second highest.`,
+   render(){
+     var g = {};
+     EMP.forEach(function(r){if(!g[r.dept])g[r.dept]=[];g[r.dept].push(Object.assign({},r));});
+     Object.values(g).forEach(function(arr){arr.sort(function(a,b){return b.sal-a.sal;});arr.forEach(function(r,i){r.rn=i+1;});});
+     var all = Object.values(g).reduce(function(a,b){return a.concat(b)},[]);
+     return tbl(['name','dept','sal','rn'],all.map(function(r){
+       return [r.name,r.dept,'₹'+r.sal,'<span class="'+(r.rn<=2?'nc':'')+'">#'+r.rn+'</span>'];
+     }));
+   }},
+  {label:'WHERE rn <= 2',qL:[8,9],
+   cpp:`// Filter: only rn <= 2\n// = top 2 per dept`,
+   explain:`<b>WHERE rn <= 2</b> — sirf top 2 per department. Change to rn <= N for top-N. Yeh pattern interview mein bar bar aata hai!`,
+   render(){
+     var g = {};
+     EMP.forEach(function(r){if(!g[r.dept])g[r.dept]=[];g[r.dept].push(Object.assign({},r));});
+     var result = [];
+     Object.entries(g).forEach(function(entry){
+       var dept=entry[0], rows=entry[1];
+       rows.sort(function(a,b){return b.sal-a.sal;});
+       rows.slice(0,2).forEach(function(r,i){result.push(Object.assign({},r,{rn:i+1}));});
+     });
+     return tbl(['dept','name','sal','rn'],result.map(function(r){
+       return [r.dept,r.name,'₹'+r.sal,'<span class="nc">#'+r.rn+'</span>'];
+     })) + '<div class="info-box ok" style="margin-top:6px">Change rn &lt;= 2 to any N for top-N per group!</div>';
+   }},
+ ]},
+
+{cat:'Real Problems',name:'Find Duplicate Rows',diff:'m',
+ desc:'Duplicate rows dhundho aur delete karo. Data cleaning — production mein bahut common.',
+ query:[
+  {t:`<span class="cm">-- Find duplicates:</span>`,l:[]},
+  {t:`<span class="kw">SELECT</span> name, dept, <span class="fn">COUNT</span>(*)`,l:[1]},
+  {t:`<span class="kw">FROM</span> employees`,l:[2]},
+  {t:`<span class="kw">GROUP BY</span> name, dept`,l:[3]},
+  {t:`<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">1</span>;`,l:[4]},
+  {t:``,l:[]},
+  {t:`<span class="cm">-- Delete, keep lowest id:</span>`,l:[]},
+  {t:`<span class="kw">DELETE FROM</span> emp`,l:[7]},
+  {t:`<span class="kw">WHERE</span> id <span class="kw">NOT IN</span>`,l:[8]},
+  {t:`  (<span class="kw">SELECT</span> <span class="fn">MIN</span>(id)`,l:[9]},
+  {t:`   <span class="kw">FROM</span> emp <span class="kw">GROUP BY</span> name, dept);`,l:[10]},
+ ],
+ steps:[
+  {label:'Find dups',qL:[1,2,3,4],
+   cpp:`// GROUP BY cols\n// HAVING COUNT > 1 = duplicates`,
+   explain:`<b>Find duplicates</b> — GROUP BY duplicate columns. HAVING COUNT(*) > 1 = groups with more than 1 row = duplicates.`,
+   render(){
+     var data = [
+       {id:1,name:'Raj',dept:'Eng'},{id:2,name:'Raj',dept:'Eng'},
+       {id:3,name:'Priya',dept:'HR'},{id:4,name:'Priya',dept:'HR'},
+       {id:5,name:'Amit',dept:'Eng'}
+     ];
+     var h = '<div class="dl">Sample data with duplicates:</div>';
+     h += tbl(['id','name','dept'],data.map(function(r){return[r.id,r.name,r.dept]}));
+     h += '<div class="info-box warn" style="margin-top:6px">Raj+Eng appears 2x, Priya+HR appears 2x → duplicates!</div>';
+     return h;
+   }},
+  {label:'Delete dups',qL:[7,8,9,10],
+   cpp:`// Keep MIN(id) per group\n// Delete rest`,
+   explain:`<b>Delete duplicates</b> — MIN(id) per group = ek representative row rakho. NOT IN us list mein sab delete. Alternative: ROW_NUMBER() se bhi kar sakte.`,
+   render(){
+     var data = [
+       {id:1,name:'Raj',dept:'Eng',keep:true},
+       {id:2,name:'Raj',dept:'Eng',keep:false},
+       {id:3,name:'Priya',dept:'HR',keep:true},
+       {id:4,name:'Priya',dept:'HR',keep:false},
+       {id:5,name:'Amit',dept:'Eng',keep:true}
+     ];
+     return tbl(['id','name','dept','action'],data.map(function(r){
+       return [r.id,r.name,r.dept,r.keep?'<span class="tag te">✓ KEEP (MIN id)</span>':'<span class="tag re">✗ DELETE</span>'];
+     }), data.map(function(r){return r.keep?'pass':'re'}));
+   }},
+ ]},
+
+{cat:'Real Problems',name:'SQL Query Optimization',diff:'h',
+ desc:'Slow queries fast karna. Index killers, SELECT *, rewriting tips — practical production knowledge.',
+ query:[
+  {t:`<span class="cm">-- SLOW (index bypass):</span>`,l:[]},
+  {t:`<span class="kw">WHERE</span> <span class="fn">YEAR</span>(dt) = <span class="num">2024</span>`,l:[1]},
+  {t:`<span class="cm">-- FAST (range query):</span>`,l:[]},
+  {t:`<span class="kw">WHERE</span> dt <span class="kw">BETWEEN</span>`,l:[3]},
+  {t:`  <span class="str">'2024-01-01'</span> <span class="kw">AND</span> <span class="str">'2024-12-31'</span>`,l:[4]},
+ ],
+ steps:[
+  {label:'Index Killers',qL:[1],
+   cpp:`// Function on column = no index!\nYEAR(dt) = 2024  // full scan\n// Fix: range query instead`,
+   explain:`<b>Index killers</b> — column pe function use karna index invalidate karta hai. YEAR(dt) = full scan. dt BETWEEN range = index use.`,
+   render(){
+     var items = [
+       ['YEAR(date_col) = 2024','Full scan! Index bypass','err'],
+       ['UPPER(name) = "RAJ"','Full scan! Index bypass','err'],
+       ['sal * 1.1 > 100000','Function on column','warn'],
+       ['dt BETWEEN d1 AND d2','Range — index ok!','ok'],
+       ['name LIKE "Raj%"','Prefix — index ok','ok'],
+       ["name LIKE '%aj%'",'Contains — NO index (% left)','warn'],
+       ['sal > 90909','Rewrite of sal*1.1>100k','ok']
+     ];
+     var h = '';
+     items.forEach(function(it){
+       h += '<div class="info-box '+it[2]+'" style="margin-bottom:3px">';
+       h += '<span style="font-family:var(--mono);font-size:11px">'+it[0]+'</span><br>';
+       h += '<span style="font-size:11px">'+it[1]+'</span></div>';
+     });
+     return h;
+   }},
+  {label:'Checklist',qL:[3,4],
+   cpp:`// Optimization checklist`,
+   explain:`<b>Query optimization checklist</b> — slow query mile toh yeh sab dekho.`,
+   render(){
+     var items = [
+       ['Add index on WHERE/JOIN/ORDER BY cols','Most impactful fix','te'],
+       ['Use covering index for hot queries','No table lookup needed','te'],
+       ['Avoid functions on indexed columns','Index killer!','re'],
+       ['SELECT specific cols (not *)','Less I/O, covering index','am'],
+       ['Use EXISTS not COUNT(*) > 0','Short-circuits faster','te'],
+       ['Check EXPLAIN ANALYZE output','Find Seq Scans','bl'],
+       ['Avoid OFFSET for pagination','Use keyset instead','re'],
+       ['Partition large tables by date','Time-series speed','bl']
+     ];
+     var h = '';
+     items.forEach(function(it){
+       h += '<div class="rb '+it[2]+'" style="flex-direction:column;align-items:flex-start;margin-bottom:2px">';
+       h += '<div style="font-weight:600;font-size:12px">'+it[0]+'</div>';
+       h += '<div style="font-size:11px;opacity:.75">'+it[1]+'</div></div>';
+     });
+     return h;
+   }},
+ ]},
+
+{cat:'Real Problems',name:'SQL vs NoSQL',diff:'m',
+ desc:'Kab SQL, kab NoSQL? System design interviews mein yeh bahut aata hai. CAP theorem bhi.',
+ query:[
+  {t:`<span class="cm">-- SQL: ACID + Relations</span>`,l:[]},
+  {t:`<span class="cm">-- NoSQL: Flexibility + Scale</span>`,l:[]},
+  {t:`<span class="cm">-- CAP: pick 2 of 3</span>`,l:[]},
+ ],
+ steps:[
+  {label:'SQL strengths',qL:[],
+   cpp:`// ACID + Schema + JOINs\nmap<key, structured_row>`,
+   explain:`<b>SQL databases</b> (PostgreSQL, MySQL) — structured, ACID, complex queries. Transactions, relations, consistency critical ho toh SQL.`,
+   render(){
+     var h = '';
+     [['ACID transactions — Bank, e-commerce, ERP','te'],
+      ['Complex JOINs + analytics','te'],
+      ['Data integrity (FK, CHECK, NOT NULL)','te'],
+      ['Mature, well-understood','te'],
+      ['Horizontal scale karna hard (sharding complex)','re'],
+      ['Fixed schema — migrations needed','re']
+     ].forEach(function(it){h += '<div class="rb '+it[1]+'">'+it[0]+'</div>';});
+     return h;
+   }},
+  {label:'NoSQL types',qL:[],
+   cpp:`// 4 NoSQL types:\n// Document, KV, Wide-col, Graph`,
+   explain:`<b>4 NoSQL types</b> — har ek alag problem solve karta hai. Interviews mein yeh sab jaanna zaroori hai.`,
+   render(){
+     var items = [
+       ['Document (MongoDB)','JSON docs. Flexible schema. Content, profiles.','bl'],
+       ['Key-Value (Redis)','Cache, sessions, O(1) lookup. Ultra-fast.','te'],
+       ['Wide Column (Cassandra)','Time series, logs. Massive scale. AP.','am'],
+       ['Graph (Neo4j)','Social networks, recommendations, paths.','pu']
+     ];
+     var h = '';
+     items.forEach(function(t){
+       var col = {bl:'blue',te:'teal',am:'amber',pu:'purple'}[t[2]];
+       h += '<div class="acid-card" style="background:var(--'+col+'-bg);border-color:var(--'+col+');margin:3px 0">';
+       h += '<div class="acid-prop" style="color:var(--'+col+'-dk)">'+t[0]+'</div>';
+       h += '<div class="acid-def" style="color:var(--'+col+'-dk)">'+t[1]+'</div></div>';
+     });
+     return h;
+   }},
+  {label:'CAP Theorem',qL:[],
+   cpp:`// C: Consistency\n// A: Availability\n// P: Partition Tolerance\n// Pick only 2!`,
+   explain:`<b>CAP Theorem</b> — distributed systems mein 3 mein se sirf 2 guarantee. SQL = CP. Cassandra = AP. Real networks always have partitions.`,
+   render(){
+     var h = '';
+     [{p:'C — Consistency',d:'Sab nodes same data. Read always latest write.','c':'te'},
+      {p:'A — Availability',d:'Har request ko response. Never down.','c':'am'},
+      {p:'P — Partition Tolerance',d:'Network split pe bhi system works.','c':'bl'}
+     ].forEach(function(a){
+       var col = {te:'teal',am:'amber',bl:'blue'}[a.c];
+       h += '<div class="acid-card" style="background:var(--'+col+'-bg);border-color:var(--'+col+');margin:3px 0">';
+       h += '<div class="acid-prop" style="color:var(--'+col+'-dk)">'+a.p+'</div>';
+       h += '<div class="acid-def" style="color:var(--'+col+'-dk)">'+a.d+'</div></div>';
+     });
+     h += '<div class="info-box info" style="margin-top:6px">SQL=CP &nbsp;|&nbsp; Cassandra=AP &nbsp;|&nbsp; Traditional RDBMS=CA</div>';
+     return h;
+   }},
+ ]},
+
+
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let curC=0, curS=0, filtered=concepts.map((_,i)=>i);
+
+// ─── CATEGORIES ───────────────────────────────────────────────────────────────
+const cats=[...new Set(concepts.map(c=>c.cat))];
+const catColors={'Foundations':'var(--blue)','JOINs':'var(--teal)','Advanced':'var(--amber)','Performance':'var(--purple)','Design':'var(--coral)','Interview Qs':'var(--pink)','Stored & Triggers':'var(--green)','Window Advanced':'var(--purple)','SQL Patterns':'var(--coral)','Real Problems':'var(--red)'};
+const diffLabel={e:'Easy',m:'Med',h:'Hard'};
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+function buildSidebar(filterText=''){
+  const nav=document.getElementById('navContent');
+  nav.innerHTML='';
+  filtered=[];
+  const fl=filterText.toLowerCase();
+  cats.forEach(cat=>{
+    const inCat=concepts.map((c,i)=>({c,i})).filter(({c,i})=>c.cat===cat&&(c.name.toLowerCase().includes(fl)||c.desc.toLowerCase().includes(fl)||cat.toLowerCase().includes(fl)||fl===''));
+    if(!inCat.length)return;
+    const div=document.createElement('div');
+    div.innerHTML=`<div class="cat-label" style="color:${catColors[cat]||'var(--text3)'}">${cat}</div>`;
+    inCat.forEach(({c,i})=>{
+      filtered.push(i);
+      const item=document.createElement('div');
+      item.className='nav-item'+(i===curC?' active':'');
+      item.innerHTML=`<span class="nav-dot" style="background:${catColors[cat]||'var(--blue)'}"></span><span style="flex:1">${c.name}</span><span class="diff-badge diff-${c.diff}">${diffLabel[c.diff]}</span>`;
+      item.onclick=()=>{curC=i;curS=0;render();document.querySelector('.sidebar').classList.remove('open');};
+      div.appendChild(item);
+    });
+    nav.appendChild(div);
+  });
+  document.getElementById('navCount').textContent=`${filtered.length} concepts`;
+}
+
+function filterConcepts(val){buildSidebar(val);}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  const con=concepts[curC];
+  const step=con.steps[curS];
+  const activeL=new Set(step.qL);
+
+  document.getElementById('ctitle').textContent=con.name;
+  document.getElementById('mobileTitle').textContent=con.name;
+
+  const tag=document.getElementById('ctag');
+  tag.textContent={e:'Easy',m:'Medium',h:'Hard'}[con.diff];
+  const tagStyles={e:'background:var(--teal-bg);color:var(--teal)',m:'background:var(--amber-bg);color:var(--amber)',h:'background:var(--red-bg);color:var(--red)'};
+  tag.style.cssText=tagStyles[con.diff];
+
+  document.getElementById('cdesc').textContent=con.desc;
+
+  // Progress
+  const pr=document.getElementById('progressRow');
+  pr.innerHTML=con.steps.map((_,i)=>`<div class="progress-seg ${i<curS?'done':i===curS?'cur':''}"></div>`).join('');
+
+  // SQL
+  document.getElementById('sqlCode').innerHTML=con.query.map((q,i)=>{
+    if(!q.t)return`<div style="height:4px"></div>`;
+    return`<div class="cl ${activeL.has(i)?'lit':''}">${q.t}</div>`;
+  }).join('');
+
+  // CPP
+  document.getElementById('cppHint').innerHTML=step.cpp;
+
+  // Steps
+  document.getElementById('stepBar').innerHTML=con.steps.map((s,i)=>
+    `<button class="sp ${i===curS?'active':''}" onclick="goStep(${i})">${i+1}. ${s.label}</button>`
+  ).join('');
+
+  // Viz
+  const viz=document.getElementById('vizArea');
+  viz.innerHTML=step.render();
+  viz.classList.remove('anim');void viz.offsetWidth;viz.classList.add('anim');
+
+  // Explain
+  document.getElementById('explainTxt').innerHTML=step.explain;
+
+  // Nav buttons
+  document.getElementById('prevBtn').disabled=curS===0;
+  document.getElementById('nextBtn').disabled=curS===con.steps.length-1;
+  document.getElementById('sc').textContent=`${curS+1} / ${con.steps.length}`;
+
+  buildSidebar(document.getElementById('searchInput').value);
+}
+
+function goStep(i){curS=i;render();}
+function nextStep(){if(curS<concepts[curC].steps.length-1){curS++;render();}}
+function prevStep(){if(curS>0){curS--;render();}}
+
+// ─── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(document.activeElement===document.getElementById('searchInput'))return;
+  if(e.key==='ArrowRight')nextStep();
+  if(e.key==='ArrowLeft')prevStep();
+  if(e.key==='ArrowDown'){const ci=filtered.indexOf(curC);if(ci<filtered.length-1){curC=filtered[ci+1];curS=0;render();}}
+  if(e.key==='ArrowUp'){const ci=filtered.indexOf(curC);if(ci>0){curC=filtered[ci-1];curS=0;render();}}
+});
+
+render();
+</script>
+</body>
+</html>
