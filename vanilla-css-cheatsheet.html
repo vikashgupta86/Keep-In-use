@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vanilla CSS Cheat Sheet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f4f6fb; color: #1a1a2e; }
+
+  header { background: linear-gradient(135deg, #ff6b35, #f7c59f); color: #fff; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  header p { font-size: 0.85rem; opacity: 0.9; margin-top: 2px; }
+  .version-badge { font-size: 11px; background: rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+
+  .controls { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  #search { flex: 1; min-width: 200px; max-width: 340px; font-size: 13px; padding: 7px 12px; border-radius: 8px; border: 1px solid #d1d5db; outline: none; }
+  #search:focus { border-color: #ff6b35; box-shadow: 0 0 0 3px rgba(255,107,53,0.15); }
+  .tab { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid #d1d5db; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .tab:hover { border-color: #ff6b35; color: #ff6b35; }
+  .tab.active { background: #ff6b35; color: #fff; border-color: #ff6b35; }
+
+  main { padding: 1.5rem 2rem 3rem; max-width: 1300px; margin: auto; }
+  .section { margin-bottom: 2.5rem; }
+  .section-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+
+  .card { background: #fff; border: 1px solid #e8ecf1; border-radius: 10px; padding: 14px 16px; }
+  .card-title { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 10px; border-left: 3px solid #ff6b35; padding-left: 8px; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px solid #f1f5f9; gap: 8px; }
+  .row:last-of-type { border-bottom: none; }
+  .prop { font-family: 'Consolas', 'Fira Code', monospace; font-size: 11.5px; color: #c2410c; background: #fff7ed; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .val { font-family: 'Consolas', 'Fira Code', monospace; font-size: 11px; color: #1d4ed8; background: #eff6ff; padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+  .desc { font-size: 11px; color: #94a3b8; text-align: right; flex-shrink: 0; }
+  .tip { font-size: 11px; color: #64748b; background: #fff7ed; border-left: 3px solid #ff6b35; padding: 6px 10px; border-radius: 0 6px 6px 0; margin-top: 8px; line-height: 1.6; }
+  .example { font-family: 'Consolas', monospace; font-size: 11px; background: #1e293b; color: #e2e8f0; padding: 10px 12px; border-radius: 6px; margin-top: 8px; line-height: 1.7; white-space: pre; overflow-x: auto; }
+  .kw { color: #f472b6; }
+  .at { color: #fb923c; }
+  .vl { color: #86efac; }
+  .cm { color: #64748b; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .two-col .row { padding: 3px 0; }
+
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; background: #fff; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎨 Vanilla CSS Cheat Sheet</h1>
+    <p>Pure CSS ka poora reference — property se value tak, sab ek jagah</p>
+  </div>
+  <span class="version-badge">CSS3</span>
+</header>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="🔍  property dhundho... (e.g. flex, grid, font)" oninput="filterCards()" />
+  <div style="display:flex;gap:5px;flex-wrap:wrap;">
+    <button class="tab active" onclick="setTab('all',this)">Sab</button>
+    <button class="tab" onclick="setTab('box',this)">Box Model</button>
+    <button class="tab" onclick="setTab('typography',this)">Typography</button>
+    <button class="tab" onclick="setTab('color',this)">Color</button>
+    <button class="tab" onclick="setTab('flexbox',this)">Flexbox</button>
+    <button class="tab" onclick="setTab('grid',this)">Grid</button>
+    <button class="tab" onclick="setTab('position',this)">Position</button>
+    <button class="tab" onclick="setTab('background',this)">Background</button>
+    <button class="tab" onclick="setTab('animation',this)">Animation</button>
+    <button class="tab" onclick="setTab('responsive',this)">Responsive</button>
+    <button class="tab" onclick="setTab('selectors',this)">Selectors</button>
+    <button class="tab" onclick="setTab('variables',this)">Variables</button>
+  </div>
+</div>
+
+<main>
+
+<!-- BOX MODEL -->
+<div class="section" data-cat="box">
+  <div class="section-title">📦 Box Model</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Width &amp; Height</div>
+      <div class="row"><span class="prop">width</span><span class="val">100px / 50% / auto</span></div>
+      <div class="row"><span class="prop">height</span><span class="val">100px / 50vh / auto</span></div>
+      <div class="row"><span class="prop">min-width</span><span class="val">200px</span></div>
+      <div class="row"><span class="prop">max-width</span><span class="val">1200px</span></div>
+      <div class="row"><span class="prop">min-height</span><span class="val">100px</span></div>
+      <div class="row"><span class="prop">max-height</span><span class="val">500px</span></div>
+      <div class="tip">box-sizing: border-box → padding/border width me count hota hai</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Margin</div>
+      <div class="row"><span class="prop">margin</span><span class="val">10px (sab taraf)</span></div>
+      <div class="row"><span class="prop">margin</span><span class="val">10px 20px (top/bottom left/right)</span></div>
+      <div class="row"><span class="prop">margin</span><span class="val">5px 10px 15px 20px</span></div>
+      <div class="row"><span class="prop">margin-top</span><span class="val">20px</span></div>
+      <div class="row"><span class="prop">margin-right</span><span class="val">10px</span></div>
+      <div class="row"><span class="prop">margin-bottom</span><span class="val">20px</span></div>
+      <div class="row"><span class="prop">margin-left</span><span class="val">10px</span></div>
+      <div class="row"><span class="prop">margin</span><span class="val">0 auto (center karo)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Padding</div>
+      <div class="row"><span class="prop">padding</span><span class="val">10px (sab taraf)</span></div>
+      <div class="row"><span class="prop">padding</span><span class="val">10px 20px</span></div>
+      <div class="row"><span class="prop">padding</span><span class="val">5px 10px 15px 20px</span></div>
+      <div class="row"><span class="prop">padding-top</span><span class="val">20px</span></div>
+      <div class="row"><span class="prop">padding-right</span><span class="val">10px</span></div>
+      <div class="row"><span class="prop">padding-bottom</span><span class="val">20px</span></div>
+      <div class="row"><span class="prop">padding-left</span><span class="val">10px</span></div>
+      <div class="tip">Order yaad rakhne ka trick: TRouBLe → Top Right Bottom Left</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Border</div>
+      <div class="row"><span class="prop">border</span><span class="val">1px solid #333</span></div>
+      <div class="row"><span class="prop">border-width</span><span class="val">2px</span></div>
+      <div class="row"><span class="prop">border-style</span><span class="val">solid / dashed / dotted / none</span></div>
+      <div class="row"><span class="prop">border-color</span><span class="val">#ff0000</span></div>
+      <div class="row"><span class="prop">border-top</span><span class="val">2px dashed red</span></div>
+      <div class="row"><span class="prop">border-radius</span><span class="val">8px / 50%</span></div>
+      <div class="row"><span class="prop">border-radius</span><span class="val">10px 0 10px 0 (diagonal)</span></div>
+      <div class="row"><span class="prop">outline</span><span class="val">2px solid blue</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Display &amp; Overflow</div>
+      <div class="row"><span class="prop">display</span><span class="val">block / inline / inline-block</span></div>
+      <div class="row"><span class="prop">display</span><span class="val">flex / grid / none</span></div>
+      <div class="row"><span class="prop">visibility</span><span class="val">visible / hidden</span></div>
+      <div class="row"><span class="prop">overflow</span><span class="val">visible / hidden / scroll / auto</span></div>
+      <div class="row"><span class="prop">overflow-x</span><span class="val">hidden</span></div>
+      <div class="row"><span class="prop">overflow-y</span><span class="val">auto</span></div>
+      <div class="row"><span class="prop">opacity</span><span class="val">0 to 1</span></div>
+      <div class="row"><span class="prop">cursor</span><span class="val">pointer / default / not-allowed</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Box Shadow</div>
+      <div class="row"><span class="prop">box-shadow</span><span class="val">2px 4px 8px rgba(0,0,0,0.2)</span></div>
+      <div class="row"><span class="prop">box-shadow</span><span class="val">inset 0 2px 4px #000</span></div>
+      <div class="row"><span class="prop">box-shadow</span><span class="val">0 0 0 3px blue (ring)</span></div>
+      <div class="row"><span class="prop">box-shadow</span><span class="val">none</span></div>
+      <div class="tip">Format: offset-x offset-y blur spread color<br>inset se andar ki shadow milti hai</div>
+    </div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="section" data-cat="typography">
+  <div class="section-title">🔤 Typography</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Font</div>
+      <div class="row"><span class="prop">font-family</span><span class="val">'Arial', sans-serif</span></div>
+      <div class="row"><span class="prop">font-size</span><span class="val">16px / 1rem / 1.2em</span></div>
+      <div class="row"><span class="prop">font-weight</span><span class="val">100–900 / bold / normal</span></div>
+      <div class="row"><span class="prop">font-style</span><span class="val">normal / italic / oblique</span></div>
+      <div class="row"><span class="prop">font-variant</span><span class="val">small-caps</span></div>
+      <div class="row"><span class="prop">font</span><span class="val">bold 16px/1.5 Arial (shorthand)</span></div>
+      <div class="tip">rem = root se relative | em = parent se relative</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Text</div>
+      <div class="row"><span class="prop">color</span><span class="val">#333 / rgb() / hsl()</span></div>
+      <div class="row"><span class="prop">text-align</span><span class="val">left / center / right / justify</span></div>
+      <div class="row"><span class="prop">text-decoration</span><span class="val">none / underline / line-through</span></div>
+      <div class="row"><span class="prop">text-transform</span><span class="val">uppercase / lowercase / capitalize</span></div>
+      <div class="row"><span class="prop">text-indent</span><span class="val">20px</span></div>
+      <div class="row"><span class="prop">text-shadow</span><span class="val">1px 1px 2px #000</span></div>
+      <div class="row"><span class="prop">text-overflow</span><span class="val">ellipsis / clip</span></div>
+      <div class="row"><span class="prop">white-space</span><span class="val">nowrap / pre / normal</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Line &amp; Letter</div>
+      <div class="row"><span class="prop">line-height</span><span class="val">1.5 / 24px / normal</span></div>
+      <div class="row"><span class="prop">letter-spacing</span><span class="val">0.05em / 2px</span></div>
+      <div class="row"><span class="prop">word-spacing</span><span class="val">4px</span></div>
+      <div class="row"><span class="prop">word-break</span><span class="val">break-word / normal</span></div>
+      <div class="row"><span class="prop">word-wrap</span><span class="val">break-word</span></div>
+      <div class="row"><span class="prop">vertical-align</span><span class="val">middle / top / bottom</span></div>
+      <div class="tip">line-height unitless value best practice hai (e.g. 1.6)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Google Fonts Import</div>
+      <div class="example"><span class="cm">/* HTML &lt;head&gt; mein */</span>
+&lt;link href="https://fonts.googleapis.com
+  /css2?family=Poppins:wght@400;600
+  &display=swap" rel="stylesheet"&gt;
+
+<span class="cm">/* Ya CSS mein */</span>
+<span class="at">@import</span> <span class="vl">url('https://fonts.googleapis.com
+  /css2?family=Poppins&display=swap')</span>;
+
+body {
+  <span class="kw">font-family</span>: <span class="vl">'Poppins', sans-serif</span>;
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- COLOR -->
+<div class="section" data-cat="color">
+  <div class="section-title">🎨 Color Formats</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Color Values</div>
+      <div class="row"><span class="prop">color</span><span class="val">red (named)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">#ff0000 (hex)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">#f00 (short hex)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">rgb(255, 0, 0)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">rgba(255, 0, 0, 0.5)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">hsl(0, 100%, 50%)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">hsla(0, 100%, 50%, 0.5)</span></div>
+      <div class="row"><span class="prop">color</span><span class="val">transparent</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gradient</div>
+      <div class="row"><span class="prop">background</span><span class="val">linear-gradient(to right, #f00, #00f)</span></div>
+      <div class="row"><span class="prop">background</span><span class="val">linear-gradient(135deg, red, blue)</span></div>
+      <div class="row"><span class="prop">background</span><span class="val">radial-gradient(circle, red, blue)</span></div>
+      <div class="row"><span class="prop">background</span><span class="val">conic-gradient(red, blue, red)</span></div>
+      <div class="tip">Multiple colors: linear-gradient(red, yellow, green)<br>Stops: linear-gradient(red 0%, blue 100%)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Filter &amp; Blend</div>
+      <div class="row"><span class="prop">filter</span><span class="val">blur(4px)</span></div>
+      <div class="row"><span class="prop">filter</span><span class="val">brightness(1.2)</span></div>
+      <div class="row"><span class="prop">filter</span><span class="val">contrast(1.5)</span></div>
+      <div class="row"><span class="prop">filter</span><span class="val">grayscale(100%)</span></div>
+      <div class="row"><span class="prop">filter</span><span class="val">saturate(2)</span></div>
+      <div class="row"><span class="prop">filter</span><span class="val">drop-shadow(2px 2px 4px #000)</span></div>
+      <div class="row"><span class="prop">mix-blend-mode</span><span class="val">multiply / screen / overlay</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FLEXBOX -->
+<div class="section" data-cat="flexbox">
+  <div class="section-title">↔️ Flexbox</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Container Properties</div>
+      <div class="row"><span class="prop">display</span><span class="val">flex</span></div>
+      <div class="row"><span class="prop">flex-direction</span><span class="val">row / column / row-reverse</span></div>
+      <div class="row"><span class="prop">flex-wrap</span><span class="val">nowrap / wrap / wrap-reverse</span></div>
+      <div class="row"><span class="prop">flex-flow</span><span class="val">row wrap (shorthand)</span></div>
+      <div class="row"><span class="prop">justify-content</span><span class="val">flex-start / center / flex-end</span></div>
+      <div class="row"><span class="prop">justify-content</span><span class="val">space-between / space-around / space-evenly</span></div>
+      <div class="row"><span class="prop">align-items</span><span class="val">stretch / center / flex-start / flex-end</span></div>
+      <div class="row"><span class="prop">align-content</span><span class="val">flex-start / center / space-between</span></div>
+      <div class="row"><span class="prop">gap</span><span class="val">10px / 10px 20px</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Item Properties</div>
+      <div class="row"><span class="prop">flex-grow</span><span class="val">0 (default) / 1</span></div>
+      <div class="row"><span class="prop">flex-shrink</span><span class="val">1 (default) / 0</span></div>
+      <div class="row"><span class="prop">flex-basis</span><span class="val">auto / 200px / 30%</span></div>
+      <div class="row"><span class="prop">flex</span><span class="val">1 (shorthand: grow shrink basis)</span></div>
+      <div class="row"><span class="prop">align-self</span><span class="val">auto / center / flex-end</span></div>
+      <div class="row"><span class="prop">order</span><span class="val">0 (default) / 1 / -1</span></div>
+      <div class="example"><span class="cm">/* Perfect center */</span>
+.container {
+  <span class="kw">display</span>: <span class="vl">flex</span>;
+  <span class="kw">justify-content</span>: <span class="vl">center</span>;
+  <span class="kw">align-items</span>: <span class="vl">center</span>;
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="section" data-cat="grid">
+  <div class="section-title">🔲 CSS Grid</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Grid Container</div>
+      <div class="row"><span class="prop">display</span><span class="val">grid</span></div>
+      <div class="row"><span class="prop">grid-template-columns</span><span class="val">200px 1fr 1fr</span></div>
+      <div class="row"><span class="prop">grid-template-columns</span><span class="val">repeat(3, 1fr)</span></div>
+      <div class="row"><span class="prop">grid-template-columns</span><span class="val">repeat(auto-fill, minmax(200px, 1fr))</span></div>
+      <div class="row"><span class="prop">grid-template-rows</span><span class="val">100px auto 100px</span></div>
+      <div class="row"><span class="prop">grid-template-areas</span><span class="val">"header header" "sidebar main"</span></div>
+      <div class="row"><span class="prop">gap</span><span class="val">20px / 10px 20px</span></div>
+      <div class="row"><span class="prop">column-gap</span><span class="val">20px</span></div>
+      <div class="row"><span class="prop">row-gap</span><span class="val">10px</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Grid Items</div>
+      <div class="row"><span class="prop">grid-column</span><span class="val">1 / 3 (col 1 se 3 tak)</span></div>
+      <div class="row"><span class="prop">grid-column</span><span class="val">1 / -1 (poori width)</span></div>
+      <div class="row"><span class="prop">grid-column</span><span class="val">span 2 (2 cols lena)</span></div>
+      <div class="row"><span class="prop">grid-row</span><span class="val">1 / 3</span></div>
+      <div class="row"><span class="prop">grid-area</span><span class="val">header</span></div>
+      <div class="row"><span class="prop">justify-self</span><span class="val">start / center / end / stretch</span></div>
+      <div class="row"><span class="prop">align-self</span><span class="val">start / center / end / stretch</span></div>
+      <div class="example"><span class="cm">/* Responsive grid */</span>
+.grid {
+  <span class="kw">display</span>: <span class="vl">grid</span>;
+  <span class="kw">grid-template-columns</span>:
+    <span class="vl">repeat(auto-fit, minmax(250px, 1fr))</span>;
+  <span class="kw">gap</span>: <span class="vl">1rem</span>;
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- POSITION -->
+<div class="section" data-cat="position">
+  <div class="section-title">📍 Position &amp; Z-Index</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Position Values</div>
+      <div class="row"><span class="prop">position</span><span class="val">static (default)</span></div>
+      <div class="row"><span class="prop">position</span><span class="val">relative (apni jagah se move)</span></div>
+      <div class="row"><span class="prop">position</span><span class="val">absolute (parent se relative)</span></div>
+      <div class="row"><span class="prop">position</span><span class="val">fixed (viewport se fixed)</span></div>
+      <div class="row"><span class="prop">position</span><span class="val">sticky (scroll pe stick)</span></div>
+      <div class="row"><span class="prop">top</span><span class="val">0 / 20px / 50%</span></div>
+      <div class="row"><span class="prop">right / bottom / left</span><span class="val">0 / auto</span></div>
+      <div class="row"><span class="prop">z-index</span><span class="val">1 / 10 / 999 / -1</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Float &amp; Clear</div>
+      <div class="row"><span class="prop">float</span><span class="val">left / right / none</span></div>
+      <div class="row"><span class="prop">clear</span><span class="val">left / right / both</span></div>
+      <div class="row"><span class="prop">clip-path</span><span class="val">circle(50%)</span></div>
+      <div class="row"><span class="prop">clip-path</span><span class="val">polygon(0 0, 100% 0, 100% 80%)</span></div>
+      <div class="example"><span class="cm">/* Center with absolute */</span>
+.child {
+  <span class="kw">position</span>: <span class="vl">absolute</span>;
+  <span class="kw">top</span>: <span class="vl">50%</span>;
+  <span class="kw">left</span>: <span class="vl">50%</span>;
+  <span class="kw">transform</span>: <span class="vl">translate(-50%, -50%)</span>;
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- BACKGROUND -->
+<div class="section" data-cat="background">
+  <div class="section-title">🖼️ Background</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Background Properties</div>
+      <div class="row"><span class="prop">background-color</span><span class="val">#fff / transparent</span></div>
+      <div class="row"><span class="prop">background-image</span><span class="val">url('image.jpg')</span></div>
+      <div class="row"><span class="prop">background-size</span><span class="val">cover / contain / 100px</span></div>
+      <div class="row"><span class="prop">background-position</span><span class="val">center / top left / 50% 50%</span></div>
+      <div class="row"><span class="prop">background-repeat</span><span class="val">no-repeat / repeat / repeat-x</span></div>
+      <div class="row"><span class="prop">background-attachment</span><span class="val">scroll / fixed / local</span></div>
+      <div class="row"><span class="prop">background-clip</span><span class="val">border-box / padding-box / content-box</span></div>
+      <div class="row"><span class="prop">background</span><span class="val">url() center/cover no-repeat (shorthand)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Object Fit (img/video)</div>
+      <div class="row"><span class="prop">object-fit</span><span class="val">fill (default)</span></div>
+      <div class="row"><span class="prop">object-fit</span><span class="val">cover (crop karke fill)</span></div>
+      <div class="row"><span class="prop">object-fit</span><span class="val">contain (aspect ratio rakho)</span></div>
+      <div class="row"><span class="prop">object-fit</span><span class="val">none / scale-down</span></div>
+      <div class="row"><span class="prop">object-position</span><span class="val">center / top / 20% 80%</span></div>
+      <div class="tip">img { width:100%; height:300px; object-fit:cover; } — ye pattern yaad rakho!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ANIMATION -->
+<div class="section" data-cat="animation">
+  <div class="section-title">✨ Transform, Transition &amp; Animation</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Transform</div>
+      <div class="row"><span class="prop">transform</span><span class="val">translateX(20px)</span></div>
+      <div class="row"><span class="prop">transform</span><span class="val">translateY(-50%)</span></div>
+      <div class="row"><span class="prop">transform</span><span class="val">translate(10px, 20px)</span></div>
+      <div class="row"><span class="prop">transform</span><span class="val">rotate(45deg)</span></div>
+      <div class="row"><span class="prop">transform</span><span class="val">scale(1.5) / scale(0.8)</span></div>
+      <div class="row"><span class="prop">transform</span><span class="val">skew(10deg, 5deg)</span></div>
+      <div class="row"><span class="prop">transform</span><span class="val">scale(1.1) rotate(5deg) (chain)</span></div>
+      <div class="row"><span class="prop">transform-origin</span><span class="val">center / top left / 50% 50%</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Transition</div>
+      <div class="row"><span class="prop">transition</span><span class="val">all 0.3s ease</span></div>
+      <div class="row"><span class="prop">transition</span><span class="val">color 0.2s, transform 0.3s</span></div>
+      <div class="row"><span class="prop">transition-property</span><span class="val">all / color / opacity</span></div>
+      <div class="row"><span class="prop">transition-duration</span><span class="val">0.3s / 300ms</span></div>
+      <div class="row"><span class="prop">transition-timing-function</span><span class="val">ease / linear / ease-in / ease-out</span></div>
+      <div class="row"><span class="prop">transition-timing-function</span><span class="val">cubic-bezier(0.4, 0, 0.2, 1)</span></div>
+      <div class="row"><span class="prop">transition-delay</span><span class="val">0.1s</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Animation</div>
+      <div class="row"><span class="prop">animation-name</span><span class="val">fadeIn</span></div>
+      <div class="row"><span class="prop">animation-duration</span><span class="val">1s</span></div>
+      <div class="row"><span class="prop">animation-timing-function</span><span class="val">ease / linear</span></div>
+      <div class="row"><span class="prop">animation-delay</span><span class="val">0.5s</span></div>
+      <div class="row"><span class="prop">animation-iteration-count</span><span class="val">infinite / 3</span></div>
+      <div class="row"><span class="prop">animation-direction</span><span class="val">normal / alternate / reverse</span></div>
+      <div class="row"><span class="prop">animation-fill-mode</span><span class="val">forwards / backwards / both</span></div>
+      <div class="row"><span class="prop">animation</span><span class="val">fadeIn 1s ease forwards (shorthand)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">@keyframes Example</div>
+      <div class="example"><span class="at">@keyframes</span> fadeIn {
+  <span class="kw">from</span> {
+    <span class="kw">opacity</span>: <span class="vl">0</span>;
+    <span class="kw">transform</span>: <span class="vl">translateY(20px)</span>;
+  }
+  <span class="kw">to</span> {
+    <span class="kw">opacity</span>: <span class="vl">1</span>;
+    <span class="kw">transform</span>: <span class="vl">translateY(0)</span>;
+  }
+}
+
+.box {
+  <span class="kw">animation</span>: <span class="vl">fadeIn 0.5s ease forwards</span>;
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- RESPONSIVE -->
+<div class="section" data-cat="responsive">
+  <div class="section-title">📱 Responsive Design — Media Queries</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Common Breakpoints</div>
+      <div class="row"><span class="prop">Mobile</span><span class="desc">max-width: 576px</span></div>
+      <div class="row"><span class="prop">Tablet</span><span class="desc">max-width: 768px</span></div>
+      <div class="row"><span class="prop">Laptop</span><span class="desc">max-width: 992px</span></div>
+      <div class="row"><span class="prop">Desktop</span><span class="desc">max-width: 1200px</span></div>
+      <div class="row"><span class="prop">Wide</span><span class="desc">min-width: 1400px</span></div>
+      <div class="tip">Mobile-first: min-width use karo<br>Desktop-first: max-width use karo</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Media Query Syntax</div>
+      <div class="example"><span class="cm">/* Mobile first approach */</span>
+<span class="at">@media</span> (min-width: <span class="vl">768px</span>) {
+  .container { <span class="kw">width</span>: <span class="vl">750px</span>; }
+}
+
+<span class="cm">/* Desktop first */</span>
+<span class="at">@media</span> (max-width: <span class="vl">768px</span>) {
+  .nav { <span class="kw">display</span>: <span class="vl">none</span>; }
+}
+
+<span class="cm">/* Range */</span>
+<span class="at">@media</span> (min-width: <span class="vl">576px</span>) and (max-width: <span class="vl">768px</span>) {
+  .col { <span class="kw">width</span>: <span class="vl">50%</span>; }
+}
+
+<span class="cm">/* Dark mode */</span>
+<span class="at">@media</span> (prefers-color-scheme: <span class="vl">dark</span>) {
+  body { <span class="kw">background</span>: <span class="vl">#111</span>; }
+}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Responsive Units</div>
+      <div class="row"><span class="prop">px</span><span class="desc">fixed pixels</span></div>
+      <div class="row"><span class="prop">%</span><span class="desc">parent se relative</span></div>
+      <div class="row"><span class="prop">em</span><span class="desc">parent font-size se relative</span></div>
+      <div class="row"><span class="prop">rem</span><span class="desc">root font-size se relative</span></div>
+      <div class="row"><span class="prop">vw</span><span class="desc">viewport width ka %</span></div>
+      <div class="row"><span class="prop">vh</span><span class="desc">viewport height ka %</span></div>
+      <div class="row"><span class="prop">vmin / vmax</span><span class="desc">chhote/bade dimension ka %</span></div>
+      <div class="row"><span class="prop">clamp()</span><span class="desc">clamp(1rem, 2vw, 2rem)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SELECTORS -->
+<div class="section" data-cat="selectors">
+  <div class="section-title">🎯 Selectors</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Basic Selectors</div>
+      <div class="row"><span class="prop">*</span><span class="desc">sab elements</span></div>
+      <div class="row"><span class="prop">div</span><span class="desc">element selector</span></div>
+      <div class="row"><span class="prop">.class</span><span class="desc">class selector</span></div>
+      <div class="row"><span class="prop">#id</span><span class="desc">id selector</span></div>
+      <div class="row"><span class="prop">div, p</span><span class="desc">multiple (comma)</span></div>
+      <div class="row"><span class="prop">div p</span><span class="desc">descendant</span></div>
+      <div class="row"><span class="prop">div > p</span><span class="desc">direct child</span></div>
+      <div class="row"><span class="prop">div + p</span><span class="desc">adjacent sibling</span></div>
+      <div class="row"><span class="prop">div ~ p</span><span class="desc">general sibling</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pseudo-classes</div>
+      <div class="row"><span class="prop">:hover</span><span class="desc">mouse over pe</span></div>
+      <div class="row"><span class="prop">:focus</span><span class="desc">focus me</span></div>
+      <div class="row"><span class="prop">:active</span><span class="desc">click ke time</span></div>
+      <div class="row"><span class="prop">:visited</span><span class="desc">visited link</span></div>
+      <div class="row"><span class="prop">:first-child</span><span class="desc">pehla child</span></div>
+      <div class="row"><span class="prop">:last-child</span><span class="desc">aakhri child</span></div>
+      <div class="row"><span class="prop">:nth-child(2)</span><span class="desc">2nd child</span></div>
+      <div class="row"><span class="prop">:nth-child(odd)</span><span class="desc">odd children</span></div>
+      <div class="row"><span class="prop">:not(.class)</span><span class="desc">exclude selector</span></div>
+      <div class="row"><span class="prop">:checked</span><span class="desc">checked input</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pseudo-elements</div>
+      <div class="row"><span class="prop">::before</span><span class="desc">element ke pehle content</span></div>
+      <div class="row"><span class="prop">::after</span><span class="desc">element ke baad content</span></div>
+      <div class="row"><span class="prop">::first-line</span><span class="desc">pehli line</span></div>
+      <div class="row"><span class="prop">::first-letter</span><span class="desc">pehla akshur</span></div>
+      <div class="row"><span class="prop">::placeholder</span><span class="desc">placeholder text</span></div>
+      <div class="row"><span class="prop">::selection</span><span class="desc">selected text</span></div>
+      <div class="example">.btn<span class="kw">::after</span> {
+  <span class="kw">content</span>: <span class="vl">' →'</span>;
+}
+p<span class="kw">::first-letter</span> {
+  <span class="kw">font-size</span>: <span class="vl">2em</span>;
+  <span class="kw">float</span>: <span class="vl">left</span>;
+}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Attribute Selectors</div>
+      <div class="row"><span class="prop">[type="text"]</span><span class="desc">exact match</span></div>
+      <div class="row"><span class="prop">[href^="https"]</span><span class="desc">starts with</span></div>
+      <div class="row"><span class="prop">[href$=".pdf"]</span><span class="desc">ends with</span></div>
+      <div class="row"><span class="prop">[class*="btn"]</span><span class="desc">contains</span></div>
+      <div class="row"><span class="prop">[disabled]</span><span class="desc">attribute exists</span></div>
+      <div class="tip">Specificity order: !important > inline > #id > .class > tag</div>
+    </div>
+  </div>
+</div>
+
+<!-- VARIABLES -->
+<div class="section" data-cat="variables">
+  <div class="section-title">🔧 CSS Variables &amp; Functions</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">CSS Custom Properties</div>
+      <div class="example"><span class="cm">/* Variables define karo */</span>
+<span class="at">:root</span> {
+  <span class="kw">--primary</span>: <span class="vl">#0d6efd</span>;
+  <span class="kw">--secondary</span>: <span class="vl">#6c757d</span>;
+  <span class="kw">--font-size-base</span>: <span class="vl">16px</span>;
+  <span class="kw">--spacing-md</span>: <span class="vl">1rem</span>;
+  <span class="kw">--border-radius</span>: <span class="vl">8px</span>;
+}
+
+<span class="cm">/* Use karo */</span>
+.btn {
+  <span class="kw">background</span>: <span class="vl">var(--primary)</span>;
+  <span class="kw">padding</span>: <span class="vl">var(--spacing-md)</span>;
+  <span class="kw">border-radius</span>: <span class="vl">var(--border-radius)</span>;
+}
+
+<span class="cm">/* Fallback value */</span>
+color: <span class="vl">var(--text, #333)</span>;</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Useful CSS Functions</div>
+      <div class="row"><span class="prop">calc()</span><span class="val">calc(100% - 20px)</span></div>
+      <div class="row"><span class="prop">clamp()</span><span class="val">clamp(1rem, 2vw, 3rem)</span></div>
+      <div class="row"><span class="prop">min()</span><span class="val">min(50%, 300px)</span></div>
+      <div class="row"><span class="prop">max()</span><span class="val">max(200px, 30%)</span></div>
+      <div class="row"><span class="prop">var()</span><span class="val">var(--color, fallback)</span></div>
+      <div class="row"><span class="prop">env()</span><span class="val">env(safe-area-inset-top)</span></div>
+      <div class="example"><span class="cm">/* Dark mode with variables */</span>
+<span class="at">@media</span> (prefers-color-scheme: <span class="vl">dark</span>) {
+  <span class="at">:root</span> {
+    <span class="kw">--bg</span>: <span class="vl">#1a1a2e</span>;
+    <span class="kw">--text</span>: <span class="vl">#e0e0e0</span>;
+  }
+}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Scroll &amp; Miscellaneous</div>
+      <div class="row"><span class="prop">scroll-behavior</span><span class="val">smooth</span></div>
+      <div class="row"><span class="prop">scroll-snap-type</span><span class="val">x mandatory</span></div>
+      <div class="row"><span class="prop">scroll-snap-align</span><span class="val">start / center</span></div>
+      <div class="row"><span class="prop">pointer-events</span><span class="val">none / auto</span></div>
+      <div class="row"><span class="prop">user-select</span><span class="val">none / text / all</span></div>
+      <div class="row"><span class="prop">resize</span><span class="val">none / both / vertical</span></div>
+      <div class="row"><span class="prop">aspect-ratio</span><span class="val">16/9 / 1/1</span></div>
+      <div class="row"><span class="prop">appearance</span><span class="val">none (default style hatao)</span></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>Vanilla CSS Cheat Sheet &nbsp;|&nbsp; Claude dwara banaya gaya &nbsp;🎨</footer>
+
+<script>
+function filterCards() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.section').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.card')].some(c => c.style.display !== 'none');
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+function setTab(cat, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.card').forEach(c => c.style.display = '');
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.style.display = (cat === 'all' || sec.dataset.cat === cat) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

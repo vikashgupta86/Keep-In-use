@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>React Concepts Visualizer — Complete Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b10;--bg2:#0d1117;--bg3:#131920;--bg4:#1a2130;--bg5:#1f2940;
+  --border:#1e2d40;--border2:#2a3d55;--border3:#3a5070;
+  --text:#dde6f0;--text2:#8fa8c0;--text3:#4d6680;
+  --purple:#a78bfa;--purple2:#7c3aed;--purple-bg:#160f2e;--purple-bd:#3d1f80;
+  --teal:#2dd4bf;--teal2:#0f766e;--teal-bg:#041f1b;--teal-bd:#0d4f48;--teal-dk:#5eead4;
+  --blue:#60a5fa;--blue2:#1d4ed8;--blue-bg:#0c1e3d;--blue-bd:#1e3f7a;--blue-dk:#93c5fd;
+  --amber:#fbbf24;--amber2:#d97706;--amber-bg:#1f1203;--amber-bd:#78350f;--amber-dk:#fde68a;
+  --coral:#f87171;--coral2:#dc2626;--coral-bg:#1f0808;--coral-bd:#7f1d1d;
+  --green:#4ade80;--green2:#16a34a;--green-bg:#031a0b;--green-bd:#14532d;
+  --pink:#f472b6;--pink-bg:#1f0818;--pink-bd:#831843;
+  --orange:#fb923c;--orange-bg:#1a0c03;--orange-bd:#7c2d12;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne','Segoe UI',sans-serif;
+  --glow:0 0 20px rgba(167,139,250,.15);
+  --glow2:0 0 40px rgba(45,212,191,.1);
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--purple2)}
+
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:0;overflow-y:auto;position:sticky;top:0;height:100vh}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.logo-main{font-size:15px;font-weight:800;color:var(--text);letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.logo-main span{color:var(--teal)}
+.logo-sub{font-size:10.5px;color:var(--text3);margin-top:3px;font-weight:400}
+.logo-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(167,139,250,.2) 0%,transparent 70%);pointer-events:none}
+
+.cat-label{padding:12px 14px 4px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.cat-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.topic-btn{display:flex;align-items:center;width:100%;text-align:left;padding:6px 14px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--sans);transition:all .15s;border-left:2px solid transparent;gap:7px}
+.topic-btn:hover{background:rgba(255,255,255,.03);color:var(--text);border-left-color:var(--border3)}
+.topic-btn.active{background:rgba(167,139,250,.08);color:var(--purple);border-left-color:var(--purple)}
+.topic-btn.active .tb-name{color:var(--purple)}
+.tb-name{flex:1}
+.tb-tag{font-size:9px;padding:1px 5px;border-radius:4px;opacity:.7;white-space:nowrap}
+
+.diff-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.diff-e{background:var(--green)}.diff-m{background:var(--amber)}.diff-h{background:var(--coral)}.diff-x{background:var(--pink)}
+
+/* INTERVIEW BTN */
+.interview-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 20px);margin:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--border3);background:linear-gradient(135deg,rgba(251,191,36,.05),rgba(251,191,36,.02));color:var(--amber-dk);cursor:pointer;font-size:11.5px;font-family:var(--sans);font-weight:600;transition:all .2s}
+.interview-btn:hover{border-color:var(--amber2);background:rgba(251,191,36,.1);box-shadow:0 0 15px rgba(251,191,36,.1)}
+.interview-btn .ib-icon{font-size:14px}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+
+/* WELCOME */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px;text-align:center;gap:16px;position:relative;overflow:hidden}
+.welcome::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 70%);pointer-events:none}
+.welcome-icon{font-size:48px;filter:drop-shadow(0 0 20px rgba(167,139,250,.4));animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.welcome h2{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--text),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.welcome p{color:var(--text2);max-width:460px;line-height:1.8;font-size:13.5px}
+.welcome-stats{display:flex;gap:20px;margin-top:8px}
+.w-stat{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);text-align:center}
+.w-stat-n{font-size:20px;font-weight:800;color:var(--teal)}
+.w-stat-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:600px;margin-top:8px}
+.qc{padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);font-size:11.5px;color:var(--text2);cursor:pointer;transition:all .15s;text-align:left}
+.qc:hover{border-color:var(--purple);color:var(--purple);background:rgba(167,139,250,.05)}
+.qc-tag{font-size:9px;color:var(--text3);display:block;margin-top:2px}
+
+/* HEADER */
+.concept-header{padding:14px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg2);position:relative}
+.concept-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--purple-bd),var(--teal-bd),transparent)}
+.concept-title{font-size:18px;font-weight:800;color:var(--text)}
+.concept-tag{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd);font-weight:600;letter-spacing:.3px}
+.diff-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.diff-badge.e{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.diff-badge.m{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+.diff-badge.h{background:var(--coral-bg);color:var(--coral);border:1px solid var(--coral-bd)}
+.diff-badge.x{background:var(--pink-bg);color:var(--pink);border:1px solid var(--pink-bd)}
+
+.concept-desc{padding:9px 20px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);line-height:1.7;background:var(--bg)}
+
+/* GRID */
+.top-grid{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0}
+.left-col,.right-col{display:flex;flex-direction:column;overflow:hidden}
+.left-col{border-right:1px solid var(--border)}
+
+.panel{border-bottom:1px solid var(--border)}
+.panel-hd{padding:6px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.panel-hd-dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.panel-hd-dot2{background:var(--purple)}
+
+/* CODE */
+.code-wrap{padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.9;background:var(--bg);overflow-x:auto;overflow-y:auto;max-height:280px}
+.code-line{display:block;padding:0 6px;border-radius:3px;transition:all .2s;border-left:2px solid transparent;white-space:pre}
+.code-line.hl{background:rgba(167,139,250,.1);border-left-color:var(--purple)}
+.code-line.hl2{background:rgba(45,212,191,.08);border-left-color:var(--teal)}
+.kw{color:#c792ea}.op{color:#89ddff}.str{color:#c3e88d}.num{color:#f78c6c}.fn{color:#82aaff}.cm{color:#4a6070;font-style:italic}.lk{color:#f07178}.tp{color:#ffcb6b}.dc{color:#546e7a}
+
+/* LARAVEL */
+.laravel-wrap{padding:10px 14px;font-size:12px;background:var(--bg);overflow-y:auto;max-height:180px;min-height:60px}
+.lv-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--teal);font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.lv-label::before{content:'';width:12px;height:1px;background:var(--teal)}
+.lv-code{font-family:var(--mono);font-size:11.5px;color:var(--teal-dk);line-height:1.8;white-space:pre-wrap}
+
+/* STEP BAR */
+.step-bar{display:flex;align-items:center;gap:5px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;flex-wrap:nowrap}
+.step-pill{padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:600;cursor:pointer;border:1px solid var(--border2);color:var(--text3);background:none;white-space:nowrap;transition:all .15s;font-family:var(--sans)}
+.step-pill:hover{border-color:var(--purple);color:var(--purple)}
+.step-pill.active{background:var(--purple-bg);border-color:var(--purple);color:var(--purple)}
+
+/* VIZ */
+.viz{padding:14px;overflow-y:auto;flex:1;min-height:200px;display:flex;flex-direction:column;gap:7px}
+.viz-fade .v-row,.viz-fade .v-flow{animation:fadeIn .25s ease forwards}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* EXPLAIN */
+.explain{padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2)}
+.explain-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--amber);font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.explain-lbl::before{content:'';width:12px;height:1px;background:var(--amber)}
+.explain-txt{color:var(--text2);line-height:1.75;font-size:12.5px;max-height:100px;overflow-y:auto}
+
+/* NAV */
+.nav-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-top:1px solid var(--border);background:var(--bg2)}
+.nb{padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text2);cursor:pointer;font-size:11px;font-family:var(--sans);transition:all .15s}
+.nb:hover:not(:disabled){background:rgba(167,139,250,.1);color:var(--purple);border-color:var(--purple)}
+.nb:disabled{opacity:.25;cursor:default}
+.sc{font-size:11px;color:var(--text3);font-weight:600}
+
+/* VIZ ELEMENTS */
+.v-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.v-box{padding:5px 11px;border-radius:6px;font-size:11.5px;font-weight:600;border:1px solid transparent;font-family:var(--mono);line-height:1.4}
+.v-box.small{font-size:10px;padding:3px 8px}
+.v-box.purple{background:var(--purple-bg);border-color:var(--purple-bd);color:var(--purple)}
+.v-box.teal{background:var(--teal-bg);border-color:var(--teal-bd);color:var(--teal-dk)}
+.v-box.blue{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-dk)}
+.v-box.amber{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber)}
+.v-box.coral{background:var(--coral-bg);border-color:var(--coral-bd);color:var(--coral)}
+.v-box.green{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+.v-box.gray{background:var(--bg4);border-color:var(--border2);color:var(--text2)}
+.v-box.pink{background:var(--pink-bg);border-color:var(--pink-bd);color:var(--pink)}
+.v-box.orange{background:var(--orange-bg);border-color:var(--orange-bd);color:var(--orange)}
+.v-arrow{color:var(--text3);font-size:13px;flex-shrink:0}
+.v-label{font-size:10.5px;color:var(--text3);font-family:var(--sans)}
+.v-divider{width:100%;height:1px;background:var(--border);margin:3px 0}
+.v-flow{display:flex;flex-direction:column;gap:6px;width:100%}
+.v-lifecycle{display:flex;align-items:stretch;gap:0;border:1px solid var(--border2);border-radius:8px;overflow:hidden;width:100%}
+.v-lc-step{flex:1;padding:7px 4px;text-align:center;font-size:10px;background:var(--bg3);border-right:1px solid var(--border);color:var(--text3)}
+.v-lc-step:last-child{border-right:none}
+.v-lc-step.active{background:rgba(167,139,250,.1);color:var(--purple);font-weight:700}
+.v-lc-step.teal{background:rgba(45,212,191,.08);color:var(--teal)}
+.v-lc-step .lc-icon{font-size:14px;display:block;margin-bottom:2px}
+.dl{font-size:11px;color:var(--text3);padding:1px 0;font-weight:600;font-family:var(--sans)}
+.tree-line{width:1px;height:14px;background:var(--border2);margin:0 auto}
+.v-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.v-badge.yes{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.v-badge.no{background:var(--coral-bg);color:var(--coral);border:1px solid var(--coral-bd)}
+.v-badge.warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+.v-badge.info{background:var(--blue-bg);color:var(--blue-dk);border:1px solid var(--blue-bd)}
+.v-grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%}
+.v-card{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px}
+.v-card-title{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:4px;font-weight:700}
+.v-tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+
+/* INTERVIEW PANEL */
+.interview-screen{display:flex;flex-direction:column;flex:1;min-height:0}
+.interview-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;gap:10px}
+.interview-title{font-size:18px;font-weight:800;color:var(--amber)}
+.interview-body{flex:1;overflow-y:auto;padding:20px}
+.q-filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.q-filter{padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:none;color:var(--text3);cursor:pointer;font-size:11px;font-family:var(--sans);transition:all .15s}
+.q-filter:hover{border-color:var(--purple);color:var(--purple)}
+.q-filter.active{background:var(--purple-bg);border-color:var(--purple);color:var(--purple)}
+
+.q-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.q-card:hover{border-color:var(--border3)}
+.q-header{padding:12px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:10px}
+.q-num{font-size:10px;color:var(--text3);font-weight:700;background:var(--bg3);padding:2px 7px;border-radius:4px;border:1px solid var(--border);margin-top:2px;flex-shrink:0;font-family:var(--mono)}
+.q-text{font-size:13px;font-weight:600;color:var(--text);flex:1;line-height:1.5}
+.q-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:5px}
+.q-diff{font-size:9.5px;padding:2px 7px;border-radius:10px;font-weight:700}
+.q-diff.e{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.q-diff.m{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+.q-diff.h{background:var(--coral-bg);color:var(--coral);border:1px solid var(--coral-bd)}
+.q-topic{font-size:9.5px;padding:2px 7px;border-radius:10px;background:var(--blue-bg);color:var(--blue-dk);border:1px solid var(--blue-bd);font-weight:600}
+.q-arrow{color:var(--text3);font-size:14px;transition:transform .2s;margin-left:auto;flex-shrink:0}
+.q-card.open .q-arrow{transform:rotate(180deg)}
+.q-answer{display:none;padding:0 16px 14px 16px;border-top:1px solid var(--border)}
+.q-card.open .q-answer{display:block}
+.q-ans-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--teal);font-weight:700;margin:10px 0 6px;display:flex;align-items:center;gap:5px}
+.q-ans-label::before{content:'';width:10px;height:1px;background:var(--teal)}
+.q-ans-text{color:var(--text2);font-size:12.5px;line-height:1.8}
+.q-code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:11.5px;color:var(--teal-dk);line-height:1.8;margin-top:8px;overflow-x:auto;white-space:pre}
+.q-tip{background:rgba(251,191,36,.05);border:1px solid var(--amber-bd);border-radius:6px;padding:8px 12px;font-size:11.5px;color:var(--amber-dk);margin-top:8px;line-height:1.7}
+.q-tip-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:3px}
+
+/* SEARCH */
+.search-wrap{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.search-inp{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;font-family:var(--sans);outline:none;transition:border-color .15s}
+.search-inp::placeholder{color:var(--text3)}
+.search-inp:focus{border-color:var(--purple)}
+
+/* PROGRESS BAR */
+.progress-bar{height:2px;background:var(--border);position:relative;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--teal));transition:width .3s ease;border-radius:1px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-main">⚛️ <span>React</span> Visualizer</div>
+      <div class="logo-sub">Laravel Dev Edition — Hinglish</div>
+      <div class="logo-glow"></div>
+    </div>
+    <div class="search-wrap">
+      <input type="text" class="search-inp" placeholder="Search concepts..." id="searchInput" oninput="filterTopics(this.value)"/>
+    </div>
+    <button class="interview-btn" onclick="showInterview()">
+      <span class="ib-icon">🎯</span> Interview Questions
+      <span style="margin-left:auto;background:rgba(251,191,36,.15);border:1px solid var(--amber-bd);padding:1px 6px;border-radius:10px;font-size:9px">90+</span>
+    </button>
+    <div id="sidebarContent"></div>
+  </div>
+  <div class="main" id="main">
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-icon">⚛️</div>
+      <h2>React Seekho — Laravel ki Nazar Se</h2>
+      <p>Har concept Laravel se compare karke, step-by-step visualize karke, aur real project examples ke saath samjho. Plus interview preparation!</p>
+      <div class="welcome-stats">
+        <div class="w-stat"><div class="w-stat-n">35+</div><div class="w-stat-l">Concepts</div></div>
+        <div class="w-stat"><div class="w-stat-n">90+</div><div class="w-stat-l">Interview Qs</div></div>
+        <div class="w-stat"><div class="w-stat-n">150+</div><div class="w-stat-l">Visual Steps</div></div>
+      </div>
+      <div class="quick-grid" id="quickLinks"></div>
+    </div>
+    <div id="conceptScreen" style="display:none;flex-direction:column;flex:1"></div>
+    <div id="interviewScreen" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const CONCEPTS = [
+// ═══════════════════════════════════════════════════
+// FOUNDATIONS
+// ═══════════════════════════════════════════════════
+{cat:'Foundations',name:'Component',diff:'e',tag:'Core',
+ desc:'React component = Laravel Blade component + Controller ka kaam ek hi jagah. Ek function jo JSX return kare — bas itna hi hai React component. Poori React app components ka ek tree hoti hai.',
+ query:[
+  {t:`<span class="kw">function</span> <span class="fn">ProductCard</span>({ name, price, inStock }) {`,l:[0]},
+  {t:`  <span class="cm">// Logic (Controller jaisa)</span>`,l:[]},
+  {t:`  <span class="kw">const</span> formatted = <span class="str">\`₹\${price.toLocaleString()}\`</span>;`,l:[1]},
+  {t:`  <span class="kw">const</span> status = inStock ? <span class="str">'Available'</span> : <span class="str">'Out of Stock'</span>;`,l:[1]},
+  {t:``,l:[]},
+  {t:`  <span class="cm">// Template (Blade jaisa)</span>`,l:[]},
+  {t:`  <span class="kw">return</span> (`,l:[2]},
+  {t:`    &lt;<span class="lk">div</span> className=<span class="str">"card"</span>&gt;`,l:[2]},
+  {t:`      &lt;<span class="lk">h3</span>&gt;{name}&lt;/<span class="lk">h3</span>&gt;`,l:[2]},
+  {t:`      &lt;<span class="lk">p</span>&gt;{formatted}&lt;/<span class="lk">p</span>&gt;`,l:[2]},
+  {t:`      &lt;<span class="lk">span</span>&gt;{status}&lt;/<span class="lk">span</span>&gt;`,l:[2]},
+  {t:`    &lt;/<span class="lk">div</span>&gt;`,l:[2]},
+  {t:`  );`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Structure',qL:[0,13],laravel:`<span class="lv-code">{{-- product-card.blade.php --}}
+@props(['name','price','inStock'])
+{{-- Sirf template, no logic --}}</span>`,explain:`<b>Component = Controller + Blade = 1 file.</b> Laravel mein controller mein logic, blade mein template. React mein dono ek function mein. PascalCase naam zaroori — React lowercase ko HTML element samajhta hai. Ek component ek cheez kare — Single Responsibility Principle.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Component = 2 parts in 1 function:</div>
+<div class="v-grid2">
+<div class="v-card"><div class="v-card-title">Logic (top)</div><div class="v-box amber small">const x = calc()</div><div class="v-box amber small" style="margin-top:4px">const y = format()</div></div>
+<div class="v-card"><div class="v-card-title">Template (return)</div><div class="v-box teal small">return &lt;JSX&gt;</div><div class="v-box teal small" style="margin-top:4px">{variables}</div></div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">Naming rules:</div>
+<div class="v-row"><div class="v-badge yes">ProductCard ✓ PascalCase</div></div>
+<div class="v-row"><div class="v-badge no">productcard ❌ lowercase = HTML element</div></div>
+</div>`}},
+  {label:'JSX',qL:[6,7,8,9,10,11,12],laravel:`<span class="lv-code">{{-- Blade syntax --}}
+&lt;div class="card"&gt;
+  {{ $name }}          // {{ }} = {}
+  class=""             // className=""
+  @if($inStock)        // {inStock && ...}
+  @foreach($items as $i) // {items.map()}
+&lt;/div&gt;</span>`,explain:`<b>JSX = Blade template on steroids.</b> Blade mein {{ $var }}, JSX mein {var}. Lekin JSX mein poora JavaScript chal sakta hai — ternary, map, filter sab. Key difference: class → className, for → htmlFor. Self-closing tags zaroori: &lt;img /&gt; not &lt;img&gt;`,
+   render(){return`<div class="v-flow">
+<div class="dl">Blade → JSX cheatsheet:</div>
+<div class="v-row"><div class="v-box amber small">{{ $name }}</div><div class="v-arrow">→</div><div class="v-box teal small">{name}</div></div>
+<div class="v-row"><div class="v-box amber small">class="x"</div><div class="v-arrow">→</div><div class="v-box teal small">className="x"</div></div>
+<div class="v-row"><div class="v-box amber small">@if($show)</div><div class="v-arrow">→</div><div class="v-box teal small">{show && &lt;X/&gt;}</div></div>
+<div class="v-row"><div class="v-box amber small">@foreach($a as $b)</div><div class="v-arrow">→</div><div class="v-box teal small">{a.map(b=&gt;...)}</div></div>
+<div class="v-row"><div class="v-box amber small">$a ? 'x' : 'y'</div><div class="v-arrow">→</div><div class="v-box teal small">{a ? 'x' : 'y'}</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-badge no">&lt;img&gt; ❌</div><div class="v-arrow">→</div><div class="v-badge yes">&lt;img/&gt; ✓ self-close</div></div>
+</div>`}},
+  {label:'Component Tree',qL:[0],laravel:`<span class="lv-code">{{-- Blade nesting --}}
+@extends('layouts.admin')
+@section('content')
+  &lt;x-product-card/&gt;
+@endsection</span>`,explain:`<b>Component Tree = Blade layout hierarchy.</b> Jaise @extends + @section se layout banti hai, React mein components nest hote hain. Data upar se neeche (props ke through). Events neeche se upar (callbacks ke through). Ye unidirectional flow React ka core principle hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Admin panel component tree:</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:0">
+<div class="v-box purple" style="text-align:center;width:120px">App</div>
+<div class="tree-line"></div>
+<div class="v-box blue" style="text-align:center;width:140px">AdminLayout</div>
+<div class="tree-line"></div>
+<div style="display:flex;gap:12px">
+<div style="display:flex;flex-direction:column;align-items:center">
+<div class="v-box teal small">Sidebar</div>
+<div class="tree-line"></div>
+<div class="v-box gray small">NavItem×5</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center">
+<div class="v-box teal small">Dashboard</div>
+<div class="tree-line"></div>
+<div class="v-box gray small">StatsCard×4</div>
+</div>
+</div>
+</div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-badge info">Props ↓ (data)</div><div class="v-badge warn">Events ↑ (callbacks)</div></div>
+</div>`}}
+ ]},
+
+{cat:'Foundations',name:'Props',diff:'e',tag:'Data Flow',
+ desc:'Props = Laravel ke @props() ya function parameters. Parent se child ko data dene ka ek-direction tarika. Props immutable hote hain — child change nahi kar sakta. Ye React ka core principle hai.',
+ query:[
+  {t:`<span class="cm">// Parent component</span>`,l:[]},
+  {t:`&lt;<span class="lk">UserCard</span>`,l:[0]},
+  {t:`  name=<span class="str">"Rahul Singh"</span>`,l:[1]},
+  {t:`  age={<span class="num">25</span>}`,l:[1]},
+  {t:`  isAdmin={<span class="kw">true</span>}`,l:[1]},
+  {t:`  user={userData}`,l:[1]},
+  {t:`  onDelete={handleDelete}`,l:[2]},
+  {t:`/&gt;`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Child component</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserCard</span>({ name, age, isAdmin, user, onDelete }) {`,l:[3]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">div</span>&gt;`,l:[]},
+  {t:`    &lt;<span class="lk">h3</span>&gt;{name}&lt;/<span class="lk">h3</span>&gt;`,l:[4]},
+  {t:`    &lt;<span class="lk">button</span> onClick={() =&gt; <span class="fn">onDelete</span>(user.id)}&gt;Delete&lt;/<span class="lk">button</span>&gt;`,l:[5]},
+  {t:`  &lt;/<span class="lk">div</span>&gt;;`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Passing Props',qL:[1,2,3,4,5,6,7],laravel:`<span class="lv-code">{{-- Blade x-component --}}
+&lt;x-user-card
+  name="Rahul"
+  :age="25"       // : = PHP expression
+  :isAdmin="true"
+  :user="$user"
+/&gt;</span>`,explain:`<b>Props = HTML attributes ki tarah likhte hain.</b> String ke liye quotes: name="Rahul". JavaScript value ke liye curly braces: age={25}, isAdmin={true}. Variable pass karne ke liye: user={userData}. Sirf parent se child tak — ek direction mein.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Props types — how to pass:</div>
+<div class="v-row"><div class="v-box blue small">string: name="Rahul"</div><div class="v-label">quotes use karo</div></div>
+<div class="v-row"><div class="v-box blue small">number: age={25}</div><div class="v-label">curly braces</div></div>
+<div class="v-row"><div class="v-box blue small">boolean: isAdmin={true}</div><div class="v-label">ya sirf isAdmin (shorthand)</div></div>
+<div class="v-row"><div class="v-box blue small">object: user={userData}</div><div class="v-label">variable pass karo</div></div>
+<div class="v-row"><div class="v-box amber small">function: onDelete={fn}</div><div class="v-label">callback for events</div></div>
+</div>`}},
+  {label:'Receiving',qL:[10,11,12,13],laravel:`<span class="lv-code">{{-- Blade @props --}}
+@props(['name','age','isAdmin','user'])
+
+// Ya Controller mein:
+public function show(User $user)
+{
+    return view('user-card',compact('user'));
+}</span>`,explain:`<b>Destructuring = @props() jaisa.</b> function UserCard({ name, age }) syntax mein directly destructure karte hain. Default values bhi de sakte ho: { name = 'Guest', role = 'user' }. Ya puri object: function UserCard(props) { props.name }. Props READ-ONLY hain — kabhi direct change mat karo.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Props receive karne ke tarike:</div>
+<div class="v-row"><div class="v-box green small">Destructure (recommended):</div></div>
+<div class="v-row"><div class="v-box teal small">({ name, age, onDelete })</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-box gray small">With defaults:</div></div>
+<div class="v-row"><div class="v-box teal small">({ name='Guest', role='user' })</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-badge no">props.name = 'Ali' ❌ immutable</div></div>
+<div class="v-row"><div class="v-badge yes">Use setState to change ✓</div></div>
+</div>`}},
+  {label:'Callbacks',qL:[6,13],laravel:`<span class="lv-code">// Laravel mein sirf Livewire mein:
+// @this.call('deleteUser', id)
+// Normal Blade stateless hai
+// React mein har component mein ho</span>`,explain:`<b>Callback props = Child se Parent communication.</b> Child direct state change nahi kar sakta. Parent ek function pass karta hai (onDelete), child use call karta hai jab event ho. Ye "lifting state up" pattern hai — React ka fundamental pattern.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Callback pattern — child → parent:</div>
+<div class="v-row"><div class="v-box purple">Parent</div><div class="v-arrow">onDelete={fn} →</div><div class="v-box teal">Child</div></div>
+<div class="v-row"><div class="v-box purple">state update ←</div><div class="v-arrow">fn(id) call</div><div class="v-box teal">Child</div></div>
+<div class="v-divider"></div>
+<div class="dl">Real example — Role Permission System:</div>
+<div class="v-row"><div class="v-box gray small">UserTable → onRoleChange → RoleDropdown</div></div>
+<div class="v-row"><div class="v-box gray small">RoleDropdown calls fn → UserTable updates</div></div>
+<div class="v-divider"></div>
+<div class="dl">Prop drilling problem → Context use karo</div>
+</div>`}}
+ ]},
+
+{cat:'Foundations',name:'JSX Deep Dive',diff:'e',tag:'Syntax',
+ desc:'JSX = JavaScript XML. Ye HTML jaisi syntax hai JavaScript ke andar. Babel ise React.createElement() calls mein convert karta hai. JSX mein poora JS power available hai.',
+ query:[
+  {t:`<span class="cm">// Conditional rendering</span>`,l:[]},
+  {t:`{isLoggedIn && &lt;<span class="lk">Dashboard</span>/&gt;}`,l:[0]},
+  {t:`{isLoggedIn ? &lt;<span class="lk">Dashboard</span>/&gt; : &lt;<span class="lk">Login</span>/&gt;}`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// List rendering</span>`,l:[]},
+  {t:`{users.<span class="fn">map</span>((user) => (`,l:[1]},
+  {t:`  &lt;<span class="lk">UserCard</span>`,l:[1]},
+  {t:`    key={user.id}  <span class="cm">// REQUIRED!</span>`,l:[2]},
+  {t:`    name={user.name}`,l:[1]},
+  {t:`  /&gt;`,l:[1]},
+  {t:`))}`,l:[1]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Inline styles</span>`,l:[]},
+  {t:`&lt;<span class="lk">div</span> style={{ color: <span class="str">'red'</span>, fontSize: <span class="num">14</span> }}&gt;`,l:[3]},
+  {t:`  styled text`,l:[]},
+  {t:`&lt;/<span class="lk">div</span>&gt;`,l:[3]},
+ ],
+ steps:[
+  {label:'Conditionals',qL:[0,1,2],laravel:`<span class="lv-code">{{-- Blade conditionals --}}
+@if($isLoggedIn)
+  &lt;x-dashboard/&gt;
+@else
+  &lt;x-login/&gt;
+@endif</span>`,explain:`<b>JSX mein 3 tarike se conditionals likho.</b> 1) Short-circuit: {condition && &lt;Component/&gt;} — condition false ho toh kuch nahi dikhta. 2) Ternary: {condition ? &lt;A/&gt; : &lt;B/&gt;} — dono cases handle karo. 3) Early return: complex logic ke liye function ke upar if/return use karo.`,
+   render(){return`<div class="v-flow">
+<div class="dl">3 conditional patterns:</div>
+<div class="v-row"><div class="v-box blue small">&&</div><div class="v-label">sirf true case (show/hide)</div></div>
+<div class="v-row"><div class="v-box blue small">? :</div><div class="v-label">true/false dono cases</div></div>
+<div class="v-row"><div class="v-box blue small">if/return</div><div class="v-label">complex conditions</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-badge no">{0 && &lt;X/&gt;} ❌ renders "0"</div></div>
+<div class="v-row"><div class="v-badge yes">{count > 0 && &lt;X/&gt;} ✓ safe</div></div>
+</div>`}},
+  {label:'List & Key',qL:[4,5,6,7,8,9,10],laravel:`<span class="lv-code">{{-- @foreach --}}
+@foreach($users as $user)
+  &lt;x-user-card
+    :key="$user->id"  // No equivalent!
+    :name="$user->name"
+  /&gt;
+@endforeach</span>`,explain:`<b>key prop = React ka internal tracker.</b> Jab list render hoti hai, React ko pata hona chahiye kaunsa item kaunsa hai — delete, reorder, add ke time. key={item.id} — unique stable ID use karo. NEVER key={index} jab list reorder ho sakti ho — wrong behavior aata hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">key prop rules:</div>
+<div class="v-badge no" style="width:fit-content">key={index} ❌ reorder pe wrong</div>
+<div class="v-badge yes" style="width:fit-content">key={user.id} ✓ stable unique ID</div>
+<div class="v-divider"></div>
+<div class="dl">Without key — what breaks:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">🗑</span>Delete item 2</div>
+<div class="v-lc-step active"><span class="lc-icon">😵</span>Wrong states</div>
+<div class="v-lc-step active"><span class="lc-icon">🔑</span>key={id}</div>
+<div class="v-lc-step active teal"><span class="lc-icon">✅</span>Correct</div>
+</div>
+</div>`}},
+  {label:'Fragments',qL:[0,12,13,14,15],laravel:`<span class="lv-code">{{-- Blade mein multiple roots OK --}}
+&lt;h1&gt;Title&lt;/h1&gt;
+&lt;p&gt;Content&lt;/p&gt;
+
+{{-- React mein ek root zaroori --}}
+{{-- Fragment use karo extra div ke bina --}}</span>`,explain:`<b>JSX mein ek root element zaroori hai.</b> Multiple elements return karne ke liye Fragment use karo: &lt;&gt;...&lt;/&gt; ya &lt;React.Fragment&gt;. Extra div nahi aata DOM mein. Inline styles mein double curly braces: style={{ property: value }} — outer {} = JS expression, inner {} = object.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Fragment vs wrapper div:</div>
+<div class="v-row"><div class="v-badge no">return &lt;A/&gt;&lt;B/&gt; ❌ multiple roots</div></div>
+<div class="v-row"><div class="v-badge yes">return &lt;&gt;&lt;A/&gt;&lt;B/&gt;&lt;/&gt; ✓ Fragment</div></div>
+<div class="v-divider"></div>
+<div class="dl">Inline style — double curly:</div>
+<div class="v-row"><div class="v-box blue small">style={{ color:'red', fontSize:14 }}</div></div>
+<div class="v-label">outer {} = JSX expression, inner {} = JS object</div>
+<div class="v-divider"></div>
+<div class="dl">camelCase property names:</div>
+<div class="v-row"><div class="v-badge no">font-size ❌</div><div class="v-badge yes">fontSize ✓</div></div>
+<div class="v-row"><div class="v-badge no">background-color ❌</div><div class="v-badge yes">backgroundColor ✓</div></div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// STATE & HOOKS
+// ═══════════════════════════════════════════════════
+{cat:'State & Hooks',name:'useState',diff:'e',tag:'Core Hook',
+ desc:'useState = PHP session ka frontend version. Component ki yaaddasht — value store karo, change karo, React automatically UI update karega. React ka sabse important hook.',
+ query:[
+  {t:`<span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">ShoppingCart</span>() {`,l:[]},
+  {t:`  <span class="cm">// [value, setter] = useState(initial)</span>`,l:[]},
+  {t:`  <span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>);`,l:[0]},
+  {t:`  <span class="kw">const</span> [items, setItems] = <span class="fn">useState</span>([]);`,l:[0]},
+  {t:`  <span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>(<span class="kw">null</span>);`,l:[0]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">const</span> <span class="fn">addItem</span> = (item) => {`,l:[]},
+  {t:`    <span class="cm">// Functional update (prev pe dependent)</span>`,l:[]},
+  {t:`    <span class="fn">setItems</span>(prev => [...prev, item]);`,l:[1]},
+  {t:`    <span class="fn">setCount</span>(prev => prev + <span class="num">1</span>);`,l:[1]},
+  {t:`  };`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">div</span>&gt;Items: {count}&lt;/<span class="lk">div</span>&gt;;`,l:[2]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Declare',qL:[4,5,6],laravel:`<span class="lv-code">// Laravel mein koi local state nahi
+// PHP variables = stateless (request end = gone)
+$count = 0; // request khatam = gone
+
+// Session use karte hain persistence ke liye:
+session(['cart_count' => 0]);</span>`,explain:`<b>useState = Component ki memory.</b> Normal JS variable render ke baad reset ho jaata hai. useState React ko kehta hai "ye value yaad rakhna". Syntax: [currentValue, setter] = useState(initialValue). Array destructuring hai — names tum khud choose karte ho.`,
+   render(){return`<div class="v-flow">
+<div class="dl">useState anatomy:</div>
+<div class="v-row"><div class="v-box purple small">const [</div><div class="v-box teal small">count</div><div class="v-box amber small">, setCount</div><div class="v-box purple small">] = useState(0)</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-box teal small">count</div><div class="v-label">= read karo (current value)</div></div>
+<div class="v-row"><div class="v-box amber small">setCount</div><div class="v-label">= update karo (setter)</div></div>
+<div class="v-row"><div class="v-box blue small">0</div><div class="v-label">= initial value (pehli render)</div></div>
+<div class="v-divider"></div>
+<div class="v-badge no">count = 5 ❌ never direct mutate</div>
+<div class="v-badge yes">setCount(5) ✓ setter se update karo</div>
+</div>`}},
+  {label:'Update',qL:[9,10,11],laravel:`<span class="lv-code">// Functional update — safe way:
+setCount(prev => prev + 1)
+// prev = guaranteed latest value
+
+// vs direct:
+setCount(count + 1) // stale closure risk!</span>`,explain:`<b>Functional update = prev value pe safe update.</b> Jab nayi value purani pe depend kare — setCount(prev => prev + 1) use karo. Direct setCount(count + 1) mein stale closure ka risk hai jab multiple updates ek saath ho. setState asynchronous hai — usi line pe change nahi hota.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Update kab kaise:</div>
+<div class="v-row"><div class="v-badge warn">setCount(count + 1) ⚠️</div><div class="v-label">stale closure possible</div></div>
+<div class="v-row"><div class="v-badge yes">setCount(p => p + 1) ✓</div><div class="v-label">always safe</div></div>
+<div class="v-divider"></div>
+<div class="dl">State update lifecycle:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">📞</span>setCount(5)</div>
+<div class="v-lc-step"><span class="lc-icon">📋</span>Queue update</div>
+<div class="v-lc-step"><span class="lc-icon">🔄</span>Re-render</div>
+<div class="v-lc-step teal"><span class="lc-icon">🖥</span>UI updates</div>
+</div>
+<div class="v-label">setState asynchronous hai — next render pe milega</div>
+</div>`}},
+  {label:'State Types',qL:[4,5,6],laravel:`<span class="lv-code">// Object state update — SPREAD use karo!
+setUser(prev => ({...prev, name: 'Ali'}))
+// Array state:
+setItems(prev => [...prev, newItem])  // add
+setItems(prev => prev.filter(i=>i.id!==id)) // delete
+setItems(prev => prev.map(i=>i.id===id ? {...i,...update} : i)) // update</span>`,explain:`<b>State kisi bhi type ka ho sakta hai.</b> Object update karte waqt spread operator zaroori — React shallow comparison karta hai. Direct mutation (items.push()) React detect nahi kar paata — nayi array/object banao hamesha. Cart mein items add/remove/update ke liye ye patterns yaad rakho.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Real project state examples:</div>
+<div class="v-row"><div class="v-box blue small">Cart: useState([])</div><div class="v-label">← E-commerce</div></div>
+<div class="v-row"><div class="v-box blue small">User: useState(null)</div><div class="v-label">← Auth system</div></div>
+<div class="v-row"><div class="v-box blue small">Loading: useState(false)</div><div class="v-label">← API calls</div></div>
+<div class="v-row"><div class="v-box blue small">Modal: useState(false)</div><div class="v-label">← UI toggle</div></div>
+<div class="v-divider"></div>
+<div class="dl">Array/Object update rules:</div>
+<div class="v-badge no">items.push(x) ❌ direct mutation</div>
+<div class="v-badge yes">[...items, x] ✓ new array</div>
+</div>`}}
+ ]},
+
+{cat:'State & Hooks',name:'useEffect',diff:'m',tag:'Lifecycle',
+ desc:'useEffect = Laravel ka Event Listener + Middleware combined. Component mount, update, aur unmount pe side effects handle karta hai. API calls, subscriptions, timers — sab yahan.',
+ query:[
+  {t:`<span class="kw">import</span> { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserProfile</span>({ userId }) {`,l:[]},
+  {t:`  <span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>(<span class="kw">null</span>);`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="cm">// [] = sirf mount pe (once)</span>`,l:[]},
+  {t:`  <span class="fn">useEffect</span>(() => { <span class="fn">initAnalytics</span>(); }, []);`,l:[0]},
+  {t:``,l:[]},
+  {t:`  <span class="cm">// [userId] = userId change hone pe</span>`,l:[]},
+  {t:`  <span class="fn">useEffect</span>(() => {`,l:[1]},
+  {t:`    <span class="kw">const</span> controller = <span class="kw">new</span> <span class="fn">AbortController</span>();`,l:[2]},
+  {t:`    fetch(<span class="str">\`/api/users/\${userId}\`</span>, {signal: controller.signal})`,l:[2]},
+  {t:`      .<span class="fn">then</span>(r => r.<span class="fn">json</span>()).<span class="fn">then</span>(<span class="fn">setUser</span>);`,l:[2]},
+  {t:`    <span class="kw">return</span> () => controller.<span class="fn">abort</span>(); <span class="cm">// cleanup!</span>`,l:[3]},
+  {t:`  }, [userId]);`,l:[4]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">return</span> user ? &lt;<span class="lk">Profile</span> user={user}/&gt; : &lt;<span class="lk">Spinner</span>/&gt;;`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Mount [ ]',qL:[5,6],laravel:`<span class="lv-code">// AppServiceProvider::boot() jaisa:
+class AppServiceProvider {
+  public function boot() {
+    // App start hone pe ek baar
+    Analytics::init();
+  }
+}</span>`,explain:`<b>useEffect(fn, []) = Mount pe ek baar.</b> Empty array = "sirf pehli baar chalo". Analytics init, WebSocket connect, ya one-time setup yahan karo. Laravel ke AppServiceProvider::boot() jaisa — application start hote waqt ek baar.`,
+   render(){return`<div class="v-flow">
+<div class="dl">useEffect(fn, []) — mount pe sirf ek baar:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">↓</span>Mount</div>
+<div class="v-lc-step active"><span class="lc-icon">⚡</span>Effect</div>
+<div class="v-lc-step"><span class="lc-icon">🔄</span>Re-renders</div>
+<div class="v-lc-step"><span class="lc-icon">↑</span>Unmount</div>
+</div>
+<div class="v-label">Effect sirf ek baar chalta hai — re-renders mein skip</div>
+<div class="v-divider"></div>
+<div class="dl">Use cases:</div>
+<div class="v-row"><div class="v-box teal small">fetch('/api/init')</div></div>
+<div class="v-row"><div class="v-box teal small">WebSocket.connect()</div></div>
+<div class="v-row"><div class="v-box teal small">analytics.trackPageView()</div></div>
+</div>`}},
+  {label:'Deps [x]',qL:[8,9,14],laravel:`<span class="lv-code">// Observer jaisa:
+class UserObserver {
+  public function updated(User $user) {
+    // User change hone pe action
+    Cache::forget('user_'.$user->id);
+  }
+}</span>`,explain:`<b>useEffect(fn, [dep]) = Dependency change hone pe.</b> [userId] matlab "userId change hote hi dobara chalo". Jaise admin panel mein user select karo — us user ka data fetch karo. Laravel ke Observer::updated() jaisa. Sab dependencies array mein daalni hain (ESLint bhi batata hai).`,
+   render(){return`<div class="v-flow">
+<div class="dl">Dependency array behavior:</div>
+<div class="v-row"><div class="v-badge no">useEffect(fn)</div><div class="v-label">har render pe ❌</div></div>
+<div class="v-row"><div class="v-badge yes">useEffect(fn, [])</div><div class="v-label">sirf mount pe ✓</div></div>
+<div class="v-row"><div class="v-badge info">useEffect(fn, [id])</div><div class="v-label">id change pe ✓</div></div>
+<div class="v-row"><div class="v-badge info">useEffect(fn, [a,b])</div><div class="v-label">a ya b change pe ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">Real: Role Permission System</div>
+<div class="v-row"><div class="v-box purple small">useEffect(() => fetchPermissions(roleId), [roleId])</div></div>
+</div>`}},
+  {label:'Cleanup',qL:[10,11,12,13,14],laravel:`<span class="lv-code">// PHP __destruct() jaisa:
+class WebSocketService {
+  public function __destruct() {
+    $this->connection->close(); // cleanup
+  }
+}
+
+// AbortController = request cancel karo</span>`,explain:`<b>Cleanup function = memory leaks rokta hai.</b> useEffect return karo ek function — ye tab chalega jab component unmount ho ya effect dobara chalne se pehle. AbortController se pending fetch cancel karo (race condition rokta hai). Timer, WebSocket, event listeners — sab cleanup karo.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Cleanup flow:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">↓</span>Mount</div>
+<div class="v-lc-step active"><span class="lc-icon">⚡</span>Setup</div>
+<div class="v-lc-step active"><span class="lc-icon">🔄</span>Dep change</div>
+<div class="v-lc-step active"><span class="lc-icon">🧹</span>Cleanup</div>
+<div class="v-lc-step teal"><span class="lc-icon">⚡</span>Re-run</div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">Zaroori cleanup cases:</div>
+<div class="v-row"><div class="v-box coral small">controller.abort() — fetch</div></div>
+<div class="v-row"><div class="v-box coral small">clearTimeout(id) — timer</div></div>
+<div class="v-row"><div class="v-box coral small">socket.disconnect() — WS</div></div>
+<div class="v-row"><div class="v-box coral small">elem.removeEventListener(...)</div></div>
+</div>`}}
+ ]},
+
+{cat:'State & Hooks',name:'useReducer',diff:'m',tag:'Complex State',
+ desc:'useReducer = Redux lite. Jab useState se zyada complex state logic ho — multiple sub-values ya next state previous pe depend kare. Laravel ke Command pattern jaisa.',
+ query:[
+  {t:`<span class="kw">const</span> initialState = { count: <span class="num">0</span>, loading: <span class="kw">false</span>, error: <span class="kw">null</span> };`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Reducer = pure function: (state, action) => newState</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">reducer</span>(state, action) {`,l:[0]},
+  {t:`  <span class="kw">switch</span>(action.type) {`,l:[0]},
+  {t:`    <span class="kw">case</span> <span class="str">'INCREMENT'</span>: <span class="kw">return</span> {...state, count: state.count+<span class="num">1</span>};`,l:[1]},
+  {t:`    <span class="kw">case</span> <span class="str">'SET_LOADING'</span>: <span class="kw">return</span> {...state, loading: action.payload};`,l:[1]},
+  {t:`    <span class="kw">case</span> <span class="str">'SET_ERROR'</span>: <span class="kw">return</span> {...state, error: action.payload};`,l:[1]},
+  {t:`    <span class="kw">default</span>: <span class="kw">return</span> state;`,l:[]},
+  {t:`  }`,l:[]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">Counter</span>() {`,l:[]},
+  {t:`  <span class="kw">const</span> [state, dispatch] = <span class="fn">useReducer</span>(reducer, initialState);`,l:[2]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">button</span> onClick={() =&gt; <span class="fn">dispatch</span>({type:<span class="str">'INCREMENT'</span>})}&gt;+&lt;/<span class="lk">button</span>&gt;`,l:[3]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Reducer fn',qL:[3,4,5,6,7,8,9,10],laravel:`<span class="lv-code">// Command Pattern jaisa:
+class IncrementCommand {
+  public function execute($state): array {
+    return array_merge($state, [
+      'count' => $state['count'] + 1
+    ]);
+  }
+}</span>`,explain:`<b>Reducer = pure function jo state transform karta hai.</b> (currentState, action) => newState. Hamesha nayi state return karo — directly modify mat karo. Switch-case se different actions handle karo. Ye predictable, testable, aur debuggable hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Reducer = state machine:</div>
+<div class="v-row"><div class="v-box blue small">currentState</div><div class="v-arrow">+</div><div class="v-box amber small">action</div><div class="v-arrow">→</div><div class="v-box teal small">newState</div></div>
+<div class="v-divider"></div>
+<div class="dl">Actions dispatch karo:</div>
+<div class="v-row"><div class="v-box gray small">dispatch({type:'INCREMENT'})</div></div>
+<div class="v-row"><div class="v-box gray small">dispatch({type:'SET_ERROR', payload: err})</div></div>
+<div class="v-divider"></div>
+<div class="dl">useState vs useReducer:</div>
+<div class="v-row"><div class="v-badge yes">useState ✓</div><div class="v-label">simple, independent values</div></div>
+<div class="v-row"><div class="v-badge info">useReducer ✓</div><div class="v-label">complex, related state</div></div>
+</div>`}},
+  {label:'Dispatch',qL:[13,14],laravel:`<span class="lv-code">// Redux-like pattern:
+// Action = {type, payload}
+// Dispatch = action bhejo
+// Reducer = action handle karo
+
+// Bus controller jaisa:
+$bus->dispatch(new IncrementCommand());</span>`,explain:`<b>dispatch = action bhejo reducer ko.</b> {type: 'ACTION_NAME', payload: data} — type required hai. payload optional. Redux DevTools se time-travel debugging kar sakte ho. Complex forms, multi-step wizards, shopping cart — useReducer ke ideal cases.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Data flow:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">👆</span>User click</div>
+<div class="v-lc-step active"><span class="lc-icon">📤</span>dispatch()</div>
+<div class="v-lc-step active"><span class="lc-icon">⚙️</span>reducer()</div>
+<div class="v-lc-step teal"><span class="lc-icon">🖥</span>New UI</div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">Complex state example (Auth):</div>
+<div class="v-row"><div class="v-box gray small">{ user, token, loading, error, isLoggedIn }</div></div>
+<div class="v-row"><div class="v-badge yes">useReducer ✓ sab ek saath manage</div></div>
+</div>`}}
+ ]},
+
+{cat:'State & Hooks',name:'useMemo & useCallback',diff:'m',tag:'Performance',
+ desc:'useMemo = expensive calculation cache karo. useCallback = function reference stable rakho. Laravel ke Cache::remember() jaisa — bar bar calculate mat karo.',
+ query:[
+  {t:`<span class="cm">// useMemo — computed value cache</span>`,l:[]},
+  {t:`<span class="kw">const</span> expensiveResult = <span class="fn">useMemo</span>(() => {`,l:[0]},
+  {t:`  <span class="kw">return</span> products`,l:[1]},
+  {t:`    .<span class="fn">filter</span>(p => p.price > minPrice)`,l:[1]},
+  {t:`    .<span class="fn">sort</span>((a,b) => b.price - a.price)`,l:[1]},
+  {t:`    .<span class="fn">slice</span>(<span class="num">0</span>, <span class="num">10</span>);`,l:[1]},
+  {t:`}, [products, minPrice]); <span class="cm">// deps</span>`,l:[2]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// useCallback — function reference stable</span>`,l:[]},
+  {t:`<span class="kw">const</span> handleDelete = <span class="fn">useCallback</span>((id) => {`,l:[3]},
+  {t:`  <span class="fn">deleteUser</span>(id);`,l:[4]},
+  {t:`  <span class="fn">queryClient</span>.<span class="fn">invalidateQueries</span>([<span class="str">'users'</span>]);`,l:[4]},
+  {t:`}, [deleteUser, queryClient]); <span class="cm">// deps</span>`,l:[5]},
+ ],
+ steps:[
+  {label:'useMemo',qL:[0,1,2,3,4,5,6],laravel:`<span class="lv-code">// Cache::remember jaisa:
+$filtered = Cache::remember(
+  "products_{$minPrice}",
+  300,
+  fn() => Product::where('price', '>', $minPrice)
+    ->orderByDesc('price')
+    ->take(10)->get()
+);</span>`,explain:`<b>useMemo = computed property with caching.</b> 1000 products filter + sort karna expensive hai. Har render pe dobara calculate karna slow hoga. useMemo result yaad rakhta hai, sirf tab recalculate karta hai jab [products, minPrice] badlein. Cache::remember() ka exact React equivalent.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Without useMemo (slow):</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">🔄</span>Render</div>
+<div class="v-lc-step active"><span class="lc-icon">💻</span>Filter 1000</div>
+<div class="v-lc-step active"><span class="lc-icon">💻</span>Sort again</div>
+<div class="v-lc-step active"><span class="lc-icon">😐</span>Same result</div>
+</div>
+<div class="dl" style="margin-top:6px">With useMemo (fast):</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">🔄</span>Render</div>
+<div class="v-lc-step teal"><span class="lc-icon">📋</span>Cache hit!</div>
+<div class="v-lc-step teal"><span class="lc-icon">⚡</span>Return</div>
+<div class="v-lc-step teal"><span class="lc-icon">😊</span>Fast!</div>
+</div>
+<div class="v-label">Recalculate sirf jab products/minPrice badlein</div>
+</div>`}},
+  {label:'useCallback',qL:[8,9,10,11,12],laravel:`<span class="lv-code">// PHP functions stateless hain
+// React mein problem:
+// Har render pe nayi function reference
+// Child samajhta hai prop badla → re-renders
+// useCallback same reference rakhta hai</span>`,explain:`<b>useCallback = function reference stable rakho.</b> Jab handleDelete child ko pass karo, har parent render pe naya function banta hai. Child ko lagta hai prop badla — re-render. useCallback same reference return karta hai jab tak dependencies na badlein. React.memo ke saath pair karo.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Without useCallback:</div>
+<div class="v-row"><div class="v-box coral small">Parent renders → new fn → Child re-renders ❌</div></div>
+<div class="dl" style="margin-top:4px">With useCallback:</div>
+<div class="v-row"><div class="v-box green small">Parent renders → same fn → Child skips ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">Perfect combo:</div>
+<div class="v-row"><div class="v-box purple small">useCallback</div><div class="v-arrow">+</div><div class="v-box teal small">React.memo</div><div class="v-arrow">=</div><div class="v-badge yes">optimal</div></div>
+<div class="v-divider"></div>
+<div class="dl">⚠️ Both have overhead — profile first!</div>
+</div>`}},
+  {label:'When to use',qL:[0,9],laravel:`<span class="lv-code">// Premature optimization = anti-pattern
+// Jaise sab kuch cache nahi karte Laravel mein:
+// - Simple queries: direct karo
+// - Expensive queries: tab cache karo
+// React mein bhi same principle</span>`,explain:`<b>Profile karo, phir optimize karo.</b> useMemo aur useCallback khud bhi memory + computation use karte hain. Simple components mein overhead benefit se zyada hoga. React DevTools Profiler se dekho kahan actual problem hai, tab optimize karo.',`,
+   render(){return`<div class="v-flow">
+<div class="dl">Use karo jab:</div>
+<div class="v-row"><div class="v-badge yes">useMemo ✓</div><div class="v-label">filter/sort 1000+ items</div></div>
+<div class="v-row"><div class="v-badge yes">useCallback ✓</div><div class="v-label">fn passed to React.memo child</div></div>
+<div class="v-divider"></div>
+<div class="dl">Use mat karo jab:</div>
+<div class="v-row"><div class="v-badge no">useMemo ❌</div><div class="v-label">simple string/number calc</div></div>
+<div class="v-row"><div class="v-badge no">useCallback ❌</div><div class="v-label">fn sirf local use, no child</div></div>
+<div class="v-row"><div class="v-badge no">Both ❌</div><div class="v-label">"just in case" without profiling</div></div>
+</div>`}}
+ ]},
+
+{cat:'State & Hooks',name:'useRef',diff:'e',tag:'DOM / Persist',
+ desc:'useRef = DOM element pakdo ya render ke beech value store karo bina re-render trigger kiye. PHP static variable jaisa persistent storage.',
+ query:[
+  {t:`<span class="kw">import</span> { useRef, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">SearchBox</span>() {`,l:[]},
+  {t:`  <span class="cm">// DOM reference</span>`,l:[]},
+  {t:`  <span class="kw">const</span> inputRef = <span class="fn">useRef</span>(<span class="kw">null</span>);`,l:[0]},
+  {t:`  <span class="cm">// Persistent value (no re-render)</span>`,l:[]},
+  {t:`  <span class="kw">const</span> timerRef = <span class="fn">useRef</span>(<span class="kw">null</span>);`,l:[1]},
+  {t:`  <span class="kw">const</span> renderCount = <span class="fn">useRef</span>(<span class="num">0</span>);`,l:[1]},
+  {t:``,l:[]},
+  {t:`  <span class="fn">useEffect</span>(() => {`,l:[]},
+  {t:`    inputRef.current.<span class="fn">focus</span>(); <span class="cm">// DOM access</span>`,l:[2]},
+  {t:`    renderCount.current++;`,l:[3]},
+  {t:`  });`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">input</span> ref={inputRef} /&gt;;`,l:[0]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'DOM Ref',qL:[4,10,14],laravel:`<span class="lv-code">// PHP mein direct DOM access nahi
+// Plain JS mein:
+document.getElementById('search').focus()
+
+// React mein useRef se:
+// inputRef.current = actual DOM element</span>`,explain:`<b>useRef = DOM element directly pakdo.</b> React normally Virtual DOM ke through kaam karta hai. Lekin kuch cases mein direct DOM access chahiye — input focus, video control, canvas draw, third-party library. ref={inputRef} attach karo element pe, phir inputRef.current = actual DOM node.`,
+   render(){return`<div class="v-flow">
+<div class="dl">DOM ref flow:</div>
+<div class="v-row"><div class="v-box purple small">useRef(null)</div><div class="v-arrow">→</div><div class="v-box gray small">ref={inputRef}</div><div class="v-arrow">→</div><div class="v-box teal small">.current=&lt;input&gt;</div></div>
+<div class="v-divider"></div>
+<div class="dl">DOM ref use cases:</div>
+<div class="v-row"><div class="v-box blue small">input.focus() — auto focus</div></div>
+<div class="v-row"><div class="v-box blue small">video.play() / video.pause()</div></div>
+<div class="v-row"><div class="v-box blue small">canvas.getContext('2d')</div></div>
+<div class="v-row"><div class="v-box blue small">div.scrollIntoView()</div></div>
+</div>`}},
+  {label:'Persist Value',qL:[6,7,11,12],laravel:`<span class="lv-code">// PHP static variable jaisa:
+class SearchController {
+  private static $timer = null;
+  // Persist karta hai lekin
+  // page reload = reset
+  // useRef = component unmount = reset</span>`,explain:`<b>useRef = value store karo bina re-render ke.</b> Timer ID, previous value, count — inka change UI pe dikhna zaroori nahi. State mein daalne se re-render trigger hoga (unnecessary). useRef mein daalo: renderCount.current++ count hoga lekin UI update nahi hoga.`,
+   render(){return`<div class="v-flow">
+<div class="dl">useState vs useRef kab kya:</div>
+<div class="v-row"><div class="v-box teal small">useState</div><div class="v-label">UI mein dikhna chahiye → re-render</div></div>
+<div class="v-row"><div class="v-box purple small">useRef</div><div class="v-label">Sirf logic — no re-render needed</div></div>
+<div class="v-divider"></div>
+<div class="dl">useRef for logic only:</div>
+<div class="v-row"><div class="v-box blue small">timerRef.current = setTimeout(...)</div></div>
+<div class="v-row"><div class="v-box blue small">prevValueRef.current = currentValue</div></div>
+<div class="v-row"><div class="v-box blue small">renderCount.current++</div></div>
+<div class="v-row"><div class="v-box blue small">socketRef.current = new WebSocket()</div></div>
+</div>`}}
+ ]},
+
+{cat:'State & Hooks',name:'useContext',diff:'m',tag:'Global State',
+ desc:'useContext = Laravel Service Container ka frontend version. Deeply nested components ko props drilling ke bina data do. Auth, theme, language sab ke liye.',
+ query:[
+  {t:`<span class="cm">// 1. Context create karo</span>`,l:[]},
+  {t:`<span class="kw">const</span> AuthContext = <span class="fn">createContext</span>(<span class="kw">null</span>);`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// 2. Provider banao</span>`,l:[]},
+  {t:`<span class="kw">export function</span> <span class="fn">AuthProvider</span>({ children }) {`,l:[1]},
+  {t:`  <span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>(<span class="kw">null</span>);`,l:[]},
+  {t:`  <span class="kw">const</span> login = <span class="fn">useCallback</span>(<span class="kw">async</span>(creds) => {`,l:[]},
+  {t:`    <span class="kw">const</span> data = <span class="kw">await</span> api.<span class="fn">post</span>(<span class="str">'/login'</span>, creds);`,l:[]},
+  {t:`    <span class="fn">setUser</span>(data.user);`,l:[]},
+  {t:`  }, []);`,l:[]},
+  {t:`  <span class="kw">return</span> (&lt;<span class="lk">AuthContext.Provider</span> value={{user,login}}&gt;`,l:[2]},
+  {t:`    {children}`,l:[]},
+  {t:`  &lt;/<span class="lk">AuthContext.Provider</span>&gt;);`,l:[2]},
+  {t:`}`,l:[]},
+  {t:`<span class="cm">// 3. Consume karo kahi bhi</span>`,l:[]},
+  {t:`<span class="kw">const</span> { user, login } = <span class="fn">useContext</span>(AuthContext);`,l:[3]},
+ ],
+ steps:[
+  {label:'Problem',qL:[15],laravel:`<span class="lv-code">// Props drilling problem:
+// App → Layout → Sidebar
+//   → NavItem → Avatar → {user}
+// 5 levels tak prop pass karna padega!
+
+// Laravel: Auth::user() anywhere
+// React: Context = same concept</span>`,explain:`<b>Props drilling = deeply nested components ka dard.</b> Jab user object 5 levels neeche chahiye, 5 baar prop pass karna padega. Beech wale components ko sirf pass-through karna padta hai — meaningless kaam. Context is problem ko solve karta hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Props drilling — pain point:</div>
+<div style="display:flex;flex-direction:column;gap:3px">
+<div class="v-row"><div class="v-box purple small">App (user hai yahan)</div></div>
+<div class="v-row" style="padding-left:12px"><div class="v-arrow">↓ user prop</div></div>
+<div class="v-row" style="padding-left:12px"><div class="v-box gray small">Layout (sirf pass karta hai)</div></div>
+<div class="v-row" style="padding-left:24px"><div class="v-arrow">↓ user prop</div></div>
+<div class="v-row" style="padding-left:24px"><div class="v-box gray small">Sidebar (sirf pass karta hai)</div></div>
+<div class="v-row" style="padding-left:36px"><div class="v-arrow">↓ user prop</div></div>
+<div class="v-row" style="padding-left:36px"><div class="v-box teal small">Avatar (finally use karta hai)</div></div>
+</div>
+</div>`}},
+  {label:'Provider',qL:[4,5,6,7,8,9,10,11,12,13],laravel:`<span class="lv-code">// AppServiceProvider::register():
+$this->app->singleton(
+  AuthService::class,
+  fn() => new AuthService()
+);
+// Kisi bhi class mein inject karo</span>`,explain:`<b>Provider = Service singleton register karna.</b> App.jsx ke root mein Provider wrap karo. Provider ke andar sab components directly access kar sakte hain. value prop mein jo do woh sab consume kar sakte hain. Custom hook banao useAuth() naam se — directly useContext likhne se better.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Provider wrapping:</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+<div class="v-box purple" style="text-align:center;width:200px">AuthProvider</div>
+<div class="tree-line"></div>
+<div class="v-box blue" style="text-align:center;width:170px">AdminLayout</div>
+<div class="tree-line"></div>
+<div style="display:flex;gap:10px">
+<div class="v-box teal small">Sidebar ✓</div>
+<div class="v-box teal small">Dashboard ✓</div>
+<div class="v-box teal small">Avatar ✓</div>
+</div>
+</div>
+<div class="v-label" style="margin-top:4px">Sab ko user milega — bina props ke!</div>
+</div>`}},
+  {label:'Consume',qL:[14,15],laravel:`<span class="lv-code">// Constructor injection:
+class UserController {
+  public function __construct(
+    private AuthService $auth
+  ) {}
+  // $this->auth->user() anywhere
+}</span>`,explain:`<b>useContext = constructor injection jaisa.</b> Ek line mein poora context ka data. Props drilling nahi — kitna bhi neeche ho. Custom hook pattern zaroori hai: export function useAuth() { return useContext(AuthContext) } — bahar se AuthContext expose nahi hota.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Context consume karo:</div>
+<div class="v-row"><div class="v-badge yes">const {user} = useContext(AuthCtx) ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">Better: Custom hook pattern:</div>
+<div class="v-row"><div class="v-box teal small">export function useAuth() {</div></div>
+<div class="v-row"><div class="v-box teal small">  return useContext(AuthContext)</div></div>
+<div class="v-row"><div class="v-box teal small">}</div></div>
+<div class="v-divider"></div>
+<div class="dl">Performance tip — split context:</div>
+<div class="v-row"><div class="v-box blue small">UserContext — user object</div></div>
+<div class="v-row"><div class="v-box blue small">UserActionsContext — login/logout</div></div>
+<div class="v-label">Actions zyada stable hain — less re-renders</div>
+</div>`}}
+ ]},
+
+{cat:'State & Hooks',name:'Custom Hooks',diff:'m',tag:'Reusability',
+ desc:'Custom hooks = Laravel Service Classes. Reusable logic extract karo components se. useAuth(), useFetch(), useDebounce() — ek baar likho, har jagah use karo.',
+ query:[
+  {t:`<span class="cm">// hooks/useDebounce.js</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">useDebounce</span>(value, delay = <span class="num">300</span>) {`,l:[0]},
+  {t:`  <span class="kw">const</span> [debounced, setDebounced] = <span class="fn">useState</span>(value);`,l:[1]},
+  {t:`  <span class="fn">useEffect</span>(() => {`,l:[2]},
+  {t:`    <span class="kw">const</span> timer = <span class="fn">setTimeout</span>(() => <span class="fn">setDebounced</span>(value), delay);`,l:[2]},
+  {t:`    <span class="kw">return</span> () => <span class="fn">clearTimeout</span>(timer);`,l:[2]},
+  {t:`  }, [value, delay]);`,l:[2]},
+  {t:`  <span class="kw">return</span> debounced;`,l:[3]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Use anywhere:</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">Search</span>() {`,l:[]},
+  {t:`  <span class="kw">const</span> [query, setQuery] = <span class="fn">useState</span>(<span class="str">''</span>);`,l:[]},
+  {t:`  <span class="kw">const</span> debouncedQuery = <span class="fn">useDebounce</span>(query, <span class="num">500</span>);`,l:[4]},
+  {t:`  <span class="cm">// useEffect([debouncedQuery]) -> API call</span>`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Create Hook',qL:[0,1,2,3,4,5,6,7,8],laravel:`<span class="lv-code">// Laravel DebounceService.php:
+class DebounceService {
+  private static array $timers = [];
+  public function debounce(callable $fn, int $ms): void {
+    // Similar concept, different impl
+  }
+}</span>`,explain:`<b>Custom hook = Logic extract karo component se.</b> Rule: agar logic 2+ components mein repeat ho raha — hook banao. Naam "use" se shuru ZAROORI hai (React ka rule). Andar koi bhi hook use kar sakte ho. Return karo jo chahiye — value, state, functions sab.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Custom hook rules:</div>
+<div class="v-row"><div class="v-badge yes">use se shuru karo ✓</div><div class="v-label">useDebounce, useAuth</div></div>
+<div class="v-row"><div class="v-badge no">debounce naam ❌</div><div class="v-label">React detect nahi karega hooks rules</div></div>
+<div class="v-divider"></div>
+<div class="dl">Common custom hooks:</div>
+<div class="v-row"><div class="v-box purple small">useDebounce(val,ms)</div><div class="v-label">← Search input</div></div>
+<div class="v-row"><div class="v-box purple small">useLocalStorage(key)</div><div class="v-label">← Persistence</div></div>
+<div class="v-row"><div class="v-box purple small">useWindowSize()</div><div class="v-label">← Responsive</div></div>
+<div class="v-row"><div class="v-box purple small">usePrevious(val)</div><div class="v-label">← Compare changes</div></div>
+</div>`}},
+  {label:'Use Everywhere',qL:[10,11,12,13,14,15],laravel:`<span class="lv-code">// Dependency Injection jaisa:
+class SearchController {
+  public function __construct(
+    private DebounceService $debounce
+  ) {}
+  // Use anywhere, same logic
+}</span>`,explain:`<b>Hook reuse = DI jaisa inject karo.</b> useDebounce ko Search mein bhi use karo, Filter mein bhi, ya kisi bhi input mein. Important: har hook call = alag state instance. Shared state chahiye toh Context ke saath combine karo.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Hook reuse across components:</div>
+<div class="v-row"><div class="v-box teal small">Search.jsx</div><div class="v-arrow">useDebounce()</div></div>
+<div class="v-row"><div class="v-box teal small">ProductFilter.jsx</div><div class="v-arrow">useDebounce()</div></div>
+<div class="v-row"><div class="v-box teal small">UserSearch.jsx</div><div class="v-arrow">useDebounce()</div></div>
+<div class="v-divider"></div>
+<div class="dl">Har call = alag state:</div>
+<div class="v-badge warn">Shared state nahi hoti by default</div>
+<div class="v-badge info">Context + hook = shared state ✓</div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// DATA & API
+// ═══════════════════════════════════════════════════
+{cat:'Data & API',name:'React Query',diff:'m',tag:'Server State',
+ desc:'React Query (TanStack Query) = Laravel Cache + HTTP Client combined. Server se data fetch, cache, loading/error handle — automatically. Senior devs ka favorite.',
+ query:[
+  {t:`<span class="kw">import</span> { useQuery, useMutation, useQueryClient } <span class="kw">from</span> <span class="str">'@tanstack/react-query'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserList</span>() {`,l:[]},
+  {t:`  <span class="kw">const</span> queryClient = <span class="fn">useQueryClient</span>();`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">const</span> { data, isLoading, error, isFetching } = <span class="fn">useQuery</span>({`,l:[0]},
+  {t:`    queryKey: [<span class="str">'users'</span>],`,l:[1]},
+  {t:`    queryFn: () => fetch(<span class="str">'/api/users'</span>).<span class="fn">then</span>(r=>r.<span class="fn">json</span>()),`,l:[2]},
+  {t:`    staleTime: <span class="num">5</span> * <span class="num">60</span> * <span class="num">1000</span>,`,l:[3]},
+  {t:`  });`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">const</span> mutation = <span class="fn">useMutation</span>({`,l:[4]},
+  {t:`    mutationFn: (id) => fetch(<span class="str">\`/api/users/\${id}\`</span>, {method:<span class="str">'DELETE'</span>}),`,l:[4]},
+  {t:`    onSuccess: () => queryClient.<span class="fn">invalidateQueries</span>([<span class="str">'users'</span>]),`,l:[5]},
+  {t:`  });`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'useQuery',qL:[5,6,7,8,9],laravel:`<span class="lv-code">// Laravel Cache::remember:
+$users = Cache::remember(
+  'users',
+  300, // 5 min = staleTime
+  fn() => User::all()->toArray()
+);
+// + Http::get() = useQuery ek mein sab</span>`,explain:`<b>useQuery = Cache::remember + HTTP call ek mein.</b> queryKey = unique cache identifier. queryFn = data fetch karne wala function. staleTime = kitni der cached data fresh maana jaye. Automatically: loading state, error handling, caching, retry, background refresh, refetch on window focus.`,
+   render(){return`<div class="v-flow">
+<div class="dl">useQuery automatically handle karta hai:</div>
+<div class="v-row"><div class="v-badge yes">Data fetch on mount</div></div>
+<div class="v-row"><div class="v-badge yes">Cache (staleTime)</div></div>
+<div class="v-row"><div class="v-badge yes">Loading & error states</div></div>
+<div class="v-row"><div class="v-badge yes">Refetch on window focus</div></div>
+<div class="v-row"><div class="v-badge yes">Auto retry (3x by default)</div></div>
+<div class="v-row"><div class="v-badge yes">Background refresh</div></div>
+<div class="v-divider"></div>
+<div class="v-badge no">useEffect approach = 50+ lines boilerplate ❌</div>
+</div>`}},
+  {label:'useMutation',qL:[11,12,13,14],laravel:`<span class="lv-code">// POST/PUT/DELETE = useMutation
+// onSuccess mein cache invalidate karo:
+// Laravel: event fire karo → listener cache clear kare
+// React: invalidateQueries(['users'])</span>`,explain:`<b>useMutation = data change karna (POST/PUT/DELETE).</b> mutationFn mein API call. onSuccess mein stale queries invalidate karo — React Query automatically refetch karega. mutation.mutate(data) se call karo. isPending state se loading show karo.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Mutation flow:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">👆</span>mutate(id)</div>
+<div class="v-lc-step active"><span class="lc-icon">📡</span>DELETE /api</div>
+<div class="v-lc-step active"><span class="lc-icon">✅</span>onSuccess</div>
+<div class="v-lc-step teal"><span class="lc-icon">🔄</span>List refresh</div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">Cache invalidation chain:</div>
+<div class="v-row"><div class="v-box amber small">invalidateQueries(['users'])</div></div>
+<div class="v-row"><div class="v-box green small">→ useQuery(['users']) auto refetches</div></div>
+<div class="v-row"><div class="v-box green small">→ UI shows fresh data</div></div>
+</div>`}},
+  {label:'States',qL:[5,10],laravel:`<span class="lv-code">// States handled automatically:
+// isLoading = fresh fetch (no data yet)
+// isFetching = bg refresh (has old data)
+// isError = fetch failed
+// isSuccess = data ready
+// isPending = mutation in progress</span>`,explain:`<b>React Query ke states = automatic UX.</b> isLoading vs isFetching difference important hai. isLoading = pehli baar, koi data nahi → full skeleton show karo. isFetching = background update, purana data hai → subtle indicator. isError → retry button.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Query state timeline:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">⏳</span>isLoading</div>
+<div class="v-lc-step teal"><span class="lc-icon">✅</span>isSuccess</div>
+<div class="v-lc-step"><span class="lc-icon">🔄</span>isFetching</div>
+<div class="v-lc-step"><span class="lc-icon">❌</span>isError</div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">Recommended UI pattern:</div>
+<div class="v-row"><div class="v-box blue small">if (isLoading) return &lt;Skeleton/&gt;</div></div>
+<div class="v-row"><div class="v-box coral small">if (error) return &lt;ErrorRetry/&gt;</div></div>
+<div class="v-row"><div class="v-box green small">return &lt;DataView data={data}/&gt;</div></div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// ARCHITECTURE
+// ═══════════════════════════════════════════════════
+{cat:'Architecture',name:'Virtual DOM',diff:'h',tag:'Internals',
+ desc:'Virtual DOM = React ka internal draft system. Real DOM mein change se pehle React ek lightweight copy banata hai, diff karta hai, sirf zaroorat ke changes apply karta hai.',
+ query:[
+  {t:`<span class="cm">// JSX → React.createElement → VDOM</span>`,l:[]},
+  {t:`<span class="kw">const</span> el = &lt;<span class="lk">div</span> className=<span class="str">"card"</span>&gt;`,l:[0]},
+  {t:`  &lt;<span class="lk">h2</span>&gt;{title}&lt;/<span class="lk">h2</span>&gt;`,l:[0]},
+  {t:`&lt;/<span class="lk">div</span>&gt;`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Compiles to:</span>`,l:[]},
+  {t:`React.<span class="fn">createElement</span>(<span class="str">'div'</span>, {className:<span class="str">'card'</span>},`,l:[1]},
+  {t:`  React.<span class="fn">createElement</span>(<span class="str">'h2'</span>, <span class="kw">null</span>, title)`,l:[1]},
+  {t:`);`,l:[1]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// VDOM object (plain JS):</span>`,l:[]},
+  {t:`{ type: <span class="str">'div'</span>, props: {className:<span class="str">'card'</span>},`,l:[2]},
+  {t:`  children: [{type:<span class="str">'h2'</span>, props:{}, children:[title]}]`,l:[2]},
+  {t:`}`,l:[2]},
+ ],
+ steps:[
+  {label:'What is VDOM',qL:[0,1,2,3,6,7,8,9],laravel:`<span class="lv-code">// Laravel mein koi VDOM nahi —
+// Har request pe server HTML render karta hai
+// Browser = fresh start
+// React mein: JS objects mein UI describe
+// Real DOM mein bas changes apply</span>`,explain:`<b>Virtual DOM = Real DOM ka JavaScript object shadow.</b> Real DOM operations (appendChild, innerHTML) browser ke saath communicate karte hain — slow. React pehle plain JS objects mein UI describe karta hai (fast), phir actual DOM se compare karta hai, phir sirf differences apply karta hai. Git diff jaisa.`,
+   render(){return`<div class="v-flow">
+<div class="dl">VDOM = Plain JS object tree:</div>
+<div class="v-row"><div class="v-box blue small">{type:'div', props:{...}, children:[...]}</div></div>
+<div class="v-divider"></div>
+<div class="dl">VDOM vs Real DOM speed:</div>
+<div class="v-row"><div class="v-badge no">Real DOM ops — browser API, slow</div></div>
+<div class="v-row"><div class="v-badge yes">VDOM — plain JS object, fast</div></div>
+<div class="v-divider"></div>
+<div class="dl">Update process:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">1</span>New VDOM</div>
+<div class="v-lc-step active"><span class="lc-icon">2</span>Diff</div>
+<div class="v-lc-step active"><span class="lc-icon">3</span>Patch list</div>
+<div class="v-lc-step teal"><span class="lc-icon">4</span>Real DOM</div>
+</div>
+</div>`}},
+  {label:'Reconciliation',qL:[11,12,13],laravel:`<span class="lv-code">// Git diff jaisa:
+git diff old.html new.html
+// → Only changed lines update karo
+// → Poora file reload nahi
+// React = same concept for DOM</span>`,explain:`<b>Reconciliation = smart diffing.</b> React dono VDOMs compare karta hai. Same type elements: sirf props update. Different type: poora subtree replace. List mein key prop critical — React key se track karta hai kaunsa item kaunsa hai. React 18 mein Fiber: work chunks mein split hota hai — UI block nahi hoti.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Reconciliation rules:</div>
+<div class="v-row"><div class="v-badge yes">&lt;div&gt; → &lt;div&gt; same type</div><div class="v-label">sirf props diff</div></div>
+<div class="v-row"><div class="v-badge warn">&lt;div&gt; → &lt;span&gt; diff type</div><div class="v-label">subtree replace</div></div>
+<div class="v-divider"></div>
+<div class="dl">key prop — list tracking:</div>
+<div class="v-badge no">key={index} ❌ reorder pe wrong</div>
+<div class="v-badge yes">key={item.id} ✓ stable</div>
+<div class="v-divider"></div>
+<div class="dl">React 18 Fiber:</div>
+<div class="v-row"><div class="v-box purple small">Work = chunks mein split</div><div class="v-label">UI block nahi hoti</div></div>
+<div class="v-row"><div class="v-box purple small">Concurrent Mode</div><div class="v-label">priority-based rendering</div></div>
+</div>`}}
+ ]},
+
+{cat:'Architecture',name:'React.memo',diff:'m',tag:'Performance',
+ desc:'React.memo = HOC jo component ko memoize karta hai. Agar props same hain toh re-render skip karo. useCallback ke saath use karo best results ke liye.',
+ query:[
+  {t:`<span class="cm">// Wrap component with memo</span>`,l:[]},
+  {t:`<span class="kw">const</span> UserRow = <span class="fn">React.memo</span>(<span class="kw">function</span> <span class="fn">UserRow</span>({ user, onDelete }) {`,l:[0]},
+  {t:`  console.<span class="fn">log</span>(<span class="str">'UserRow renders'</span>);`,l:[]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">tr</span>&gt;`,l:[]},
+  {t:`    &lt;<span class="lk">td</span>&gt;{user.name}&lt;/<span class="lk">td</span>&gt;`,l:[]},
+  {t:`    &lt;<span class="lk">button</span> onClick={() =&gt; <span class="fn">onDelete</span>(user.id)}&gt;Delete&lt;/<span class="lk">button</span>&gt;`,l:[]},
+  {t:`  &lt;/<span class="lk">tr</span>&gt;;`,l:[]},
+  {t:`});`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Custom comparator</span>`,l:[]},
+  {t:`<span class="kw">const</span> UserRow = <span class="fn">React.memo</span>(UserRowFn, (prev, next) => {`,l:[1]},
+  {t:`  <span class="kw">return</span> prev.user.id === next.user.id <span class="cm">// true = skip render</span>`,l:[1]},
+  {t:`    && prev.user.updatedAt === next.user.updatedAt;`,l:[1]},
+  {t:`});`,l:[]},
+ ],
+ steps:[
+  {label:'How it works',qL:[0,1,2,3,4,5,6,7],laravel:`<span class="lv-code">// Laravel mein direct equivalent nahi
+// Lekin concept jaisa hai:
+// Eloquent: $user->isDirty()
+// Sirf dirty models database mein save hote hain
+// memo: sirf changed props pe re-render</span>`,explain:`<b>React.memo = Props compare karo, re-render decide karo.</b> Normally jab parent re-renders hota hai, sare children bhi render hote hain. memo se wrapped component shallow comparison karta hai props ka — agar same hai toh skip. 100 rows wali table mein ek row change pe sirf woh row render hogi.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Without React.memo:</div>
+<div class="v-row"><div class="v-box coral small">Parent re-renders → ALL 100 UserRows render ❌</div></div>
+<div class="dl" style="margin-top:4px">With React.memo:</div>
+<div class="v-row"><div class="v-box green small">Parent re-renders → only changed UserRow renders ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">Comparison type:</div>
+<div class="v-row"><div class="v-badge warn">Shallow comparison (default)</div></div>
+<div class="v-row"><div class="v-badge info">Custom comparator (for deep)</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-badge info">useCallback + React.memo = best combo</div></div>
+</div>`}},
+  {label:'Custom Compare',qL:[9,10,11,12,13],laravel:`<span class="lv-code">// Custom isDirty check:
+public function isDirty(array $attributes = [])
+{
+  // Compare old vs new specific attributes
+  return $this->original['id'] !== $this->id
+    || $this->original['updated_at'] !== $this->updated_at;
+}</span>`,explain:`<b>Custom comparator = granular control.</b> Default shallow comparison objects ke liye galat result deta hai. Custom function mein (prev, next) milte hain — true return karo agar same hai (skip render), false karo agar different (render). Expensive comparisons avoid karo yahan.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Custom comparator return:</div>
+<div class="v-row"><div class="v-badge yes">true = same = SKIP render</div></div>
+<div class="v-row"><div class="v-badge no">false = different = DO render</div></div>
+<div class="v-divider"></div>
+<div class="dl">When to use:</div>
+<div class="v-row"><div class="v-badge info">Large lists (50+ items)</div></div>
+<div class="v-row"><div class="v-badge info">Expensive renders</div></div>
+<div class="v-row"><div class="v-badge info">Pure display components</div></div>
+<div class="v-divider"></div>
+<div class="dl">⚠️ Measure before adding memo!</div>
+</div>`}}
+ ]},
+
+{cat:'Architecture',name:'Error Boundaries',diff:'h',tag:'Error Handling',
+ desc:'Error Boundary = Laravel ka try-catch ka React equivalent. Component tree mein JavaScript errors catch karo, fallback UI show karo, poora app crash na ho.',
+ query:[
+  {t:`<span class="cm">// Must be Class Component</span>`,l:[]},
+  {t:`<span class="kw">class</span> <span class="tp">ErrorBoundary</span> <span class="kw">extends</span> <span class="tp">Component</span> {`,l:[0]},
+  {t:`  state = { hasError: <span class="kw">false</span>, error: <span class="kw">null</span> };`,l:[0]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">static</span> <span class="fn">getDerivedStateFromError</span>(error) {`,l:[1]},
+  {t:`    <span class="kw">return</span> { hasError: <span class="kw">true</span>, error };`,l:[1]},
+  {t:`  }`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="fn">componentDidCatch</span>(error, info) {`,l:[2]},
+  {t:`    <span class="fn">logError</span>(error, info); <span class="cm">// Sentry, etc</span>`,l:[2]},
+  {t:`  }`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="fn">render</span>() {`,l:[]},
+  {t:`    <span class="kw">if</span>(this.state.hasError) <span class="kw">return</span> &lt;<span class="lk">FallbackUI</span>/&gt;;`,l:[3]},
+  {t:`    <span class="kw">return</span> this.props.children;`,l:[]},
+  {t:`  }`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Concept',qL:[0,1,2,3],laravel:`<span class="lv-code">// Laravel try-catch jaisa:
+try {
+  return view('dashboard', $data);
+} catch (Exception $e) {
+  Log::error($e);
+  return view('errors.500');
+}
+// React mein component level pe</span>`,explain:`<b>Error Boundary = Component-level try-catch.</b> JavaScript error kisi component mein hone pe poora React app crash ho jaata hai normally. Error Boundary us subtree ke errors catch karta hai aur fallback UI show karta hai. Class component banana zaroori hai (function component mein ye lifecycle methods nahi hain).`,
+   render(){return`<div class="v-flow">
+<div class="dl">Error boundary wrapping:</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+<div class="v-box purple" style="text-align:center;width:180px">App</div>
+<div class="tree-line"></div>
+<div class="v-box amber" style="text-align:center;width:180px">ErrorBoundary ← catch</div>
+<div class="tree-line"></div>
+<div style="display:flex;gap:10px">
+<div class="v-box coral small">💥 Broken Comp</div>
+<div class="v-box teal small">Safe Comp</div>
+</div>
+</div>
+<div class="v-label" style="margin-top:4px">💥 crash → FallbackUI, baki app safe</div>
+</div>`}},
+  {label:'Methods',qL:[4,5,6,8,9,10],laravel:`<span class="lv-code">// Two lifecycle methods:
+// getDerivedStateFromError → state update
+// componentDidCatch → side effects (logging)
+
+// react-error-boundary package use karo
+// production mein — simpler API</span>`,explain:`<b>getDerivedStateFromError vs componentDidCatch.</b> getDerivedStateFromError = error se state update karo (fallback UI trigger). componentDidCatch = side effects — Sentry ya error tracking service ko report karo. react-error-boundary library use karo production mein — useErrorBoundary hook bhi milta hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Two methods:</div>
+<div class="v-row"><div class="v-box teal small">getDerivedStateFromError</div><div class="v-label">→ state update → fallback UI</div></div>
+<div class="v-row"><div class="v-box purple small">componentDidCatch</div><div class="v-label">→ logging, reporting</div></div>
+<div class="v-divider"></div>
+<div class="dl">Recommended: react-error-boundary:</div>
+<div class="v-row"><div class="v-box blue small">&lt;ErrorBoundary FallbackComponent={Err}&gt;</div></div>
+<div class="v-row"><div class="v-box blue small">  &lt;Component/&gt;</div></div>
+<div class="v-row"><div class="v-box blue small">&lt;/ErrorBoundary&gt;</div></div>
+</div>`}}
+ ]},
+
+{cat:'Architecture',name:'Code Splitting',diff:'h',tag:'Performance',
+ desc:'Code Splitting = Laravel mein lazy loading jaisa. Badi files ko chhote chunks mein split karo. User ko sirf woh code bhejo jo abhi chahiye — faster initial load.',
+ query:[
+  {t:`<span class="kw">import</span> { lazy, Suspense } <span class="kw">from</span> <span class="str">'react'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Lazy load — sirf jab route visit ho tab load</span>`,l:[]},
+  {t:`<span class="kw">const</span> Dashboard = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./Dashboard'</span>));`,l:[0]},
+  {t:`<span class="kw">const</span> Reports = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./Reports'</span>));`,l:[0]},
+  {t:`<span class="kw">const</span> Settings = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./Settings'</span>));`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">App</span>() {`,l:[]},
+  {t:`  <span class="kw">return</span> (`,l:[]},
+  {t:`    &lt;<span class="lk">Suspense</span> fallback={&lt;<span class="lk">Spinner</span>/&gt;}&gt;`,l:[1]},
+  {t:`      &lt;<span class="lk">Routes</span>&gt;`,l:[]},
+  {t:`        &lt;<span class="lk">Route</span> path=<span class="str">"/dashboard"</span> element={&lt;<span class="lk">Dashboard</span>/&gt;}/&gt;`,l:[]},
+  {t:`        &lt;<span class="lk">Route</span> path=<span class="str">"/reports"</span> element={&lt;<span class="lk">Reports</span>/&gt;}/&gt;`,l:[]},
+  {t:`      &lt;/<span class="lk">Routes</span>&gt;`,l:[]},
+  {t:`    &lt;/<span class="lk">Suspense</span>&gt;`,l:[1]},
+  {t:`  );`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'lazy()',qL:[3,4,5],laravel:`<span class="lv-code">// Laravel Lazy Loading:
+// Composer autoloader lazy hai by default
+// Route-level: middleware lazy load
+// React.lazy = component-level splitting
+// Vite/Webpack automatically chunking karta hai</span>`,explain:`<b>React.lazy = component ko on-demand load karo.</b> Normal import sab kuch upfront bundle mein daalta hai. lazy() se dynamic import hota hai — sirf jab component pehli baar render hone wala ho tab JavaScript file download hoti hai. Admin panel ka Settings page — sirf tab load karo jab user Settings pe jaaye.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Bundle without splitting:</div>
+<div class="v-row"><div class="v-box coral small">app.js = Dashboard + Reports + Settings = 2MB 😱</div></div>
+<div class="dl" style="margin-top:4px">Bundle with splitting:</div>
+<div class="v-row"><div class="v-box green small">app.js = 200KB (core only)</div></div>
+<div class="v-row"><div class="v-box teal small">dashboard.chunk.js = 500KB (on demand)</div></div>
+<div class="v-row"><div class="v-box teal small">reports.chunk.js = 800KB (on demand)</div></div>
+<div class="v-row"><div class="v-badge yes">Initial load 10x faster ✓</div></div>
+</div>`}},
+  {label:'Suspense',qL:[9,10,14],laravel:`<span class="lv-code">// Loading state for lazy component:
+// Jab chunk download ho raha ho
+// Suspense fallback show hota hai
+// Blade @loading jaisa concept
+// (Livewire mein hota hai)</span>`,explain:`<b>Suspense = Loading state wrapper.</b> Lazy component download hone mein time lagta hai. Suspense ke andar raho aur fallback UI do — download hone tak woh dikhega. Multiple lazy components ke liye ek hi Suspense kaafi hai, ya granular nesting bhi kar sakte ho.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Suspense loading flow:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">👆</span>Route visit</div>
+<div class="v-lc-step active"><span class="lc-icon">⬇</span>Chunk download</div>
+<div class="v-lc-step active"><span class="lc-icon">⏳</span>Spinner shows</div>
+<div class="v-lc-step teal"><span class="lc-icon">✅</span>Component</div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">Prefetching (advanced):</div>
+<div class="v-row"><div class="v-box purple small">import('./Dashboard') // hover pe prefetch</div></div>
+<div class="v-label">User Dashboard pe hover kare tab hi load shuru</div>
+</div>`}}
+ ]},
+
+{cat:'Architecture',name:'Portals',diff:'h',tag:'DOM',
+ desc:'Portal = Component tree se bahar kisi aur DOM node mein render karo. Modal, tooltip, dropdown jo parent overflow:hidden se clip na ho.',
+ query:[
+  {t:`<span class="kw">import</span> { createPortal } <span class="kw">from</span> <span class="str">'react-dom'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">Modal</span>({ children, onClose }) {`,l:[]},
+  {t:`  <span class="cm">// document.body mein render karo</span>`,l:[]},
+  {t:`  <span class="kw">return</span> <span class="fn">createPortal</span>(`,l:[0]},
+  {t:`    &lt;<span class="lk">div</span> className=<span class="str">"modal-overlay"</span>&gt;`,l:[0]},
+  {t:`      &lt;<span class="lk">div</span> className=<span class="str">"modal-content"</span>&gt;`,l:[0]},
+  {t:`        {children}`,l:[]},
+  {t:`        &lt;<span class="lk">button</span> onClick={onClose}&gt;Close&lt;/<span class="lk">button</span>&gt;`,l:[]},
+  {t:`      &lt;/<span class="lk">div</span>&gt;`,l:[]},
+  {t:`    &lt;/<span class="lk">div</span>&gt;,`,l:[0]},
+  {t:`    document.body <span class="cm">// Target DOM node</span>`,l:[1]},
+  {t:`  );`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'createPortal',qL:[4,5,6,10,11],laravel:`<span class="lv-code">// Laravel @stack/@push jaisa:
+// Layout mein @stack('modals')
+// Kisi bhi component se:
+// @push('modals')
+//   &lt;div class="modal"&gt;...&lt;/div&gt;
+// @endpush</span>`,explain:`<b>Portal = Component tree se bahar render karo.</b> createPortal(content, targetNode). JSX React tree ka hissa rehta hai (events bubble normally), lekin DOM mein document.body ke andar render hota hai. Modal jo table ke andar hai — overflow:hidden se clip nahi hoga.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Portal DOM placement:</div>
+<div class="v-row"><div class="v-box blue small">React Tree: Table → Row → Modal</div></div>
+<div class="v-row"><div class="v-box green small">DOM: &lt;body&gt; → &lt;div.modal&gt; (direct!)</div></div>
+<div class="v-divider"></div>
+<div class="dl">Use cases:</div>
+<div class="v-row"><div class="v-badge info">Modals & dialogs</div></div>
+<div class="v-row"><div class="v-badge info">Tooltips</div></div>
+<div class="v-row"><div class="v-badge info">Dropdown menus</div></div>
+<div class="v-row"><div class="v-badge info">Toast notifications</div></div>
+<div class="v-divider"></div>
+<div class="v-row"><div class="v-badge yes">Events still bubble through React tree ✓</div></div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// ROUTING
+// ═══════════════════════════════════════════════════
+{cat:'Routing',name:'React Router v6',diff:'m',tag:'Navigation',
+ desc:'React Router = Laravel Routes ka frontend version. URL pe component show karo, navigate karo, params lo. SPA mein ye zaroori hai.',
+ query:[
+  {t:`<span class="kw">import</span> { BrowserRouter, Routes, Route, Link, useParams, useNavigate } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// routes/web.php jaisa:</span>`,l:[]},
+  {t:`&lt;<span class="lk">Routes</span>&gt;`,l:[0]},
+  {t:`  &lt;<span class="lk">Route</span> path=<span class="str">"/"</span> element={&lt;<span class="lk">Home</span>/&gt;} /&gt;`,l:[0]},
+  {t:`  &lt;<span class="lk">Route</span> path=<span class="str">"/users/:id"</span> element={&lt;<span class="lk">UserDetail</span>/&gt;} /&gt;`,l:[1]},
+  {t:`  &lt;<span class="lk">Route</span> path=<span class="str">"/admin"</span> element={&lt;<span class="lk">AdminLayout</span>/&gt;}&gt;`,l:[2]},
+  {t:`    &lt;<span class="lk">Route</span> index element={&lt;<span class="lk">Dashboard</span>/&gt;} /&gt;`,l:[2]},
+  {t:`    &lt;<span class="lk">Route</span> path=<span class="str">"users"</span> element={&lt;<span class="lk">Users</span>/&gt;} /&gt;`,l:[2]},
+  {t:`  &lt;/<span class="lk">Route</span>&gt;`,l:[2]},
+  {t:`&lt;/<span class="lk">Routes</span>&gt;`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Params & navigation:</span>`,l:[]},
+  {t:`<span class="kw">const</span> { id } = <span class="fn">useParams</span>();`,l:[3]},
+  {t:`<span class="kw">const</span> navigate = <span class="fn">useNavigate</span>();`,l:[4]},
+  {t:`<span class="fn">navigate</span>(<span class="str">'/users'</span>);`,l:[4]},
+ ],
+ steps:[
+  {label:'Routes Setup',qL:[3,4,5,6,7,8,9,10],laravel:`<span class="lv-code">// routes/web.php:
+Route::get('/', HomeController::class);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::prefix('admin')->group(function() {
+  Route::get('/', DashboardController::class);
+  Route::get('/users', UserController::class);
+});</span>`,explain:`<b>Routes = Laravel routes/web.php ka frontend equivalent.</b> path="/users/:id" mein :id = dynamic segment (Laravel ka {id}). Nested routes = prefix grouping. &lt;Outlet/&gt; child route render karta hai — @yield('content') jaisa. Exact match automatic hai v6 mein.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Route comparison:</div>
+<div class="v-row"><div class="v-box amber small">Route::get('/users/{id}')</div></div>
+<div class="v-row"><div class="v-box teal small">path="/users/:id" ← same concept</div></div>
+<div class="v-divider"></div>
+<div class="dl">Nested routes (prefix group):</div>
+<div class="v-row"><div class="v-box purple small">/admin → AdminLayout</div></div>
+<div class="v-row"><div class="v-box blue small">/admin/users → AdminLayout + Users</div></div>
+<div class="v-row"><div class="v-box blue small">/admin/ → AdminLayout + Dashboard</div></div>
+<div class="v-divider"></div>
+<div class="dl">&lt;Outlet/&gt; = @yield('content')</div>
+</div>`}},
+  {label:'Navigation',qL:[12,13,14,15],laravel:`<span class="lv-code">// Laravel:
+// &lt;a href="{{ route('users.show', $id) }}"&gt;
+// return redirect('/users');
+
+// React Router:
+// &lt;Link to="/users/1"&gt; = &lt;a&gt; without page reload
+// useNavigate = programmatic redirect</span>`,explain:`<b>&lt;Link&gt; aur useNavigate = navigate without page reload.</b> SPA mein page reload nahi hota — React Router URL update karta hai aur component swap karta hai. &lt;Link to="/path"&gt; = &lt;a href&gt; without reload. useNavigate = programmatic navigation (form submit ke baad).`,
+   render(){return`<div class="v-flow">
+<div class="dl">Navigation methods:</div>
+<div class="v-row"><div class="v-box amber small">&lt;a href="..."&gt;</div><div class="v-label">page reload ❌ SPA mein</div></div>
+<div class="v-row"><div class="v-box green small">&lt;Link to="..."&gt;</div><div class="v-label">no reload, fast ✓</div></div>
+<div class="v-row"><div class="v-box teal small">useNavigate()</div><div class="v-label">programmatic ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">Hooks:</div>
+<div class="v-row"><div class="v-box purple small">useParams()</div><div class="v-label">URL params {:id}</div></div>
+<div class="v-row"><div class="v-box purple small">useSearchParams()</div><div class="v-label">query string (?q=...)</div></div>
+<div class="v-row"><div class="v-box purple small">useLocation()</div><div class="v-label">current URL info</div></div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// FORMS
+// ═══════════════════════════════════════════════════
+{cat:'Forms',name:'Controlled Forms',diff:'m',tag:'User Input',
+ desc:'Controlled components = React state form ko control karta hai. Har input change pe state update hoti hai. Laravel ke Form Requests jaisa validation.',
+ query:[
+  {t:`<span class="kw">function</span> <span class="fn">LoginForm</span>() {`,l:[]},
+  {t:`  <span class="kw">const</span> [form, setForm] = <span class="fn">useState</span>({`,l:[0]},
+  {t:`    email: <span class="str">''</span>, password: <span class="str">''</span>`,l:[0]},
+  {t:`  });`,l:[]},
+  {t:`  <span class="kw">const</span> [errors, setErrors] = <span class="fn">useState</span>({});`,l:[1]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">const</span> handleChange = (e) => {`,l:[2]},
+  {t:`    <span class="fn">setForm</span>(prev => ({...prev, [e.target.name]: e.target.value}));`,l:[2]},
+  {t:`  };`,l:[]},
+  {t:``,l:[]},
+  {t:`  <span class="kw">return</span> (`,l:[]},
+  {t:`    &lt;<span class="lk">input</span> name=<span class="str">"email"</span> value={form.email} onChange={handleChange}/&gt;`,l:[3]},
+  {t:`    <span class="cm">// value + onChange = controlled</span>`,l:[]},
+  {t:`  );`,l:[]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Controlled Input',qL:[1,2,3,6,7,8,11],laravel:`<span class="lv-code">// Blade form (uncontrolled equivalent):
+&lt;input name="email" value="{{ old('email') }}"&gt;
+
+// React controlled = value aur onChange dono:
+// value={state} → React controls display
+// onChange → state update hoti hai
+// = Single source of truth</span>`,explain:`<b>Controlled = value aur onChange dono zaroori.</b> value={form.email} — React state se value show hoti hai. onChange — user type kare toh state update karo. Agar sirf value do bina onChange ke — input read-only ho jaata hai. Ye "single source of truth" pattern hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Controlled vs Uncontrolled:</div>
+<div class="v-row"><div class="v-box coral small">Uncontrolled: DOM apna state manage karta hai</div></div>
+<div class="v-row"><div class="v-box green small">Controlled: React state source of truth hai</div></div>
+<div class="v-divider"></div>
+<div class="dl">Controlled input zaroori hai jab:</div>
+<div class="v-badge info">Real-time validation</div>
+<div class="v-badge info">Conditional fields</div>
+<div class="v-badge info">Format as you type (phone, card)</div>
+<div class="v-badge info">Submit pe state access chahiye</div>
+</div>`}},
+  {label:'React Hook Form',qL:[0,1,4,11],laravel:`<span class="lv-code">// Production mein React Hook Form use karo:
+// - Less re-renders (uncontrolled internally)
+// - Built-in validation
+// - Yup/Zod schema validation
+// - Laravel FormRequest jaisa
+
+const { register, handleSubmit, formState: { errors } } = useForm();</span>`,explain:`<b>React Hook Form = production-grade form library.</b> Manual controlled forms mein har keypress pe re-render hota hai (slow). RHF internally uncontrolled use karta hai — fast. register() se input connect karo, handleSubmit se submit handle karo, Zod se validation karo — Laravel FormRequest jaisa structured.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Manual vs React Hook Form:</div>
+<div class="v-row"><div class="v-badge warn">Manual: har keypress = re-render 😐</div></div>
+<div class="v-row"><div class="v-badge yes">RHF: sirf submit pe re-render ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">RHF + Zod schema validation:</div>
+<div class="v-row"><div class="v-box teal small">const schema = z.object({</div></div>
+<div class="v-row"><div class="v-box teal small">  email: z.string().email(),</div></div>
+<div class="v-row"><div class="v-box teal small">  password: z.string().min(8)</div></div>
+<div class="v-row"><div class="v-box teal small">})</div></div>
+<div class="v-label">Laravel FormRequest jaisi validation ✓</div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// ADVANCED
+// ═══════════════════════════════════════════════════
+{cat:'Advanced',name:'Render Props & HOC',diff:'h',tag:'Patterns',
+ desc:'Render Props aur HOC = React ke design patterns for code reuse. Custom hooks ne inhe mostly replace kar diya hai — lekin legacy code mein milenge.',
+ query:[
+  {t:`<span class="cm">// Render Props pattern</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">DataFetcher</span>({ url, render }) {`,l:[0]},
+  {t:`  <span class="kw">const</span> [data, setData] = <span class="fn">useState</span>(<span class="kw">null</span>);`,l:[]},
+  {t:`  <span class="cm">// ... fetch logic</span>`,l:[]},
+  {t:`  <span class="kw">return</span> render(data);`,l:[0]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// HOC — Higher Order Component</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">withAuth</span>(WrappedComponent) {`,l:[1]},
+  {t:`  <span class="kw">return function</span> <span class="fn">AuthenticatedComponent</span>(props) {`,l:[1]},
+  {t:`    <span class="kw">const</span> { user } = <span class="fn">useAuth</span>();`,l:[1]},
+  {t:`    <span class="kw">if</span>(!user) <span class="kw">return</span> &lt;<span class="lk">Redirect</span> to=<span class="str">"/login"</span>/&gt;;`,l:[1]},
+  {t:`    <span class="kw">return</span> &lt;<span class="lk">WrappedComponent</span> {...props} user={user}/&gt;;`,l:[1]},
+  {t:`  };`,l:[]},
+  {t:`}`,l:[]},
+  {t:`<span class="kw">export default</span> <span class="fn">withAuth</span>(Dashboard);`,l:[1]},
+ ],
+ steps:[
+  {label:'Render Props',qL:[0,1,2,3,4,5],laravel:`<span class="lv-code">// Laravel Blade Component slot jaisa:
+// &lt;x-data-fetcher url="/api/users"&gt;
+//   @slot('render')
+//     {{ $data }}
+//   @endslot
+// &lt;/x-data-fetcher&gt;
+
+// Children as function = render prop</span>`,explain:`<b>Render Props = function as children/prop.</b> Component logic share karo, rendering consumer pe chhodo. render={data => &lt;UI data={data}/&gt;} — DataFetcher data fetch karta hai, consumer decide karta hai kaise show karna. Custom hooks ne ye pattern mostly replace kar diya.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Render prop flow:</div>
+<div class="v-row"><div class="v-box purple small">DataFetcher (logic)</div><div class="v-arrow">→</div><div class="v-box teal small">render(data) call</div></div>
+<div class="v-row"><div class="v-arrow">→</div><div class="v-box blue small">Consumer decides UI</div></div>
+<div class="v-divider"></div>
+<div class="dl">Modern equivalent:</div>
+<div class="v-row"><div class="v-badge warn">Render Props = legacy</div></div>
+<div class="v-row"><div class="v-badge yes">Custom Hook = modern ✓</div></div>
+<div class="v-label">Same result, cleaner syntax</div>
+</div>`}},
+  {label:'HOC',qL:[7,8,9,10,11,12,13,14,15],laravel:`<span class="lv-code">// Laravel Middleware jaisa:
+class AuthMiddleware {
+  public function handle($request, Closure $next) {
+    if (!Auth::check()) {
+      return redirect('/login');
+    }
+    return $next($request);
+  }
+}</span>`,explain:`<b>HOC = Middleware jaisa component wrapper.</b> withAuth(Dashboard) = Dashboard component ko auth check ke saath wrap karo. HOC ek function hai jo component leta hai, enhanced component return karta hai. withAuth, withLoading, withPermission — ye patterns milte hain legacy code mein.`,
+   render(){return`<div class="v-flow">
+<div class="dl">HOC pattern:</div>
+<div class="v-row"><div class="v-box blue small">withAuth(Dashboard)</div><div class="v-arrow">→</div><div class="v-box teal small">AuthenticatedDashboard</div></div>
+<div class="v-divider"></div>
+<div class="dl">Laravel Middleware comparison:</div>
+<div class="v-row"><div class="v-box amber small">Middleware: auth check → $next($req)</div></div>
+<div class="v-row"><div class="v-box teal small">HOC: auth check → WrappedComponent</div></div>
+<div class="v-divider"></div>
+<div class="dl">Common HOCs:</div>
+<div class="v-row"><div class="v-box purple small">withAuth(Component)</div></div>
+<div class="v-row"><div class="v-box purple small">withPermission('admin')(Component)</div></div>
+<div class="v-row"><div class="v-box purple small">connect(mapState)(Component) // Redux</div></div>
+</div>`}}
+ ]},
+
+{cat:'Advanced',name:'Compound Components',diff:'h',tag:'Pattern',
+ desc:'Compound Components = Laravel mein Blade x-component groups jaisa. Related components jo milke kaam karte hain, implicit state share karte hain. Select/Option jaisa.',
+ query:[
+  {t:`<span class="cm">// Compound Component pattern</span>`,l:[]},
+  {t:`<span class="kw">const</span> TabContext = <span class="fn">createContext</span>();`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">Tabs</span>({ children }) {`,l:[]},
+  {t:`  <span class="kw">const</span> [active, setActive] = <span class="fn">useState</span>(<span class="num">0</span>);`,l:[1]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">TabContext.Provider</span> value={{ active, setActive }}&gt;`,l:[1]},
+  {t:`    {children}`,l:[]},
+  {t:`  &lt;/<span class="lk">TabContext.Provider</span>&gt;;`,l:[1]},
+  {t:`}`,l:[]},
+  {t:`Tabs.Tab = <span class="kw">function</span>({ label, index }) {`,l:[2]},
+  {t:`  <span class="kw">const</span> { active, setActive } = <span class="fn">useContext</span>(TabContext);`,l:[2]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">button</span> onClick={() =&gt; <span class="fn">setActive</span>(index)}&gt;{label}&lt;/<span class="lk">button</span>&gt;;`,l:[2]},
+  {t:`};`,l:[]},
+  {t:`<span class="cm">// Usage: &lt;Tabs&gt;&lt;Tabs.Tab label="A" index={0}/&gt;&lt;/Tabs&gt;</span>`,l:[3]},
+ ],
+ steps:[
+  {label:'Pattern',qL:[0,1,2,3,4,5,6,7,8],laravel:`<span class="lv-code">// HTML native compound:
+// &lt;select&gt;
+//   &lt;option&gt;...&lt;/option&gt;
+// &lt;/select&gt;
+// select aur option milke kaam karte hain
+// React mein same concept custom components ke liye</span>`,explain:`<b>Compound Components = components ka family.</b> Jaise &lt;select&gt; aur &lt;option&gt; milke kaam karte hain, aise hi custom components implicit context ke through state share karte hain. User ko clean API milti hai: &lt;Tabs&gt;&lt;Tabs.Tab/&gt;&lt;/Tabs&gt;. Headless UI libraries ye pattern use karti hain.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Compound component example:</div>
+<div class="v-row"><div class="v-box blue small">&lt;Tabs&gt;</div></div>
+<div class="v-row" style="padding-left:16px"><div class="v-box teal small">&lt;Tabs.List&gt;&lt;Tabs.Tab&gt;</div></div>
+<div class="v-row" style="padding-left:16px"><div class="v-box teal small">&lt;Tabs.Panels&gt;&lt;Tabs.Panel&gt;</div></div>
+<div class="v-row"><div class="v-box blue small">&lt;/Tabs&gt;</div></div>
+<div class="v-divider"></div>
+<div class="dl">Libraries using this pattern:</div>
+<div class="v-badge info">Headless UI</div>
+<div class="v-badge info">Radix UI</div>
+<div class="v-badge info">shadcn/ui</div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// TYPESCRIPT + REACT
+// ═══════════════════════════════════════════════════
+{cat:'TypeScript',name:'TypeScript + React',diff:'m',tag:'Type Safety',
+ desc:'TypeScript = Laravel mein PHP type declarations jaisa. Props, state, events sab typed karo. Bugs build time pe pakdo, runtime pe nahi. Modern React projects mein standard hai.',
+ query:[
+  {t:`<span class="cm">// Props interface define karo</span>`,l:[]},
+  {t:`<span class="kw">interface</span> <span class="tp">UserCardProps</span> {`,l:[0]},
+  {t:`  name: <span class="kw">string</span>;`,l:[0]},
+  {t:`  age: <span class="kw">number</span>;`,l:[0]},
+  {t:`  isAdmin?: <span class="kw">boolean</span>; <span class="cm">// optional</span>`,l:[0]},
+  {t:`  onDelete: (id: <span class="kw">number</span>) => <span class="kw">void</span>;`,l:[0]},
+  {t:`  user: <span class="tp">User</span>; <span class="cm">// custom type</span>`,l:[0]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Typed component</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserCard</span>({ name, age, isAdmin = <span class="kw">false</span>, onDelete }: <span class="tp">UserCardProps</span>) {`,l:[1]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">div</span>&gt;{name}&lt;/<span class="lk">div</span>&gt;;`,l:[]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// useState with type</span>`,l:[]},
+  {t:`<span class="kw">const</span> [user, setUser] = useState&lt;<span class="tp">User</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);`,l:[2]},
+  {t:`<span class="kw">const</span> [items, setItems] = useState&lt;<span class="tp">Product</span>[]&gt;([]);`,l:[2]},
+ ],
+ steps:[
+  {label:'Props Types',qL:[0,1,2,3,4,5,6,7,10,11,12],laravel:`<span class="lv-code">// Laravel PHP types:
+function show(int $id, string $name): Response
+{
+    return response()->json($data);
+}
+
+// TypeScript same concept frontend mein:
+// Props types = function parameters ki types</span>`,explain:`<b>interface = Laravel ke PHP type declarations jaisa.</b> Props interface mein har property ka type likho. ? = optional prop. Callback types mein parameter aur return type likho. TypeScript build time pe error batata hai — runtime bugs bahut km hote hain.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Common prop types:</div>
+<div class="v-row"><div class="v-box blue small">string</div><div class="v-label">name: string</div></div>
+<div class="v-row"><div class="v-box blue small">number</div><div class="v-label">age: number</div></div>
+<div class="v-row"><div class="v-box blue small">boolean</div><div class="v-label">isAdmin?: boolean</div></div>
+<div class="v-row"><div class="v-box blue small">function</div><div class="v-label">onClick: () => void</div></div>
+<div class="v-row"><div class="v-box blue small">array</div><div class="v-label">items: Product[]</div></div>
+<div class="v-row"><div class="v-box blue small">union</div><div class="v-label">status: 'loading'|'done'</div></div>
+<div class="v-divider"></div>
+<div class="v-badge yes">? = optional prop (default de sakte ho)</div>
+</div>`}},
+  {label:'useState Types',qL:[14,15,16],laravel:`<span class="lv-code">// PHP nullable type:
+private ?User $user = null;
+
+// TypeScript:
+const [user, setUser] = useState<User | null>(null);
+// User | null = nullable
+// null = initial value</span>`,explain:`<b>Generic types = useState ko batao kya store karoge.</b> useState&lt;User | null&gt;(null) — User ya null ho sakta hai. useState&lt;Product[]&gt;([]) — array of Products. TypeScript automatically infer bhi karta hai simple cases mein: useState(0) automatically number type samajhta hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">useState type patterns:</div>
+<div class="v-row"><div class="v-box teal small">useState&lt;User | null&gt;(null)</div></div>
+<div class="v-row"><div class="v-box teal small">useState&lt;Product[]&gt;([])</div></div>
+<div class="v-row"><div class="v-box teal small">useState&lt;'idle'|'loading'|'done'&gt;('idle')</div></div>
+<div class="v-divider"></div>
+<div class="dl">Auto inference (no generic needed):</div>
+<div class="v-row"><div class="v-badge yes">useState(0) → automatically number ✓</div></div>
+<div class="v-row"><div class="v-badge yes">useState('') → automatically string ✓</div></div>
+<div class="v-row"><div class="v-badge warn">useState(null) → null type only ❌ explicit chahiye</div></div>
+</div>`}},
+  {label:'Event Types',qL:[10,11],laravel:`<span class="lv-code">// Event types in TypeScript:
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setValue(e.target.value);
+};
+const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+};
+const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {};</span>`,explain:`<b>Event types = browser events ke TypeScript wrappers.</b> React.ChangeEvent&lt;HTMLInputElement&gt; — input change event. React.FormEvent&lt;HTMLFormElement&gt; — form submit. React.MouseEvent — click. e.target.value mein TypeScript automatically type provide karta hai — autocomplete milti hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Common event types:</div>
+<div class="v-row"><div class="v-box purple small">ChangeEvent&lt;HTMLInputElement&gt;</div><div class="v-label">input</div></div>
+<div class="v-row"><div class="v-box purple small">FormEvent&lt;HTMLFormElement&gt;</div><div class="v-label">form submit</div></div>
+<div class="v-row"><div class="v-box purple small">MouseEvent&lt;HTMLButtonElement&gt;</div><div class="v-label">click</div></div>
+<div class="v-row"><div class="v-box purple small">KeyboardEvent&lt;HTMLInputElement&gt;</div><div class="v-label">keypress</div></div>
+<div class="v-divider"></div>
+<div class="dl">useRef typing:</div>
+<div class="v-row"><div class="v-box blue small">useRef&lt;HTMLInputElement&gt;(null)</div></div>
+<div class="v-label">inputRef.current mein full autocomplete milega</div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// STATE MANAGEMENT
+// ═══════════════════════════════════════════════════
+{cat:'State Mgmt',name:'Zustand',diff:'m',tag:'Global State',
+ desc:'Zustand = simplest global state manager. Redux ka simplified version. No boilerplate, no Provider needed, TypeScript friendly. Small-medium apps ke liye perfect.',
+ query:[
+  {t:`<span class="kw">import</span> { create } <span class="kw">from</span> <span class="str">'zustand'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Store define karo</span>`,l:[]},
+  {t:`<span class="kw">const</span> useCartStore = <span class="fn">create</span>((set, get) => ({`,l:[0]},
+  {t:`  items: [],`,l:[0]},
+  {t:`  total: <span class="num">0</span>,`,l:[0]},
+  {t:``,l:[]},
+  {t:`  addItem: (item) => <span class="fn">set</span>(state => ({`,l:[1]},
+  {t:`    items: [...state.items, item],`,l:[1]},
+  {t:`    total: state.total + item.price`,l:[1]},
+  {t:`  })),`,l:[1]},
+  {t:``,l:[]},
+  {t:`  removeItem: (id) => <span class="fn">set</span>(state => ({`,l:[1]},
+  {t:`    items: state.items.<span class="fn">filter</span>(i => i.id !== id)`,l:[1]},
+  {t:`  })),`,l:[]},
+  {t:`}));`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Kisi bhi component mein — no Provider!</span>`,l:[]},
+  {t:`<span class="kw">const</span> { items, addItem } = <span class="fn">useCartStore</span>();`,l:[2]},
+ ],
+ steps:[
+  {label:'Create Store',qL:[3,4,5,7,8,9,10,12,13,14,15],laravel:`<span class="lv-code">// Laravel Singleton jaisa:
+// AppServiceProvider mein:
+$this->app->singleton(CartService::class);
+
+// Zustand store = global singleton
+// Koi bhi component mein access karo
+// Provider wrap karne ki zaroorat nahi!</span>`,explain:`<b>Zustand store = global singleton state.</b> create() mein state aur actions define karo. set() se state update karo — spread nahi karna (Immer-style updates). get() se current state read karo andar se. TypeScript support built-in. Ye Context + useReducer ka simpler alternative hai.',`,
+   render(){return`<div class="v-flow">
+<div class="dl">Redux vs Zustand:</div>
+<div class="v-row"><div class="v-badge no">Redux: Actions + Reducers + Provider + connect() 😰</div></div>
+<div class="v-row"><div class="v-badge yes">Zustand: create() + useStore() 😊</div></div>
+<div class="v-divider"></div>
+<div class="dl">Store structure:</div>
+<div class="v-row"><div class="v-box blue small">State: items, total</div></div>
+<div class="v-row"><div class="v-box teal small">Actions: addItem, removeItem</div></div>
+<div class="v-row"><div class="v-box purple small">Selectors: useCartStore(s => s.items)</div></div>
+</div>`}},
+  {label:'Use Store',qL:[18,19],laravel:`<span class="lv-code">// Dependency injection jaisa:
+class CartController {
+  public function __construct(
+    private CartService $cart
+  ) {}
+  // $this->cart->getItems()
+}
+
+// Zustand: no injection needed
+const { items } = useCartStore();</span>`,explain:`<b>No Provider = zero setup overhead.</b> Context mein har jagah Provider wrap karna padta hai. Zustand mein sirf hook call karo — koi bhi component mein. Selective subscription: useCartStore(state => state.items) — sirf items change pe re-render, total change pe nahi.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Selective subscription (performance):</div>
+<div class="v-row"><div class="v-badge warn">useCartStore() — any change = re-render</div></div>
+<div class="v-row"><div class="v-badge yes">useCartStore(s => s.items) — sirf items change pe ✓</div></div>
+<div class="v-divider"></div>
+<div class="dl">Outside component access:</div>
+<div class="v-row"><div class="v-box gray small">useCartStore.getState().addItem(item)</div></div>
+<div class="v-label">API interceptors, event handlers mein useful</div>
+<div class="v-divider"></div>
+<div class="dl">Persistence (localStorage):</div>
+<div class="v-row"><div class="v-box purple small">create(persist((set) => ({...}), {name:'cart'}))</div></div>
+</div>`}}
+ ]},
+
+{cat:'State Mgmt',name:'Redux Toolkit',diff:'h',tag:'Enterprise State',
+ desc:'Redux Toolkit = Redux ka modern, opinionated version. createSlice, createAsyncThunk — boilerplate zero. Large enterprise apps ke liye. Laravel ka full MVC jaisa structured approach.',
+ query:[
+  {t:`<span class="kw">import</span> { createSlice, createAsyncThunk } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Async thunk = API call</span>`,l:[]},
+  {t:`<span class="kw">export const</span> fetchUsers = <span class="fn">createAsyncThunk</span>(<span class="str">'users/fetch'</span>, <span class="kw">async</span>() => {`,l:[0]},
+  {t:`  <span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">'/api/users'</span>);`,l:[0]},
+  {t:`  <span class="kw">return</span> res.<span class="fn">json</span>();`,l:[0]},
+  {t:`});`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// Slice = state + reducers + actions</span>`,l:[]},
+  {t:`<span class="kw">const</span> usersSlice = <span class="fn">createSlice</span>({`,l:[1]},
+  {t:`  name: <span class="str">'users'</span>,`,l:[1]},
+  {t:`  initialState: { data: [], loading: <span class="kw">false</span> },`,l:[1]},
+  {t:`  reducers: {`,l:[2]},
+  {t:`    addUser: (state, action) => { state.data.<span class="fn">push</span>(action.payload); }`,l:[2]},
+  {t:`  },`,l:[]},
+  {t:`  extraReducers: (builder) => {`,l:[3]},
+  {t:`    builder.<span class="fn">addCase</span>(fetchUsers.fulfilled, (state, action) => {`,l:[3]},
+  {t:`      state.data = action.payload;`,l:[3]},
+  {t:`    });`,l:[]},
+  {t:`  }`,l:[]},
+  {t:`});`,l:[]},
+ ],
+ steps:[
+  {label:'createSlice',qL:[9,10,11,12,13,14],laravel:`<span class="lv-code">// Laravel Controller + Model + Migration = 1 command
+// php artisan make:model User -mcr
+
+// Redux Toolkit createSlice =
+// state + actions + reducers ek jagah
+// Immer ke through direct mutation OK!</span>`,explain:`<b>createSlice = state + reducers + actions ek saath.</b> name = slice ka identifier. initialState = default state. reducers = synchronous state changes. Immer integrate hai — state.data.push() directly kar sakte ho (internally immutable rakhta hai). Auto-generates action creators.',`,
+   render(){return`<div class="v-flow">
+<div class="dl">createSlice generates automatically:</div>
+<div class="v-row"><div class="v-badge yes">Action creators: usersSlice.actions.addUser</div></div>
+<div class="v-row"><div class="v-badge yes">Action types: 'users/addUser'</div></div>
+<div class="v-row"><div class="v-badge yes">Reducer: usersSlice.reducer</div></div>
+<div class="v-divider"></div>
+<div class="dl">Immer magic — direct mutation OK:</div>
+<div class="v-badge warn">Normal Redux: return {...state, data:[...state.data, x]}</div>
+<div class="v-badge yes">RTK Immer: state.data.push(x) ✓ simpler!</div>
+</div>`}},
+  {label:'Async Thunk',qL:[3,4,5,6,15,16,17,18,19],laravel:`<span class="lv-code">// Laravel Job jaisa:
+class FetchUsersJob implements ShouldQueue {
+  public function handle(): void {
+    $users = Http::get('/api/users')->json();
+    cache(['users' => $users]);
+  }
+}
+// dispatch(new FetchUsersJob());</span>`,explain:`<b>createAsyncThunk = async action handler.</b> Auto pending/fulfilled/rejected states generate karta hai. extraReducers mein handle karo. API call ke 3 states automatically: loading shuru = pending, success = fulfilled, error = rejected. RTK Query aur bhi powerful hai — React Query jaisa built-in hai RTK mein.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Async thunk lifecycle:</div>
+<div class="v-lifecycle">
+<div class="v-lc-step active"><span class="lc-icon">📤</span>dispatch(fetchUsers())</div>
+<div class="v-lc-step active"><span class="lc-icon">⏳</span>pending</div>
+<div class="v-lc-step teal"><span class="lc-icon">✅</span>fulfilled</div>
+<div class="v-lc-step"><span class="lc-icon">❌</span>rejected</div>
+</div>
+<div class="v-divider"></div>
+<div class="dl">RTK Query (recommended over thunks):</div>
+<div class="v-row"><div class="v-box purple small">createApi + fetchBaseQuery</div></div>
+<div class="v-label">React Query jaisa but Redux integrated</div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// TESTING
+// ═══════════════════════════════════════════════════
+{cat:'Testing',name:'React Testing Library',diff:'m',tag:'Unit Tests',
+ desc:'RTL = user behavior test karo, implementation nahi. "If the user can see it and click it, test it." Laravel ke Feature Tests jaisa — internal kaise kaam karta hai ye test nahi karte.',
+ query:[
+  {t:`<span class="kw">import</span> { render, screen, fireEvent, waitFor } <span class="kw">from</span> <span class="str">'@testing-library/react'</span>;`,l:[]},
+  {t:`<span class="kw">import</span> { vi } <span class="kw">from</span> <span class="str">'vitest'</span>;`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="fn">test</span>(<span class="str">'user login form works'</span>, <span class="kw">async</span>() => {`,l:[0]},
+  {t:`  <span class="cm">// Render karo</span>`,l:[]},
+  {t:`  <span class="fn">render</span>(&lt;<span class="lk">LoginForm</span>/&gt;);`,l:[1]},
+  {t:``,l:[]},
+  {t:`  <span class="cm">// Elements dhundho (user ki tarah)</span>`,l:[]},
+  {t:`  <span class="kw">const</span> emailInput = screen.<span class="fn">getByLabelText</span>(<span class="str">/email/i</span>);`,l:[2]},
+  {t:`  <span class="kw">const</span> submitBtn = screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: /login/i });`,l:[2]},
+  {t:``,l:[]},
+  {t:`  <span class="cm">// User actions simulate karo</span>`,l:[]},
+  {t:`  fireEvent.<span class="fn">change</span>(emailInput, { target: { value: <span class="str">'test@test.com'</span> } });`,l:[3]},
+  {t:`  fireEvent.<span class="fn">click</span>(submitBtn);`,l:[3]},
+  {t:``,l:[]},
+  {t:`  <span class="cm">// Assert karo</span>`,l:[]},
+  {t:`  <span class="kw">await</span> <span class="fn">waitFor</span>(() => {`,l:[4]},
+  {t:`    expect(screen.<span class="fn">getByText</span>(<span class="str">/welcome/i</span>)).<span class="fn">toBeInTheDocument</span>();`,l:[4]},
+  {t:`  });`,l:[]},
+  {t:`});`,l:[]},
+ ],
+ steps:[
+  {label:'Queries',qL:[7,8,9],laravel:`<span class="lv-code">// Laravel Dusk/Pest Feature Test:
+$this->get('/login')
+     ->assertSee('Email')
+     ->assertSee('Login');
+
+// RTL: DOM se elements dhundho
+// getByLabelText = label se input
+// getByRole = accessibility role se
+// getByText = visible text se</span>`,explain:`<b>Query priority = accessibility first.</b> getByRole() > getByLabelText() > getByPlaceholderText() > getByText() > getByTestId(). Role-based queries = screen reader users ka experience test karte hain. data-testid sirf last resort mein use karo — brittle hota hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Query priority (best to worst):</div>
+<div class="v-row"><div class="v-badge yes">1. getByRole</div><div class="v-label">button, input, heading</div></div>
+<div class="v-row"><div class="v-badge yes">2. getByLabelText</div><div class="v-label">form labels</div></div>
+<div class="v-row"><div class="v-badge info">3. getByText</div><div class="v-label">visible text</div></div>
+<div class="v-row"><div class="v-badge warn">4. getByTestId</div><div class="v-label">last resort only</div></div>
+<div class="v-divider"></div>
+<div class="dl">getBy vs queryBy vs findBy:</div>
+<div class="v-row"><div class="v-box blue small">getBy</div><div class="v-label">throws if not found</div></div>
+<div class="v-row"><div class="v-box blue small">queryBy</div><div class="v-label">null if not found (optional)</div></div>
+<div class="v-row"><div class="v-box blue small">findBy</div><div class="v-label">async, waits for element</div></div>
+</div>`}},
+  {label:'User Events',qL:[11,12,13],laravel:`<span class="lv-code">// Pest browser test:
+$browser->type('email', 'test@test.com')
+        ->press('Login')
+        ->assertSee('Welcome');
+
+// RTL @testing-library/user-event:
+// userEvent.type() > fireEvent.change()
+// More realistic user simulation</span>`,explain:`<b>userEvent > fireEvent for realistic testing.</b> fireEvent directly DOM events trigger karta hai. userEvent actual user behavior simulate karta hai (keydown, keypress, keyup, focus, blur). userEvent.setup() se configure karo, userEvent.type(el, 'text') se type karo.',`,
+   render(){return`<div class="v-flow">
+<div class="dl">fireEvent vs userEvent:</div>
+<div class="v-badge warn">fireEvent.change(el, {target:{value:'x'}}) — low level</div>
+<div class="v-badge yes">userEvent.type(el, 'x') — realistic ✓</div>
+<div class="v-divider"></div>
+<div class="dl">Common user actions:</div>
+<div class="v-row"><div class="v-box teal small">userEvent.click(button)</div></div>
+<div class="v-row"><div class="v-box teal small">userEvent.type(input, 'text')</div></div>
+<div class="v-row"><div class="v-box teal small">userEvent.selectOptions(select, ['opt1'])</div></div>
+<div class="v-row"><div class="v-box teal small">userEvent.upload(input, file)</div></div>
+</div>`}},
+  {label:'Async Testing',qL:[15,16,17,18,19,20,21],laravel:`<span class="lv-code">// Laravel async test:
+$this->postJson('/api/users', $data)
+     ->assertStatus(201)
+     ->assertJson(['name' => 'Rahul']);
+
+// RTL async:
+// waitFor() — element appear hone ka wait
+// findBy*() — async query (built-in wait)
+// Mock API with MSW (Mock Service Worker)</span>`,explain:`<b>Async testing = waitFor ya findBy use karo.</b> API calls async hain — result aane mein time lagta hai. waitFor() callback tab tak retry karta hai jab tak assert pass na ho (timeout: 1000ms default). API mock karne ke liye MSW (Mock Service Worker) use karo — actual network interceptors.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Async testing patterns:</div>
+<div class="v-row"><div class="v-box purple small">await waitFor(() => expect(el).toBeVisible())</div></div>
+<div class="v-row"><div class="v-box purple small">const el = await screen.findByText(/done/i)</div></div>
+<div class="v-divider"></div>
+<div class="dl">MSW — API mocking:</div>
+<div class="v-row"><div class="v-box teal small">http.get('/api/users', () => HttpResponse.json([...]))</div></div>
+<div class="v-label">Real network requests intercept — no axios mock needed</div>
+<div class="v-divider"></div>
+<div class="dl">Test structure (AAA):</div>
+<div class="v-row"><div class="v-badge info">Arrange → Act → Assert</div></div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// NEXT.JS
+// ═══════════════════════════════════════════════════
+{cat:'Next.js',name:'Next.js App Router',diff:'m',tag:'Full Stack',
+ desc:'Next.js = Laravel ka full-stack React framework. SSR, SSG, API Routes, file-based routing, image optimization — sab built-in. Modern React apps ke liye go-to framework.',
+ query:[
+  {t:`<span class="cm">// app/users/page.tsx — Server Component</span>`,l:[]},
+  {t:`<span class="kw">async function</span> <span class="fn">UsersPage</span>() {`,l:[0]},
+  {t:`  <span class="cm">// Direct DB — no API needed!</span>`,l:[]},
+  {t:`  <span class="kw">const</span> users = <span class="kw">await</span> db.user.<span class="fn">findMany</span>();`,l:[0]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">UserList</span> users={users} /&gt;;`,l:[]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// app/users/[id]/page.tsx — Dynamic route</span>`,l:[]},
+  {t:`<span class="kw">export async function</span> <span class="fn">generateMetadata</span>({ params }) {`,l:[1]},
+  {t:`  <span class="kw">return</span> { title: <span class="str">\`User \${params.id}\`</span> };`,l:[1]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// app/api/users/route.ts — API Route</span>`,l:[]},
+  {t:`<span class="kw">export async function</span> <span class="fn">GET</span>() {`,l:[2]},
+  {t:`  <span class="kw">const</span> users = <span class="kw">await</span> db.user.<span class="fn">findMany</span>();`,l:[2]},
+  {t:`  <span class="kw">return</span> Response.<span class="fn">json</span>(users);`,l:[2]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'File Routing',qL:[0,1,2,3,4,5,7,8,9,10],laravel:`<span class="lv-code">// Laravel routes/web.php:
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+
+// Next.js App Router file-based:
+// app/users/page.tsx → /users
+// app/users/[id]/page.tsx → /users/:id
+// app/layout.tsx → shared layout</span>`,explain:`<b>File-based routing = zero route config.</b> Laravel mein routes manually define karte ho. Next.js App Router mein file location = URL. app/users/page.tsx = /users. app/users/[id]/page.tsx = /users/:id. layout.tsx = @extends('layout') jaisa. Server Components mein direct database access!',`,
+   render(){return`<div class="v-flow">
+<div class="dl">File → Route mapping:</div>
+<div class="v-row"><div class="v-box blue small">app/page.tsx</div><div class="v-arrow">→</div><div class="v-box teal small">/</div></div>
+<div class="v-row"><div class="v-box blue small">app/users/page.tsx</div><div class="v-arrow">→</div><div class="v-box teal small">/users</div></div>
+<div class="v-row"><div class="v-box blue small">app/users/[id]/page.tsx</div><div class="v-arrow">→</div><div class="v-box teal small">/users/:id</div></div>
+<div class="v-row"><div class="v-box blue small">app/api/users/route.ts</div><div class="v-arrow">→</div><div class="v-box teal small">API /api/users</div></div>
+<div class="v-divider"></div>
+<div class="dl">Special files:</div>
+<div class="v-row"><div class="v-box purple small">layout.tsx</div><div class="v-label">= @extends('layout')</div></div>
+<div class="v-row"><div class="v-box purple small">loading.tsx</div><div class="v-label">= Suspense fallback auto</div></div>
+<div class="v-row"><div class="v-box purple small">error.tsx</div><div class="v-label">= Error Boundary auto</div></div>
+</div>`}},
+  {label:'Server vs Client',qL:[0,1,2,3,4,12,13,14,15,16],laravel:`<span class="lv-code">'use client' directive:
+// Server Component (default) = Laravel Controller
+// - Direct DB access ✓
+// - No hooks ✓
+// - Smaller bundle ✓
+
+// Client Component ('use client') = Blade + Alpine
+// - useState, useEffect ✓
+// - Browser APIs ✓
+// - Event handlers ✓</span>`,explain:`<b>Server Components = default, Client = opt-in.</b> Server Components server pe render hote hain — client ko sirf HTML jaata hai, JavaScript bundle chhota hota hai. Direct database, filesystem access possible. Client Components ke liye top pe "use client" likho — hooks, events, browser APIs tab available hote hain.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Server vs Client Component:</div>
+<div class="v-grid2">
+<div class="v-card"><div class="v-card-title">Server (default)</div>
+<div class="v-badge yes" style="margin-bottom:3px">Direct DB ✓</div>
+<div class="v-badge yes">No JS bundle ✓</div>
+<div class="v-badge no">No hooks ❌</div>
+<div class="v-badge no">No events ❌</div>
+</div>
+<div class="v-card"><div class="v-card-title">Client ('use client')</div>
+<div class="v-badge yes" style="margin-bottom:3px">useState ✓</div>
+<div class="v-badge yes">Events ✓</div>
+<div class="v-badge no">No direct DB ❌</div>
+<div class="v-badge warn">Adds to bundle</div>
+</div>
+</div>
+<div class="v-label">Rule: as much server as possible, minimum client</div>
+</div>`}},
+  {label:'API Routes',qL:[12,13,14,15,16],laravel:`<span class="lv-code">// Laravel API Controller:
+class UserController extends Controller {
+  public function index(): JsonResponse {
+    return response()->json(User::all());
+  }
+  public function store(Request $req): JsonResponse {
+    return response()->json(User::create($req->all()), 201);
+  }
+}</span>`,explain:`<b>API Routes = Laravel API Controllers.</b> app/api/[route]/route.ts mein GET, POST, PUT, DELETE functions export karo. Named exports = HTTP methods. Request object se body, params, headers lo. Response.json() se JSON return karo. Full-stack in one project — separate backend optional ho jaata hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">HTTP methods = named exports:</div>
+<div class="v-row"><div class="v-box teal small">export async function GET(req)</div></div>
+<div class="v-row"><div class="v-box teal small">export async function POST(req)</div></div>
+<div class="v-row"><div class="v-box teal small">export async function PUT(req)</div></div>
+<div class="v-row"><div class="v-box teal small">export async function DELETE(req)</div></div>
+<div class="v-divider"></div>
+<div class="dl">Next.js features vs Laravel:</div>
+<div class="v-row"><div class="v-box blue small">Middleware</div><div class="v-label">= Laravel Middleware</div></div>
+<div class="v-row"><div class="v-box blue small">next/image</div><div class="v-label">= Intervention Image</div></div>
+<div class="v-row"><div class="v-box blue small">next/font</div><div class="v-label">= Local fonts optimized</div></div>
+</div>`}}
+ ]},
+
+// ═══════════════════════════════════════════════════
+// PATTERNS & BEST PRACTICES
+// ═══════════════════════════════════════════════════
+{cat:'Patterns',name:'Component Patterns',diff:'m',tag:'Best Practices',
+ desc:'React mein sahi patterns use karo — separation of concerns, reusability, maintainability. Laravel ke SOLID principles ka React equivalent.',
+ query:[
+  {t:`<span class="cm">// ❌ Fat component — sab kuch ek mein</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserDashboard</span>() { <span class="cm">/* API + UI + logic all mixed */</span> }`,l:[0]},
+  {t:``,l:[]},
+  {t:`<span class="cm">// ✓ Container + Presentational separation</span>`,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserDashboardContainer</span>() {`,l:[1]},
+  {t:`  <span class="kw">const</span> { data, isLoading } = <span class="fn">useQuery</span>({queryKey:[<span class="str">'users'</span>],...});`,l:[1]},
+  {t:`  <span class="kw">const</span> handleDelete = <span class="fn">useCallback</span>(...);`,l:[1]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">UserDashboardView</span> users={data} onDelete={handleDelete}/&gt;;`,l:[1]},
+  {t:`}`,l:[]},
+  {t:``,l:[]},
+  {t:`<span class="kw">function</span> <span class="fn">UserDashboardView</span>({ users, onDelete }) {`,l:[2]},
+  {t:`  <span class="cm">// Pure UI — no logic, no API calls</span>`,l:[]},
+  {t:`  <span class="kw">return</span> &lt;<span class="lk">table</span>&gt;{users.<span class="fn">map</span>(u => ...)}&lt;/<span class="lk">table</span>&gt;;`,l:[2]},
+  {t:`}`,l:[]},
+ ],
+ steps:[
+  {label:'Container Pattern',qL:[3,4,5,6,7,8,9,10,11,12,13],laravel:`<span class="lv-code">// Laravel separation:
+// Controller = business logic, data fetching
+// Blade = pure presentation
+
+// React same:
+// Container = data, logic, state
+// Presentational = pure JSX, props only</span>`,explain:`<b>Container + Presentational = Laravel Controller + Blade.</b> Container: API calls, state, business logic. Presentational: sirf props receive karo, sirf JSX return karo — koi side effects. Presentational components easily testable hain (pure functions). Custom hooks ne containers ko aur simple bana diya hai.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Separation of concerns:</div>
+<div class="v-row"><div class="v-box purple small">Container</div><div class="v-label">= data + logic + state</div></div>
+<div class="v-row"><div class="v-box teal small">Presentational</div><div class="v-label">= pure JSX, props only</div></div>
+<div class="v-divider"></div>
+<div class="dl">Benefits:</div>
+<div class="v-badge yes">Easy to test (pure components)</div>
+<div class="v-badge yes">Reusable UI (different data sources)</div>
+<div class="v-badge yes">Clear responsibilities</div>
+<div class="v-divider"></div>
+<div class="dl">Modern: Custom Hook + Component</div>
+<div class="v-row"><div class="v-box blue small">useUserDashboard() + UserDashboard()</div></div>
+</div>`}},
+  {label:'Folder Structure',qL:[0,3,10],laravel:`<span class="lv-code">// Laravel structure:
+// app/Http/Controllers/
+// app/Models/
+// app/Services/
+// resources/views/
+
+// React recommended:
+// src/components/ (UI)
+// src/features/ (feature-based)
+// src/hooks/ (custom hooks)
+// src/services/ (API calls)
+// src/types/ (TypeScript)</span>`,explain:`<b>Feature-based folder structure = Laravel module jaisa.</b> Component-based structure chhote apps ke liye theek hai. Bade apps mein feature-based: src/features/users/ mein UserList, UserCard, useUsers, userApi sab saath rakho. Scalable, team-friendly.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Feature-based structure:</div>
+<div class="v-row"><div class="v-box blue small">src/features/users/</div></div>
+<div class="v-row" style="padding-left:14px"><div class="v-box gray small">UserList.tsx</div></div>
+<div class="v-row" style="padding-left:14px"><div class="v-box gray small">UserCard.tsx</div></div>
+<div class="v-row" style="padding-left:14px"><div class="v-box gray small">useUsers.ts (custom hook)</div></div>
+<div class="v-row" style="padding-left:14px"><div class="v-box gray small">userApi.ts (API calls)</div></div>
+<div class="v-row" style="padding-left:14px"><div class="v-box gray small">userTypes.ts</div></div>
+<div class="v-row" style="padding-left:14px"><div class="v-box gray small">index.ts (barrel exports)</div></div>
+</div>`}},
+  {label:'Barrel Exports',qL:[0,10],laravel:`<span class="lv-code">// Laravel facades jaisa:
+// Ek jagah se sab import
+use App\Services\{AuthService, UserService};
+
+// React barrel export (index.ts):
+// export { UserList } from './UserList';
+// export { UserCard } from './UserCard';
+
+// Import karo cleanly:
+import { UserList, UserCard } from '@/features/users';</span>`,explain:`<b>Barrel exports = clean imports.</b> har file se alag-alag import karna messy hota hai. index.ts mein sab re-export karo. Phir ek clean import. Alias (@/features/users) Vite/webpack config mein setup karo. Circular dependencies se bachna — barrel exports mein dhyan rakho.`,
+   render(){return`<div class="v-flow">
+<div class="dl">Without barrel (messy):</div>
+<div class="v-row"><div class="v-badge no">import UserList from '../features/users/UserList'</div></div>
+<div class="v-row"><div class="v-badge no">import UserCard from '../features/users/UserCard'</div></div>
+<div class="dl" style="margin-top:4px">With barrel (clean):</div>
+<div class="v-badge yes">import {UserList, UserCard} from '@/features/users' ✓</div>
+<div class="v-divider"></div>
+<div class="dl">Vite path alias (vite.config.ts):</div>
+<div class="v-row"><div class="v-box gray small">resolve: {alias: {'@': '/src'}}</div></div>
+</div>`}}
+ ]},
+];
+
+// ═══════════════════════════════════════════════════
+// INTERVIEW QUESTIONS
+// ═══════════════════════════════════════════════════
+const INTERVIEW_QS = [
+// BASIC
+{q:'React kya hai aur Vue/Angular se kaise alag hai?',diff:'e',topic:'Basics',
+ ans:'React ek UI library hai (framework nahi) jo Facebook ne banaya. Sirf View layer handle karta hai — routing, state management ke liye alag libraries chahiye. Vue = opinionated framework (built-in routing/state). Angular = full MVC framework, TypeScript-first. React ka Virtual DOM aur unidirectional data flow iske core features hain.',
+ code:`// React = just components
+function App() { return <h1>Hello</h1>; }
+
+// Vue component
+export default { template: '<h1>Hello</h1>' }`,
+ tip:'Interview mein kehna: "React = flexible library, Vue = progressive framework, Angular = full framework with batteries included"'},
+
+{q:'Virtual DOM kya hai aur ye actual DOM se faster kyon hai?',diff:'e',topic:'Core',
+ ans:'Virtual DOM = Real DOM ka plain JavaScript object representation. Real DOM operations slow hain kyunki browser ka rendering engine involve hota hai. VDOM fast hai kyunki sirf JS objects hain. Process: 1) New VDOM banao, 2) Old VDOM se diff karo, 3) Sirf differences (patch) real DOM mein apply karo.',
+ code:`// VDOM = plain object
+{ type: 'div', props: { className: 'card' }, children: [...] }
+
+// Real DOM = slow browser API
+document.getElementById('x').style.color = 'red'; // slow!`,
+ tip:'"Git diff" analogy use karo — poori file nahi, sirf changes apply karo.'},
+
+{q:'Class Component vs Functional Component mein kya fark hai?',diff:'e',topic:'Core',
+ ans:'Functional components = simple functions jo JSX return karte hain. Hooks ke saath sab features available. Class components = extend Component, render() method zaroori, this.state aur lifecycle methods. Modern React mein functional + hooks preferred hain. Class components sirf Error Boundary ke liye aaj bhi use hote hain.',
+ code:`// Modern: Functional
+function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(c => c+1)}>{count}</button>;
+}
+
+// Legacy: Class
+class Counter extends Component {
+  state = { count: 0 };
+  render() { return <button>{this.state.count}</button>; }
+}`,
+ tip:'Kehna: "Hooks ne class components ki zaroorat almost khatam kar di hai, sirf Error Boundaries ke liye class use hota hai."'},
+
+{q:'useState mein state directly mutate kyon nahi karna chahiye?',diff:'e',topic:'State',
+ ans:'React shallow comparison karta hai — agar same reference return karo toh React samjhega koi change nahi hua, re-render nahi hoga. items.push(x) same array reference return karta hai — React detect nahi karega. [...items, x] nayi array return karta hai — React change detect karega aur re-render karega.',
+ code:`// ❌ Wrong — same reference
+const items = state.items;
+items.push(newItem);
+setState({ items }); // React: "same array, no change"
+
+// ✓ Correct — new reference
+setState({ items: [...state.items, newItem] }); // React detects change`,
+ tip:'"Immutability = React ki superpower" — predict karna aasaan hota hai kab UI update hogi.'},
+
+{q:'useEffect dependency array ke sare cases explain karo.',diff:'e',topic:'Hooks',
+ ans:'useEffect(fn) = har render ke baad chale. useEffect(fn, []) = sirf mount pe (once). useEffect(fn, [dep]) = dep change hone pe. useEffect cleanup return karo = unmount ya next effect se pehle chale. ESLint react-hooks/exhaustive-deps rule sabhi used variables ko deps mein add karne ko kehti hai.',
+ code:`useEffect(fn);          // ❌ infinite loop risk
+useEffect(fn, []);      // ✓ mount only
+useEffect(fn, [userId]); // ✓ userId change pe
+useEffect(() => {
+  const sub = subscribe();
+  return () => sub.unsubscribe(); // cleanup
+}, []);`,
+ tip:'Cleanup function bhoolna = memory leak. Production mein AbortController se fetch cancel karo.'},
+
+{q:'props drilling problem kya hai aur kaise solve karo?',diff:'e',topic:'State',
+ ans:'Props drilling = data 5-6 levels neeche pass karna padta hai, beech wale components sirf pass-through karte hain. Solutions: 1) Context API (auth, theme, global data), 2) State management (Zustand, Redux) for complex apps, 3) Component composition (children prop), 4) Custom hooks with Context.',
+ code:`// Problem:
+App → Layout → Sidebar → NavItem → Avatar → {user}
+// 5 levels tak sirf pass-through!
+
+// Solution: Context
+const { user } = useContext(AuthContext); // kahi bhi!`,
+ tip:'"Context use karo global data ke liye, props use karo local data ke liye — overengineering mat karo"'},
+
+// INTERMEDIATE
+{q:'useEffect mein async/await directly kyon nahi use kar sakte?',diff:'m',topic:'Hooks',
+ ans:'useEffect callback ko either kuch return nahi karna chahiye ya cleanup function return karna chahiye. Async function Promise return karta hai — React expect karta hai cleanup function ya nothing. Solution: async function effect ke andar define karo.',
+ code:`// ❌ Wrong
+useEffect(async () => {
+  const data = await fetchData(); // React ko Promise mila
+}, []);
+
+// ✓ Correct
+useEffect(() => {
+  const fetchData = async () => {
+    const data = await api.get('/users');
+    setUsers(data);
+  };
+  fetchData();
+}, []);`,
+ tip:'Race condition bhi handle karo: AbortController ya isMounted flag use karo'},
+
+{q:'useMemo aur useCallback mein kya fark hai?',diff:'m',topic:'Performance',
+ ans:'useMemo = computed VALUE memoize karta hai. useCallback = FUNCTION reference memoize karta hai. useCallback(fn, deps) = useMemo(() => fn, deps) ke equivalent hai. useMemo jab heavy calculation ho. useCallback jab function React.memo wrapped child ko pass karo.',
+ code:`// useMemo = value cache
+const sortedList = useMemo(
+  () => items.sort((a,b) => a.price - b.price),
+  [items]
+); // sortedList = sorted array
+
+// useCallback = function reference stable
+const handleClick = useCallback(
+  (id) => deleteItem(id),
+  [deleteItem]
+); // handleClick = same fn reference`,
+ tip:'"Both optimize renders, but useMemo = value, useCallback = function" — ye yaad rakho'},
+
+{q:'React mein reconciliation kaise kaam karta hai?',diff:'m',topic:'Core',
+ ans:'Reconciliation = React ka algorithm jo decide karta hai kya update karna hai. Rules: 1) Different element types = subtree unmount + remount. 2) Same type = props update. 3) Lists mein key prop se track karta hai. React 18 mein Fiber architecture se work chunks mein split hota hai — UI block nahi hoti.',
+ code:`// Same type — sirf props update:
+<div className="old" /> → <div className="new" /> // ✓ fast
+
+// Different type — full remount:
+<div> → <span> // ❌ slow, unmount+remount
+
+// Lists — key se tracking:
+<li key={user.id}>{user.name}</li> // ✓ correct`,
+ tip:'"key prop = React ka primary tracking mechanism for lists" — stable unique ID use karo'},
+
+{q:'Controlled vs Uncontrolled components mein kya fark hai?',diff:'m',topic:'Forms',
+ ans:'Controlled = React state form value control karta hai (value + onChange dono). Single source of truth. Uncontrolled = DOM apna state manage karta hai, useRef se value access karo. Controlled = real-time validation possible. Uncontrolled = simpler, file inputs ke liye zaroori.',
+ code:`// Controlled:
+<input value={name} onChange={e => setName(e.target.value)} />
+
+// Uncontrolled:
+const inputRef = useRef();
+<input ref={inputRef} />
+// inputRef.current.value se access karo
+
+// File input = always uncontrolled
+<input type="file" ref={fileRef} />`,
+ tip:'"React Hook Form internally uncontrolled use karta hai — less re-renders ke liye"'},
+
+{q:'useLayoutEffect aur useEffect mein kya fark hai?',diff:'m',topic:'Hooks',
+ ans:'useEffect = asynchronous, browser paint ke baad. useLayoutEffect = synchronous, DOM update ke baad lekin browser paint se pehle. useLayoutEffect mein DOM measurements accurate hote hain (getBoundingClientRect). Normally useEffect use karo — sirf DOM measurement ya visual glitch rokne ke liye useLayoutEffect.',
+ code:`useEffect(() => {
+  // Async — browser paint ke baad
+  // API calls, subscriptions yahan
+});
+
+useLayoutEffect(() => {
+  // Sync — paint se pehle
+  // DOM measurement, scroll position
+  const rect = ref.current.getBoundingClientRect();
+  setPosition(rect);
+});`,
+ tip:'SSR mein useLayoutEffect warning deta hai — useEffect prefer karo ya isomorphic hook use karo'},
+
+{q:'React mein performance optimize karne ke kya tarike hain?',diff:'m',topic:'Performance',
+ ans:'1) React.memo — unnecessary re-renders rokna. 2) useMemo — expensive calculations cache. 3) useCallback — stable fn references. 4) Code splitting — lazy() aur Suspense. 5) Virtualization — react-window/virtual for long lists. 6) Key prop correctly use karna. 7) State structure optimize karna — related state saath rakho. 8) React DevTools Profiler se measure karo.',
+ code:`// 1. React.memo
+const UserRow = React.memo(({ user }) => <tr>{user.name}</tr>);
+
+// 2. Code splitting
+const Dashboard = lazy(() => import('./Dashboard'));
+
+// 3. List virtualization
+import { FixedSizeList } from 'react-window';`,
+ tip:'"Profile first, optimize second" — premature optimization worst pattern hai React mein'},
+
+// ADVANCED
+{q:'Fiber architecture kya hai aur React 16+ mein kyun important hai?',diff:'h',topic:'Internals',
+ ans:'Fiber = React 16 mein rewrite hua reconciliation engine. Pehle = synchronous rendering (UI freeze). Fiber = work units (fibers) mein split, pauseable/resumeable/prioritizable. Concurrent Mode enable karta hai. Features: Time slicing (50ms chunks), Suspense, Transitions (startTransition), Priority scheduling.',
+ code:`// React 18 concurrent features:
+import { startTransition, useDeferredValue } from 'react';
+
+// Low priority update
+startTransition(() => {
+  setSearchResults(filterData(query));
+});
+
+// Deferred value
+const deferredQuery = useDeferredValue(query);`,
+ tip:'"Fiber = React ka internal scheduler — important updates (typing) ko low priority updates se pehle process karo"'},
+
+{q:'React mein memory leaks kab hote hain aur kaise rokein?',diff:'h',topic:'Performance',
+ ans:'Memory leaks: 1) Cleanup nahi kiya (timer, subscription). 2) Unmounted component pe setState. Solutions: useEffect cleanup function. AbortController for fetch. isMounted pattern. React 18 mein strict mode double invocation ye leaks detect karta hai.',
+ code:`// Memory leak example:
+useEffect(() => {
+  const timer = setInterval(tick, 1000);
+  // ❌ No cleanup!
+}, []);
+
+// ✓ Fix:
+useEffect(() => {
+  const timer = setInterval(tick, 1000);
+  return () => clearInterval(timer); // cleanup!
+}, []);
+
+// ✓ Fetch cleanup:
+useEffect(() => {
+  const controller = new AbortController();
+  fetch('/api/data', { signal: controller.signal });
+  return () => controller.abort();
+}, []);`,
+ tip:'"React 18 Strict Mode development mein effects twice mount karta hai — ye intentional hai leaks detect karne ke liye"'},
+
+{q:'Context vs Redux vs Zustand — kab kya use karein?',diff:'h',topic:'State',
+ ans:'Context: Simple global state (auth, theme). Re-render issue hai. Redux: Large apps, time-travel debugging, complex state logic, DevTools. Zustand: Simple API, minimal boilerplate, no provider needed, performance optimized. React Query: Server state ke liye (fetch, cache, sync) — Redux ki zaroorat km kar deta hai.',
+ code:`// Context (simple):
+const theme = useContext(ThemeContext);
+
+// Zustand (recommended for local global state):
+const useStore = create((set) => ({
+  count: 0,
+  increment: () => set(s => ({ count: s.count + 1 }))
+}));
+
+// React Query (server state):
+const { data } = useQuery({ queryKey: ['users'], queryFn: fetchUsers });`,
+ tip:'"Context + useState = small apps. Zustand = medium apps. Redux Toolkit = large complex apps with DevTools need"'},
+
+{q:'React Server Components kya hain? (React 18+)',diff:'h',topic:'Advanced',
+ ans:'RSC = Server pe run hone wale components. JavaScript bundle mein include nahi hote. Direct database access kar sakte hain. "use client" directive se client component banate hain. Next.js App Router mein default sab server components hain. Benefits: Smaller bundle, faster load, direct data access.',
+ code:`// Server Component (default in Next.js App Router)
+// ❌ No hooks, no browser APIs
+async function UserList() {
+  const users = await db.users.findMany(); // Direct DB!
+  return <ul>{users.map(u => <li key={u.id}>{u.name}</li>)}</ul>;
+}
+
+// Client Component
+'use client';
+function Counter() {
+  const [count, setCount] = useState(0); // Hooks OK
+  return <button onClick={() => setCount(c => c+1)}>{count}</button>;
+}`,
+ tip:'"RSC = Laravel Controller jaisa — server pe logic, client ko sirf HTML bhejo. Smaller JS bundle = faster app"'},
+
+{q:'Hooks ke rules kya hain aur ye kyon hain?',diff:'m',topic:'Hooks',
+ ans:'Rule 1: Top level pe call karo — loops, conditions, nested functions ke andar nahi. Rule 2: Sirf React functions mein (components ya custom hooks) — plain JS functions mein nahi. Reason: React hooks ka order track karta hai — agar order change ho (conditional) toh state galat component ko milegi. ESLint plugin "eslint-plugin-react-hooks" enforce karta hai.',
+ code:`// ❌ Wrong — conditional hook
+if (isLoggedIn) {
+  const [data, setData] = useState(null); // ERROR!
+}
+
+// ✓ Correct — condition inside hook
+const [data, setData] = useState(null);
+useEffect(() => {
+  if (isLoggedIn) fetchData();
+}, [isLoggedIn]);`,
+ tip:'"React hooks = call order matters — linked list internally. Order change = state mixing"'},
+
+{q:'useId, useTransition, useDeferredValue — React 18 new hooks explain karo.',diff:'h',topic:'React 18',
+ ans:'useId: SSR-safe unique ID generate karna (label-input pairing ke liye). useTransition: [isPending, startTransition] — non-urgent updates mark karo (search, filter). useDeferredValue: value ka deferred copy — urgent render pehle, deferred baad mein. useTransition = action wrap karo, useDeferredValue = value defer karo.',
+ code:`// useId
+const id = useId();
+<label htmlFor={id}>Name</label>
+<input id={id} />
+
+// useTransition
+const [isPending, startTransition] = useTransition();
+startTransition(() => setFilter(newFilter)); // low priority
+
+// useDeferredValue
+const deferredQuery = useDeferredValue(query);
+// deferredQuery = slightly stale, fast typing ke liye`,
+ tip:'"startTransition = tell React: ye update urgent nahi hai, user input first" — smooth UX ke liye'},
+
+{q:'forwardRef kab aur kaise use karte hain?',diff:'m',topic:'Advanced',
+ ans:'forwardRef = parent component ko child DOM element ka ref access dene deta hai. Design system components (Input, Button) mein common. useImperativeHandle se custom ref API expose kar sakte ho.',
+ code:`// Child exposes ref
+const Input = forwardRef((props, ref) => {
+  return <input ref={ref} {...props} />;
+});
+
+// Parent uses it
+function Form() {
+  const inputRef = useRef();
+  useEffect(() => inputRef.current.focus(), []);
+  return <Input ref={inputRef} placeholder="Search..." />;
+}`,
+ tip:'"Design system mein almost har input/button component mein forwardRef hona chahiye"'},
+
+{q:'React mein event handling kaise kaam karta hai? Synthetic events kya hain?',diff:'e',topic:'Events',
+ ans:'React Synthetic Events = browser native events ka wrapper. Cross-browser compatible, same API sab browsers mein. React event delegation use karta hai — actual DOM node pe nahi, root pe listeners hote hain (React 17+ mein root container). Event pooling React 17 mein remove hua. onClick, onChange, onSubmit — camelCase mein.',
+ code:`// Synthetic event
+function handleClick(e) {
+  e.preventDefault(); // Works same across browsers
+  e.stopPropagation(); // Event bubbling rokna
+  console.log(e.target.value);
+}
+
+// Event delegation — React manages listeners
+<button onClick={handleClick}>Click</button>
+// Actually: root.addEventListener('click', handler)`,
+ tip:'"React mein event delegation = performance benefit — 1000 buttons ke liye 1 listener"'},
+
+{q:'Strict Mode kya karta hai React mein?',diff:'e',topic:'Dev Tools',
+ ans:'StrictMode = development-only component jo potential problems detect karta hai. React 18 mein: 1) Components ko twice invoke karta hai (state consistency check). 2) Deprecated lifecycle warnings. 3) Unexpected side effects detect karna. Production builds mein koi effect nahi.',
+ code:`// index.js:
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// Development mein:
+// - Effects twice mount hote hain (intentional!)
+// - Helps find cleanup issues
+// - Deprecation warnings`,
+ tip:'"StrictMode double-invocation = side effects detect karta hai — iska matlab bug nahi hai, feature hai"'},
+
+{q:'React DevTools se performance profiling kaise karte hain?',diff:'m',topic:'Dev Tools',
+ ans:'React DevTools Profiler tab: Record button → user actions karo → Stop. Flame graph = component render times. "Why did this render?" shows exact reason. Components tab = props, state, hooks inspect karo. Browser se install karo. Wasted renders = grey (same output), actual renders = colored.',
+ code:`// Add display name for better profiling
+const UserCard = React.memo(function UserCard(props) {
+  return <div>{props.name}</div>;
+});
+UserCard.displayName = 'UserCard'; // DevTools mein dikhega
+
+// Why-did-you-render library:
+// npm install @welldone-software/why-did-you-render`,
+ tip:'"Profile karo before optimizing — gut feeling pe React.memo mat lagao everywhere"'},
+
+{q:'key prop sirf lists mein hi use hota hai kya?',diff:'m',topic:'Core',
+ ans:'Nahi! key component ko "reset" karne ke liye bhi use kar sakte ho. Jab key change ho, React component ko unmount karta hai aur fresh mount karta hai — state reset hoti hai. Ye ek powerful pattern hai jab tum sirf props change se component reset karna chahte ho.',
+ code:`// Key as reset trigger — not just lists!
+// userId change pe UserForm completely reset karo
+<UserForm key={userId} userId={userId} />
+// Jab userId change ho:
+// - Old UserForm unmount
+// - New UserForm fresh mount
+// - All state reset!
+
+// Vs: userId change pe manual reset (complex!)
+useEffect(() => { resetForm(); }, [userId]);`,
+ tip:'"key = React ka identity. Change it = fresh start" — underused powerful pattern hai ye'},
+
+{q:'Batching kya hai React mein?',diff:'m',topic:'Performance',
+ ans:'Batching = multiple setState calls ko ek single re-render mein group karna. React 17 = sirf React event handlers mein batch. React 18 = automatic batching everywhere (setTimeout, fetch callbacks, native events bhi). flushSync se batching rokna possible.',
+ code:`// React 18: All updates batched automatically
+setTimeout(() => {
+  setCount(c => c + 1);
+  setFlag(f => !f);
+  // React 18: sirf 1 re-render ✓
+  // React 17: 2 re-renders ❌
+}, 1000);
+
+// Force immediate update:
+import { flushSync } from 'react-dom';
+flushSync(() => setCount(c => c + 1)); // Immediate re-render`,
+ tip:'"React 18 automatic batching = performance improvement bina kuch kiye"'},
+
+{q:'Suspense kya hai aur kaise use karte hain?',diff:'m',topic:'Advanced',
+ ans:'Suspense = async operations ke liye loading UI. Use cases: 1) lazy() loaded components, 2) Data fetching (React Query + Suspense mode), 3) React 18 streaming SSR. fallback prop mein loading UI do. Error Boundary ke saath pair karo error handling ke liye.',
+ code:`// Code splitting
+const Dashboard = lazy(() => import('./Dashboard'));
+<Suspense fallback={<Spinner/>}>
+  <Dashboard />
+</Suspense>
+
+// Data fetching (React Query + Suspense)
+const { data } = useSuspenseQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});
+// No isLoading check needed — Suspense handles it!`,
+ tip:'"Suspense = declarative loading states — imperative isLoading checks se cleaner code"'},
+
+{q:'Portals kab use karte hain?',diff:'m',topic:'DOM',
+ ans:'Portals = component tree se bahar kisi DOM node mein render karo. Use cases: Modal/Dialog (body pe render karo, z-index issues avoid), Tooltips (overflow:hidden parent se escape), Toast notifications. Event bubbling React tree ke through hota hai (DOM nahi) — context still accessible hai.',
+ code:`// Modal portal
+function Modal({ children }) {
+  return createPortal(
+    <div className="modal-overlay">
+      {children}
+    </div>,
+    document.body // Render body mein
+  );
+}
+
+// Component tree mein hai lekin DOM mein body mein:
+// React tree: Table → Modal
+// DOM: body → .modal-overlay`,
+ tip:'"Portal = component tree ka part rehta hai React ke liye — props, context, events sab normal"'},
+
+// TYPESCRIPT
+{q:'React mein TypeScript kyun use karein?',diff:'e',topic:'TypeScript',
+ ans:'TypeScript = compile-time type safety. Props types autocompletion milti hai IDE mein. Wrong prop type dene pe build fail hota hai runtime se pehle. Refactoring safe ho jaata hai — rename karo, TS sab jagah error dikhata hai. Large teams mein code navigate karna aasaan. interface PropTypes > React.PropTypes (runtime) — faster aur more powerful.',
+ code:`// Without TS — runtime error:
+function UserCard({ name }) { return <h1>{name.toUpperCase()}</h1> }
+<UserCard name={null} /> // Crash at runtime!
+
+// With TS — compile time error:
+interface UserCardProps { name: string; }
+function UserCard({ name }: UserCardProps) { ... }
+<UserCard name={null} /> // TS ERROR: null is not string ✓`,
+ tip:'"TypeScript = Laravel ko strict types ke saath use karne jaisa — runtime surprises bahut km ho jaate hain"'},
+
+{q:'TypeScript mein generic types React mein kab useful hain?',diff:'m',topic:'TypeScript',
+ ans:'Generics = reusable types with flexibility. useState<User | null>(null), useRef<HTMLInputElement>(null), custom hooks mein generic data types. API functions mein: async function fetchData<T>(url: string): Promise<T>. Generic components: function List<T>({ items, renderItem }: ListProps<T>) — any type ke items ke liye ek component.',
+ code:`// Generic API function:
+async function fetchData<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  return res.json() as T;
+}
+const users = await fetchData<User[]>('/api/users');
+
+// Generic component:
+interface ListProps<T> {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+}
+function List<T>({ items, renderItem }: ListProps<T>) {
+  return <ul>{items.map(renderItem)}</ul>;
+}`,
+ tip:'"Generics = DRY principle for types — ek function/component multiple types ke saath kaam kare"'},
+
+// PERFORMANCE
+{q:'React app slow ho rahi hai — kaise debug aur fix karein?',diff:'h',topic:'Performance',
+ ans:'Step 1: React DevTools Profiler se identify karo kaunse components slow hain. Step 2: Why did this render? check karo. Step 3: Solutions: React.memo for pure components, useMemo for expensive calcs, useCallback for stable fn refs, code splitting for large bundles, virtualization for long lists, state ko zyada neeche move karo (avoid lifting too high).',
+ code:`// Debug tools:
+// 1. React DevTools Profiler
+// 2. Why-did-you-render package
+// 3. Chrome Performance tab
+
+// Common fixes:
+const MemoizedRow = React.memo(TableRow);           // unnecessary re-renders
+const filtered = useMemo(() => filter(data), [data]); // expensive calc
+const onClick = useCallback(() => handle(id), [id]);  // stable fn
+const BigList = lazy(() => import('./BigList'));       // code split
+
+// Long lists — virtualize:
+import { FixedSizeList } from 'react-window';`,
+ tip:'"Profile → Identify bottleneck → Fix specific issue. Never randomly add memos everywhere"'},
+
+{q:'Re-render kab hota hai React mein aur kaise rokein?',diff:'m',topic:'Performance',
+ ans:'Re-render triggers: 1) State change (setState). 2) Props change. 3) Parent re-render. 4) Context change. Rokne ke tarike: React.memo (props same hain toh skip). useMemo (computed value same rakhna). useCallback (function reference stable). State ko lower tree mein move karo. Context split karo.',
+ code:`// Context split — re-renders minimize:
+// Bad: ek context mein sab
+const AppContext = createContext({ user, theme, cart, language });
+// Good: separate contexts
+const UserContext = createContext(user);
+const ThemeContext = createContext(theme);
+// Sirf relevant context change pe re-render hoga
+
+// State colocation — push state down:
+// Bad: parent mein state, sirf child use karta hai
+// Good: child mein state rakhna = parent re-render nahi`,
+ tip:'"State ko us component mein rakho jo actually use karta hai — unnecessarily lift mat karo"'},
+
+// HOOKS ADVANCED
+{q:'useImperativeHandle kya karta hai?',diff:'h',topic:'Hooks',
+ ans:'useImperativeHandle = forwardRef ke saath use karo — parent ko sirf specific methods expose karo, poora DOM nahi. Design system mein useful: Input component sirf focus() expose kare, parent doosre DOM properties touch na kar sake. Encapsulation principle.',
+ code:`const FancyInput = forwardRef((props, ref) => {
+  const inputRef = useRef();
+  
+  useImperativeHandle(ref, () => ({
+    focus: () => inputRef.current.focus(),
+    clear: () => inputRef.current.value = '',
+    // poora DOM nahi — sirf ye 2 methods
+  }));
+  
+  return <input ref={inputRef} {...props} />;
+});
+
+// Parent:
+const ref = useRef();
+ref.current.focus(); // ✓ only exposed methods
+ref.current.value;   // ❌ not exposed`,
+ tip:'"useImperativeHandle = API design — implementation hide karo, interface expose karo"'},
+
+{q:'useInsertionEffect kya hai aur kab use hota hai?',diff:'h',topic:'Hooks',
+ ans:'useInsertionEffect = CSS-in-JS libraries ke liye. DOM mutations se pehle chalta hai — useLayoutEffect se bhi pehle. CSS inject karne ke liye (styled-components, emotion internally use karte hain). Normal app code mein kabhi use nahi karna chahiye — library authors ke liye hai.',
+ code:`// Library code mein (not app code!):
+useInsertionEffect(() => {
+  // DOM mutations se pehle CSS inject karo
+  const style = document.createElement('style');
+  style.textContent = generatedCSS;
+  document.head.appendChild(style);
+  return () => style.remove();
+}, [generatedCSS]);
+
+// Execution order:
+// useInsertionEffect → DOM mutation → useLayoutEffect → Paint → useEffect`,
+ tip:'"Normal apps mein kabhi use mat karo — ye styled-components jaise libraries ke internal use ke liye hai"'},
+
+// NEXT.JS
+{q:'Next.js mein SSR, SSG, ISR kya hain?',diff:'m',topic:'Next.js',
+ ans:'SSR (Server Side Rendering): Har request pe server HTML generate karta hai. Fresh data, SEO friendly. Laravel ke traditional rendering jaisa. SSG (Static Site Generation): Build time pe HTML generate. Super fast, CDN pe serve. Blog, docs ke liye. ISR (Incremental Static Regeneration): SSG + background refresh. revalidate time set karo. Best of both worlds.',
+ code:`// SSR — App Router (Server Component):
+async function Page() {
+  const data = await fetch('/api', { cache: 'no-store' }); // no cache
+  return <UI data={data} />;
+}
+
+// SSG — build time:
+async function Page() {
+  const data = await fetch('/api'); // cached by default
+  return <UI data={data} />;
+}
+
+// ISR — revalidate:
+const data = await fetch('/api', { next: { revalidate: 60 } }); // 60 sec`,
+ tip:'"Laravel rendering = SSR. Static sites = SSG. Blog with fresh data = ISR. Choose based on data freshness need"'},
+
+{q:'Next.js Server Actions kya hain?',diff:'h',topic:'Next.js',
+ ans:'Server Actions = React 19 feature, Next.js mein available. Client component se directly server function call karo — API route banane ki zaroorat nahi. Form submission, data mutations ke liye. "use server" directive se mark karo. Laravel Controller mein directly function call karne jaisa.',
+ code:`// Server Action define karo
+'use server';
+async function createUser(formData: FormData) {
+  const name = formData.get('name');
+  await db.user.create({ data: { name } });
+  revalidatePath('/users');
+}
+
+// Client mein use karo:
+<form action={createUser}> // No API route needed!
+  <input name="name" />
+  <button type="submit">Create</button>
+</form>
+
+// Or programmatically:
+const result = await createUser(data);`,
+ tip:'"Server Actions = Laravel form submit karke redirect jaisa — client-server roundtrip simplest possible"'},
+
+// STATE MANAGEMENT
+{q:'Zustand vs Context API — kab kya use karein?',diff:'m',topic:'State',
+ ans:'Context API: Simple, built-in, no dependency. Lekin har context update pe sab consumers re-render hote hain. Simple global state (theme, language, auth) ke liye theek. Zustand: Selective subscriptions — sirf relevant slice use karo. No provider boilerplate. Middleware (persist, devtools). Medium apps ke liye perfect. Redux Toolkit: Large teams, complex logic, DevTools time-travel.',
+ code:`// Context — auth ke liye (rarely changes):
+const { user } = useContext(AuthContext); // OK
+
+// Zustand — cart ke liye (frequently changes):
+const items = useCartStore(state => state.items); // selective
+// Sirf items change pe re-render, total change pe nahi
+
+// RTK — complex enterprise app:
+const { data } = useAppSelector(selectFilteredUsers);
+// Memoized selectors, DevTools, middleware`,
+ tip:'"Rule of thumb: Context = infrequent global data. Zustand = frequent updates. RTK = large team, complex logic"'},
+
+// TESTING
+{q:'React mein testing ke liye kya tools use karte hain?',diff:'m',topic:'Testing',
+ ans:'Test runner: Vitest (Vite projects) ya Jest. Component testing: React Testing Library (RTL). API mocking: MSW (Mock Service Worker). E2E testing: Playwright ya Cypress. Unit testing: Vitest + RTL combination most popular hai. coverage report ke liye --coverage flag.',
+ code:`// Vitest + RTL setup:
+// vitest.config.ts:
+test: { environment: 'jsdom', globals: true }
+
+// Test file:
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+test('button click updates count', async () => {
+  const user = userEvent.setup();
+  render(<Counter />);
+  await user.click(screen.getByRole('button'));
+  expect(screen.getByText('1')).toBeInTheDocument();
+});`,
+ tip:'"Test behavior, not implementation — getByRole > getByTestId. Test kya user dekhta hai"'},
+
+{q:'Snapshot testing kya hai aur iske drawbacks kya hain?',diff:'m',topic:'Testing',
+ ans:'Snapshot testing = component ka HTML output save karo, future mein compare karo. Accidental UI changes catch karna. Drawbacks: 1) Snapshots stale ho jaate hain — developers blindly update karte hain. 2) Too large snapshots = meaningless. 3) Implementation detail test karte hain. Better alternative: RTL + specific assertions. Snapshots sirf stable UI components ke liye useful.',
+ code:`// Snapshot test:
+test('renders correctly', () => {
+  const { container } = render(<Button>Click</Button>);
+  expect(container).toMatchSnapshot();
+});
+// .snap file generate hoti hai — commit karo
+
+// Better alternative:
+test('button renders correctly', () => {
+  render(<Button>Click</Button>);
+  expect(screen.getByRole('button')).toHaveTextContent('Click');
+  expect(screen.getByRole('button')).toBeEnabled();
+});`,
+ tip:'"Snapshots = lazy testing. RTL assertions = meaningful testing. Prefer specific over snapshot"'},
+
+// PATTERNS
+{q:'React mein data fetching ke patterns kya hain?',diff:'m',topic:'Patterns',
+ ans:'1) useEffect + fetch (basic, boilerplate heavy). 2) React Query/SWR (recommended for most). 3) React Query + Suspense (cleanest DX). 4) Server Components in Next.js (zero client JS). Pattern choose karna: Small app = useEffect OK. Production = React Query. Next.js = Server Components + React Query hybrid.',
+ code:`// 1. useEffect (basic)
+useEffect(() => { fetch('/api').then(setData); }, []);
+
+// 2. React Query (recommended)
+const { data, isLoading } = useQuery({queryKey:['data'], queryFn: fetchFn});
+
+// 3. With Suspense (cleanest)
+const { data } = useSuspenseQuery({queryKey:['data'], queryFn: fetchFn});
+// No isLoading check — Suspense handles it
+
+// 4. Next.js Server Component (best performance)
+async function Page() {
+  const data = await db.findMany(); // direct DB!
+  return <UI data={data}/>;
+}`,
+ tip:'"Next.js mein Server Components + React Query combination = ultimate stack"'},
+
+{q:'Lifting State Up kya hai?',diff:'e',topic:'Patterns',
+ ans:'Lifting state up = shared state ko lowest common ancestor mein rakho. Jab 2 sibling components same data chahiye — unke parent mein state rakho, dono ko props ke through do. Over-lifting problem bhi hai — state bahut upar le gaye toh props drilling ho jaata hai. Solution: Context ya State management library.',
+ code:`// Problem: Dono components ko temperature chahiye
+function TemperatureDisplay() { /* needs temp */ }
+function TemperatureControl() { /* changes temp */ }
+
+// Solution: Lift to parent
+function TemperatureApp() {
+  const [temp, setTemp] = useState(20); // lifted here
+  return (
+    <>
+      <TemperatureDisplay temp={temp} />
+      <TemperatureControl temp={temp} onChange={setTemp} />
+    </>
+  );
+}`,
+ tip:'"Lift state up jab siblings share karein — but too high = props drilling, Context se solve karo"'},
+
+{q:'React mein composition kya hai? Inheritance se kyun better hai?',diff:'m',topic:'Patterns',
+ ans:'React explicitly recommends composition over inheritance. children prop se flexible components banao. Inheritance se component hierarchy banana React mein anti-pattern hai. "Specialization" bhi composition se achieve karo — ek generic component ko props se specialize karo.',
+ code:`// Inheritance ❌ React mein avoid karo
+class SpecialButton extends Button { ... }
+
+// Composition ✓
+function Button({ children, variant, ...props }) {
+  return <button className={variant} {...props}>{children}</button>;
+}
+// Specialize with props:
+function PrimaryButton(props) {
+  return <Button variant="primary" {...props} />;
+}
+// Flexible children:
+function Card({ children }) {
+  return <div className="card">{children}</div>;
+}`,
+ tip:'"children prop = Laravel @yield jaisa — parent decide nahi karta content kya ho, consumer decide karta hai"'},
+
+{q:'React 19 mein kya naya aaya?',diff:'h',topic:'React 18+',
+ ans:'React 19 major features: 1) Actions — async transitions with form handling. 2) useActionState hook — form state + action combine. 3) useOptimistic — optimistic UI updates. 4) use() hook — promises aur contexts read karna. 5) Server Actions stable. 6) ref as prop (no more forwardRef needed). 7) Improved hydration error messages.',
+ code:`// useActionState — React 19
+const [state, formAction, isPending] = useActionState(
+  async (prevState, formData) => {
+    const result = await submitForm(formData);
+    return result;
+  },
+  initialState
+);
+
+// useOptimistic
+const [optimisticItems, addOptimistic] = useOptimistic(items);
+// Instantly show item, revert if API fails
+
+// use() hook
+const user = use(UserPromise); // Suspense mein resolve hota hai
+const theme = use(ThemeContext); // useContext replacement`,
+ tip:'"React 19 = forms aur async operations bahut simpler ho gaye — Server Actions + useActionState = game changer"'},
+
+{q:'Lazy loading images React mein kaise karte hain?',diff:'e',topic:'Performance',
+ ans:'Native browser lazy loading: loading="lazy" attribute on img. React mein: Next.js ka next/image (automatic lazy loading + optimization). react-intersection-observer se custom implementation. Intersection Observer API directly bhi use kar sakte ho.',
+ code:`// 1. Native (simplest):
+<img src="/photo.jpg" loading="lazy" alt="photo" />
+
+// 2. Next.js Image (recommended for Next.js):
+import Image from 'next/image';
+<Image src="/photo.jpg" width={400} height={300} alt="photo" />
+// Automatically: lazy, WebP format, responsive sizes
+
+// 3. Custom with Intersection Observer:
+const { ref, inView } = useInView({ triggerOnce: true });
+<div ref={ref}>
+  {inView && <img src="/photo.jpg" alt="photo" />}
+</div>`,
+ tip:'"Next.js Image component = sab kuch automatic — lazy, format, size optimization. Use it!"'},
+
+{q:'Accessibility (a11y) React mein kaise ensure karein?',diff:'m',topic:'Accessibility',
+ ans:'1) Semantic HTML use karo — button not div. 2) aria-* attributes jahan zaroori ho. 3) keyboard navigation test karo. 4) Focus management (modal open/close pe). 5) useId() se label-input pair. 6) Color contrast check. 7) axe-core ya eslint-plugin-jsx-a11y se auto-check. RTL ke getByRole() queries accessibility encourage karte hain.',
+ code:`// ❌ Inaccessible:
+<div onClick={handleClick}>Click me</div>
+
+// ✓ Accessible:
+<button onClick={handleClick}>Click me</button>
+
+// ARIA labels:
+<button aria-label="Delete user Rahul">🗑</button>
+
+// Focus management in modal:
+useEffect(() => {
+  if (isOpen) closeButtonRef.current?.focus();
+}, [isOpen]);
+
+// Keyboard trap in modal:
+// react-focus-trap-hook use karo`,
+ tip:'"RTL mein getByRole() use karna = accessibility test bhi ho raha hai implicitly"'},
+];
+
+let currentTopic = null;
+let currentStep = 0;
+let interviewFilter = 'all';
+let searchQuery = '';
+
+function buildSidebar(){
+  const cats = {};
+  CONCEPTS.forEach((c,i)=>{
+    if(!cats[c.cat]) cats[c.cat]=[];
+    cats[c.cat].push({...c,idx:i});
+  });
+  let h='';
+  for(const cat in cats){
+    h+=`<div class="cat-label">${cat}</div>`;
+    cats[cat].forEach(c=>{
+      const dc=c.diff==='e'?'e':c.diff==='m'?'m':c.diff==='h'?'h':'x';
+      h+=`<button class="topic-btn" data-name="${c.name.toLowerCase()}" onclick="loadTopic(${c.idx})">
+        <span class="diff-dot diff-${dc}"></span>
+        <span class="tb-name">${c.name}</span>
+        <span class="tb-tag" style="background:var(--bg4);color:var(--text3)">${c.tag}</span>
+      </button>`;
+    });
+  }
+  document.getElementById('sidebarContent').innerHTML=h;
+  const ql=document.getElementById('quickLinks');
+  if(ql){
+    let qh='';
+    CONCEPTS.slice(0,8).forEach((c,i)=>{
+      qh+=`<div class="qc" onclick="loadTopic(${i})"><div>${c.name}</div><span class="qc-tag">${c.tag}</span></div>`;
+    });
+    ql.innerHTML=qh;
+  }
+}
+
+function filterTopics(q){
+  searchQuery=q.toLowerCase();
+  document.querySelectorAll('.topic-btn').forEach(b=>{
+    const name=b.dataset.name||'';
+    b.style.display=(!searchQuery||name.includes(searchQuery))?'flex':'none';
+  });
+}
+
+function loadTopic(idx){
+  currentTopic=CONCEPTS[idx];
+  currentStep=0;
+  document.getElementById('welcomeScreen').style.display='none';
+  document.getElementById('interviewScreen').style.display='none';
+  const cs=document.getElementById('conceptScreen');
+  cs.style.display='flex';
+  document.querySelectorAll('.topic-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const diff=currentTopic.diff;
+  const dc=diff==='e'?'e':diff==='m'?'m':'h';
+  const dl=diff==='e'?'Beginner':diff==='m'?'Intermediate':'Advanced';
+  cs.innerHTML=`
+<div class="concept-header">
+  <div class="concept-title">${currentTopic.name}</div>
+  <span class="concept-tag">${currentTopic.tag}</span>
+  <span class="diff-badge ${dc}">${dl}</span>
+</div>
+<div class="concept-desc">${currentTopic.desc}</div>
+<div class="top-grid" style="flex:1;min-height:0">
+  <div class="left-col" style="overflow-y:auto">
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-hd-dot panel-hd-dot2"></span>React Code</div>
+      <div class="code-wrap" id="sqlCode"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-hd-dot"></span>Laravel / PHP Equivalent</div>
+      <div class="laravel-wrap"><div class="lv-label">Comparison</div><div class="lv-code" id="cppHint"></div></div>
+    </div>
+  </div>
+  <div class="right-col" style="overflow-y:auto">
+    <div class="panel" style="flex-shrink:0">
+      <div class="step-bar" id="stepBar"></div>
+      <div class="viz viz-fade" id="vizArea"></div>
+    </div>
+    <div class="explain" id="explainBox">
+      <div class="explain-lbl">Kya ho raha hai</div>
+      <div class="explain-txt" id="explainTxt"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nb" id="prevBtn" onclick="prevStep()">← Pichla</button>
+      <span class="sc" id="sc"></span>
+      <button class="nb" id="nextBtn" onclick="nextStep()">Agla →</button>
+    </div>
+  </div>
+</div>`;
+  renderStep();
+}
+
+function renderStep(){
+  if(!currentTopic) return;
+  const steps=currentTopic.steps;
+  const step=steps[currentStep];
+  const sb=document.getElementById('stepBar');
+  sb.innerHTML=steps.map((s,i)=>`<button class="step-pill${i===currentStep?' active':''}" onclick="goStep(${i})">${s.label}</button>`).join('');
+  const codeEl=document.getElementById('sqlCode');
+  codeEl.innerHTML=currentTopic.query.map((q,li)=>{
+    const hl=step.qL&&step.qL.includes(li);
+    return`<span class="code-line${hl?' hl':''}">${q.t||' '}</span>`;
+  }).join('');
+  document.getElementById('cppHint').innerHTML=step.laravel||'';
+  document.getElementById('vizArea').innerHTML=step.render();
+  document.getElementById('explainTxt').innerHTML=step.explain||'';
+  document.getElementById('sc').textContent=`${currentStep+1} / ${steps.length}`;
+  document.getElementById('prevBtn').disabled=currentStep===0;
+  document.getElementById('nextBtn').disabled=currentStep===steps.length-1;
+  const bar=document.querySelector('.progress-bar');
+  if(bar) bar.querySelector('.progress-fill').style.width=`${((currentStep+1)/steps.length)*100}%`;
+}
+
+function goStep(i){currentStep=i;renderStep();}
+function nextStep(){if(currentStep<currentTopic.steps.length-1){currentStep++;renderStep();}}
+function prevStep(){if(currentStep>0){currentStep--;renderStep();}}
+
+function showInterview(){
+  document.getElementById('welcomeScreen').style.display='none';
+  document.getElementById('conceptScreen').style.display='none';
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  const is=document.getElementById('interviewScreen');
+  is.style.display='flex';
+  is.style.flexDirection='column';
+  renderInterview();
+}
+
+function renderInterview(){
+  const is=document.getElementById('interviewScreen');
+  const filtered=INTERVIEW_QS.filter(q=>
+    interviewFilter==='all'||q.diff===interviewFilter||q.topic.toLowerCase()===interviewFilter
+  );
+  const topics=[...new Set(INTERVIEW_QS.map(q=>q.topic))];
+  is.innerHTML=`
+<div class="interview-header">
+  <span style="font-size:20px">🎯</span>
+  <div class="interview-title">React Interview Questions</div>
+  <span style="margin-left:auto;font-size:12px;color:var(--text3)">${INTERVIEW_QS.length} questions • ${filtered.length} showing</span>
+</div>
+<div class="interview-body">
+  <div class="q-filter-row">
+    <button class="q-filter${interviewFilter==='all'?' active':''}" onclick="setFilter('all')">All (${INTERVIEW_QS.length})</button>
+    <button class="q-filter${interviewFilter==='e'?' active':''}" onclick="setFilter('e')" style="color:var(--green)">● Beginner</button>
+    <button class="q-filter${interviewFilter==='m'?' active':''}" onclick="setFilter('m')" style="color:var(--amber)">● Intermediate</button>
+    <button class="q-filter${interviewFilter==='h'?' active':''}" onclick="setFilter('h')" style="color:var(--coral)">● Advanced</button>
+    ${topics.map(t=>`<button class="q-filter${interviewFilter===t.toLowerCase()?' active':''}" onclick="setFilter('${t.toLowerCase()}')">${t}</button>`).join('')}
+  </div>
+  ${filtered.map((q,i)=>`
+  <div class="q-card" id="qcard${i}" onclick="toggleQ(${i})">
+    <div class="q-header">
+      <span class="q-num">Q${INTERVIEW_QS.indexOf(q)+1}</span>
+      <div style="flex:1">
+        <div class="q-text">${q.q}</div>
+        <div class="q-meta">
+          <span class="q-diff ${q.diff}">${q.diff==='e'?'Beginner':q.diff==='m'?'Intermediate':'Advanced'}</span>
+          <span class="q-topic">${q.topic}</span>
+        </div>
+      </div>
+      <span class="q-arrow">▾</span>
+    </div>
+    <div class="q-answer">
+      <div class="q-ans-label">Answer</div>
+      <div class="q-ans-text">${q.ans}</div>
+      ${q.code?`<pre class="q-code">${escapeHtml(q.code)}</pre>`:''}
+      ${q.tip?`<div class="q-tip"><div class="q-tip-label">💡 Interview Tip</div>${q.tip}</div>`:''}
+    </div>
+  </div>`).join('')}
+</div>`;
+}
+
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toggleQ(i){const c=document.getElementById('qcard'+i);c.classList.toggle('open');}
+function setFilter(f){interviewFilter=f;renderInterview();}
+
+buildSidebar();
+</script>
+</body>
+</html>
