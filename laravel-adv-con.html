@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laravel Advanced Mastery Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --bg4: #252d3f;
+    --border: #2a3347;
+    --border2: #364059;
+    --text: #e8eaf0;
+    --text2: #9ba3b8;
+    --text3: #6b7491;
+    --red: #ff6b6b;
+    --orange: #ff9f43;
+    --yellow: #ffd32a;
+    --green: #1dd1a1;
+    --blue: #54a0ff;
+    --purple: #a29bfe;
+    --pink: #fd79a8;
+    --cyan: #00cec9;
+    --red-bg: rgba(255,107,107,0.08);
+    --orange-bg: rgba(255,159,67,0.08);
+    --green-bg: rgba(29,209,161,0.08);
+    --blue-bg: rgba(84,160,255,0.08);
+    --purple-bg: rgba(162,155,254,0.08);
+    --pink-bg: rgba(253,121,168,0.08);
+    --cyan-bg: rgba(0,206,201,0.08);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font-ui: 'Inter', sans-serif;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0f1117 0%, #161b27 50%, #1a1f2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 24px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .logo {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .header-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text2);
+    transition: all 0.2s;
+    font-family: var(--font-ui);
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+  .tab.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* MAIN */
+  .main { padding: 20px 24px; max-width: 1200px; margin: 0 auto; }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* SEARCH */
+  .search-wrap { position: relative; margin-bottom: 18px; }
+  .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); }
+  .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font-ui);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--border2); }
+  .search-input::placeholder { color: var(--text3); }
+
+  /* CONCEPT GRID */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+  }
+
+  .concept-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .concept-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .concept-card.open { border-color: var(--border2); }
+
+  .card-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-num {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .card-tag {
+    font-size: 10px; font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .card-arrow { color: var(--text3); font-size: 12px; transition: transform 0.2s; flex-shrink: 0; }
+  .concept-card.open .card-arrow { transform: rotate(180deg); }
+  .card-preview { padding: 0 16px 14px; font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  .card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .concept-card.open .card-body { display: block; }
+
+  .detail-block { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .detail-block:last-child { border-bottom: none; }
+  .detail-label {
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text3); margin-bottom: 8px;
+  }
+  .detail-text { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+  .analogy-box {
+    background: var(--bg3);
+    border-left: 3px solid var(--yellow);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px; color: var(--text); line-height: 1.6;
+  }
+  .code-box {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    color: #abb2bf;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .mistake-box {
+    background: var(--red-bg);
+    border-left: 3px solid var(--red);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+  }
+  .iq-box {
+    background: var(--orange-bg);
+    border-left: 3px solid var(--orange);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px; color: var(--text); line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .ia-box {
+    background: var(--green-bg);
+    border-left: 3px solid var(--green);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+  }
+
+  /* COLOR THEMES */
+  .theme-red    { background: var(--red-bg); color: var(--red); }
+  .theme-orange { background: var(--orange-bg); color: var(--orange); }
+  .theme-green  { background: var(--green-bg); color: var(--green); }
+  .theme-blue   { background: var(--blue-bg); color: var(--blue); }
+  .theme-purple { background: var(--purple-bg); color: var(--purple); }
+  .theme-pink   { background: var(--pink-bg); color: var(--pink); }
+  .theme-cyan   { background: var(--cyan-bg); color: var(--cyan); }
+
+  /* PROJECT SECTION */
+  .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .section-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+
+  .flow-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 28px; }
+  .flow-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
+  }
+  .flow-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 44px;
+    flex-shrink: 0;
+  }
+  .flow-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    z-index: 1;
+  }
+  .flow-line {
+    width: 2px;
+    flex: 1;
+    min-height: 20px;
+    background: var(--border);
+  }
+  .flow-item:last-child .flow-line { display: none; }
+  .flow-content {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    flex: 1;
+  }
+  .flow-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .flow-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  .db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-bottom: 28px; }
+  .db-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .db-head { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--cyan); font-family: var(--font-mono); }
+  .db-cols { padding: 10px 14px; font-size: 11.5px; color: var(--text3); font-family: var(--font-mono); line-height: 1.8; }
+
+  .folder-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .folder-head { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text2); }
+  .folder-body { padding: 14px; font-size: 12px; font-family: var(--font-mono); color: #abb2bf; line-height: 1.9; white-space: pre; overflow-x: auto; }
+
+  /* 7-DAY PLAN */
+  .day-cards { display: flex; flex-direction: column; gap: 12px; }
+  .day-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .day-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+  .day-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+  .day-title-text { font-size: 14px; font-weight: 600; color: var(--text); }
+  .day-tasks { padding: 14px 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .task-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .task-check { color: var(--green); flex-shrink: 0; font-size: 11px; margin-top: 1px; }
+
+  /* Q&A SECTION */
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text2);
+    transition: all 0.2s;
+    font-family: var(--font-ui);
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  .qa-list { display: flex; flex-direction: column; gap: 8px; }
+  .qa-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .qa-question {
+    padding: 13px 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    transition: background 0.15s;
+  }
+  .qa-question:hover { background: var(--bg3); }
+  .qa-q-text { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .qa-cat { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 10px; flex-shrink: 0; }
+  .qa-chevron { color: var(--text3); font-size: 12px; flex-shrink: 0; transition: transform 0.2s; }
+  .qa-item.open .qa-chevron { transform: rotate(180deg); }
+  .qa-answer {
+    display: none;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--text2); line-height: 1.7;
+    background: var(--bg3);
+  }
+  .qa-item.open .qa-answer { display: block; }
+
+  /* STORY */
+  .story-wrapper { max-width: 780px; }
+  .story-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 16px; }
+  .story-para { font-size: 14px; color: var(--text); line-height: 1.85; margin-bottom: 16px; }
+  .story-para:last-child { margin-bottom: 0; }
+  .hl { background: var(--blue-bg); color: var(--blue); padding: 1px 7px; border-radius: 4px; font-size: 13px; font-weight: 500; }
+  code { background: var(--bg3); color: var(--orange); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: var(--font-mono); }
+  .hinglish-card { background: var(--bg3); border-left: 3px solid var(--purple); padding: 12px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 10px; font-size: 13px; color: var(--text2); line-height: 1.7; font-style: italic; }
+  .hinglish-label { font-size: 11px; font-weight: 600; color: var(--purple); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* STATS BAR */
+  .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 12px; color: var(--text2); }
+  .stat strong { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">🏗️</div>
+    <div>
+      <div class="header-title">Laravel Advanced Mastery Guide</div>
+      <div class="header-sub">30 concepts · Project architecture · 7-day plan · 30 Interview Q&As · Story answer</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('concepts',this)">📚 30 Concepts</button>
+    <button class="tab" onclick="showSection('project',this)">🏛️ Project</button>
+    <button class="tab" onclick="showSection('plan',this)">📅 7-Day Plan</button>
+    <button class="tab" onclick="showSection('qa',this)">🎯 30 Q&As</button>
+    <button class="tab" onclick="showSection('story',this)">📖 Story Answer</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- CONCEPTS -->
+<div id="section-concepts" class="section active">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input class="search-input" type="text" placeholder="Search concepts, tags, keywords..." oninput="filterConcepts(this.value)" />
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><strong>30</strong> Concepts</div>
+    <div class="stat"><strong>30</strong> Code Examples</div>
+    <div class="stat"><strong>30</strong> Interview Q&As</div>
+    <div class="stat"><strong>30</strong> Common Mistakes</div>
+  </div>
+  <div class="concept-grid" id="concept-grid"></div>
+</div>
+
+<!-- PROJECT -->
+<div id="section-project" class="section">
+  <div class="section-title">🏛️ Government Document Approval & Publishing CMS</div>
+  <div class="section-sub">An enterprise-grade system where ALL 30 Laravel concepts are used naturally. This is your main interview project story.</div>
+
+  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">📋 Complete Project Flow</div>
+  <div class="flow-list" id="flow-list"></div>
+
+  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">🗄️ Database Tables</div>
+  <div class="db-grid" id="db-grid"></div>
+
+  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">📁 Folder Structure</div>
+  <div class="folder-card">
+    <div class="folder-head">app/ directory</div>
+    <div class="folder-body">app/
+├── Console/Commands/
+│   └── PublishScheduledDocuments.php
+├── Events/
+│   └── DocumentSubmitted.php
+├── Http/
+│   ├── Controllers/
+│   │   └── DocumentController.php
+│   ├── Middleware/
+│   │   └── CheckApproverRole.php
+│   ├── Requests/
+│   │   └── DocumentUploadRequest.php
+│   └── Resources/
+│       └── DocumentResource.php
+├── Jobs/
+│   └── ProcessDocumentPDF.php
+├── Listeners/
+│   ├── SendDocumentNotification.php
+│   └── CreateAuditLog.php
+├── Mail/
+│   └── DocumentApprovedMail.php
+├── Models/
+│   └── Document.php
+├── Notifications/
+│   └── DocumentStatusNotification.php
+├── Observers/
+│   └── DocumentObserver.php
+├── Policies/
+│   └── DocumentPolicy.php
+├── Repositories/
+│   ├── Contracts/
+│   │   └── DocumentRepositoryInterface.php
+│   └── DocumentRepository.php
+├── Services/
+│   └── DocumentService.php
+└── Traits/
+    └── HasAuditLog.php</div>
+  </div>
+</div>
+
+<!-- 7-DAY PLAN -->
+<div id="section-plan" class="section">
+  <div class="section-title">📅 7-Day Intensive Practice Plan</div>
+  <div class="section-sub">Follow this plan daily. Each day builds on the previous. By Day 7 you can explain everything without notes.</div>
+  <div class="day-cards" id="day-cards"></div>
+</div>
+
+<!-- Q&A -->
+<div id="section-qa" class="section">
+  <div class="section-title">🎯 30 Advanced Interview Q&As</div>
+  <div class="section-sub">Click any question to reveal the strong answer. Filter by category to focus your practice.</div>
+  <div class="filter-bar" id="filter-bar"></div>
+  <div class="qa-list" id="qa-list"></div>
+</div>
+
+<!-- STORY -->
+<div id="section-story" class="section">
+  <div class="section-title">📖 Interview Story Answer</div>
+  <div class="section-sub">Your complete narrative for "Tell me about a complex project". Read aloud daily until it flows naturally.</div>
+  <div class="story-wrapper" id="story-content"></div>
+</div>
+
+</div><!-- end main -->
+
+<script>
+const concepts = [
+{n:1,title:"Service Container",tag:"Core",theme:"theme-purple",
+def:"Laravel's IoC container — manages class dependencies and performs dependency injection automatically.",
+analogy:"🏪 Smart registry. You register: 'When anyone asks for Logger, give them this class.' Any class needing Logger gets it auto-provided. You never new it up manually.",
+use:"Binding interfaces to implementations, making code testable, managing singletons across the app lifecycle.",
+answer:"In our CMS, I bound DocumentRepositoryInterface → DocumentRepository in AppServiceProvider. Any class type-hinting the interface gets our implementation auto-injected.",
+code:`// AppServiceProvider.php
+public function register(): void {
+    $this->app->bind(
+        DocumentRepositoryInterface::class,
+        DocumentRepository::class
+    );
+    // singleton = same instance every time
+    $this->app->singleton(CacheService::class);
+}
+
+// Auto-resolved in constructor
+public function __construct(
+    private DocumentRepositoryInterface $repo
+) {}`,
+mistake:"Confusing bind() vs singleton(). bind() = new instance each time. singleton() = same instance reused. Use singleton for shared-state services.",
+iq:"What's the difference between bind(), singleton(), and instance()?",
+ia:"bind() = new object every resolution. singleton() = same object throughout request. instance() = manually register an already-created object. Use singleton for config/cache wrappers; bind for stateless repositories."
+},
+{n:2,title:"Dependency Injection",tag:"Core",theme:"theme-purple",
+def:"Passing dependencies from outside a class rather than creating them inside — via constructor, method, or property injection.",
+analogy:"🍕 Pizza shop doesn't grow tomatoes. Tomatoes are injected from outside. Shop focuses on pizza; ingredients come from suppliers.",
+use:"Every controller, service, job — makes code decoupled and testable.",
+answer:"DocumentController injects DocumentService via constructor. In tests I mock the service — no real DB needed. The class has zero awareness of how the service is built.",
+code:`class DocumentController extends Controller {
+    public function __construct(
+        private DocumentService $service,
+        private Cache $cache
+    ) {}
+
+    public function store(DocumentUploadRequest $request) {
+        return new DocumentResource(
+            $this->service->create($request->validated())
+        );
+    }
+}`,
+mistake:"Using app() or new Service() inside methods — creates tight coupling and kills testability.",
+iq:"How is method injection different from constructor injection?",
+ia:"Constructor injection = always required, available everywhere. Method injection = Laravel resolves only for that method call — useful for route methods where you need request-specific objects."
+},
+{n:3,title:"Custom Service Provider",tag:"Core",theme:"theme-purple",
+def:"Bootstraps and registers services, bindings, observers, macros into the Laravel application.",
+analogy:"🏗️ Office setup contractor. Wires electricity, sets up phones, binds contracts — all before employees arrive. When app starts, everything is ready.",
+use:"Register bindings, boot observers, register macros, load config for a domain.",
+answer:"I created DocumentServiceProvider to register repository bindings and boot DocumentObserver — keeping all document-setup in one place.",
+code:`class DocumentServiceProvider extends ServiceProvider {
+    public function register(): void {
+        $this->app->singleton(
+            DocumentRepositoryInterface::class,
+            DocumentRepository::class
+        );
+    }
+
+    public function boot(): void {
+        Document::observe(DocumentObserver::class);
+
+        Blade::directive('rupee', function($expr) {
+            return "<?php echo '₹'.number_format($expr,2); ?>";
+        });
+    }
+}
+// Register in config/app.php providers array`,
+mistake:"Putting heavy logic in register() — it runs before other providers boot. Use boot() for anything needing other services.",
+iq:"Difference between register() and boot() in ServiceProvider?",
+ia:"register() runs first — only bind to container. boot() runs after ALL providers registered — safely use other services here. Think: register = set up, boot = start up."
+},
+{n:4,title:"Repository Pattern",tag:"Architecture",theme:"theme-cyan",
+def:"Abstraction layer between business logic and data access — all DB queries go through Repository classes.",
+analogy:"📚 Librarian is your repository. You don't search shelves — you ask the librarian. They know where everything is. Shelves can be reorganized; you still ask the same librarian.",
+use:"All model CRUD operations, especially when query logic is complex or you need testability.",
+answer:"DocumentRepository handles all Eloquent queries. Service layer calls $this->repo->findPublished() — no query logic leaks into services or controllers.",
+code:`interface DocumentRepositoryInterface {
+    public function findPublished(): Collection;
+    public function create(array $data): Document;
+    public function approve(int $id): Document;
+}
+
+class DocumentRepository implements
+    DocumentRepositoryInterface
+{
+    public function findPublished(): Collection {
+        return Document::published()
+            ->with(['category', 'uploader'])
+            ->latest()
+            ->get();
+    }
+
+    public function create(array $data): Document {
+        return Document::create($data);
+    }
+}`,
+mistake:"Putting business logic inside repository. Repository = data access only. Events, notifications, cache = Service layer.",
+iq:"Why use Repository Pattern when Eloquent is already an abstraction?",
+ia:"Eloquent abstracts SQL but query logic still leaks everywhere. Repository centralizes it, makes controllers thin, and lets you mock the DB in tests. You can swap Eloquent for raw SQL or an API without touching business logic."
+},
+{n:5,title:"Service Layer",tag:"Architecture",theme:"theme-cyan",
+def:"Contains business logic — sits between Controller and Repository. Controller → Service → Repository → DB.",
+analogy:"🏦 Bank teller (Controller) takes your request. Manager (Service) decides what to do. Vault (Repository) stores money. Teller never opens the vault directly.",
+use:"Any action with multiple steps: validate, save, fire event, send notification, clear cache.",
+answer:"DocumentService.create() generates slug, calls repository, fires event, dispatches PDF job, clears cache — all in one clean method.",
+code:`class DocumentService {
+    public function __construct(
+        private DocumentRepositoryInterface $repo,
+        private Cache $cache
+    ) {}
+
+    public function create(array $data): Document {
+        $data['slug'] = Str::slug($data['title']);
+        $data['submitted_by'] = auth()->id();
+
+        $document = $this->repo->create($data);
+
+        event(new DocumentSubmitted($document));
+        ProcessDocumentPDF::dispatch($document);
+        $this->cache->forget('published_documents');
+
+        return $document;
+    }
+}`,
+mistake:"Making service a thin wrapper around repository. Service must contain ALL business logic including events, cache clearing, notifications.",
+iq:"What goes in Service vs Repository vs Controller?",
+ia:"Controller: HTTP handling, response formatting. Service: business rules, events, cache, notifications. Repository: database queries only. If it's 'what the app does' → Service. If it's 'how data is fetched' → Repository."
+},
+{n:6,title:"Form Request Validation",tag:"HTTP",theme:"theme-blue",
+def:"Dedicated class for validating HTTP requests — moves validation out of controllers into dedicated classes.",
+analogy:"🔒 Airport security checkpoint. Before reaching the gate (controller), bag is checked (FormRequest). Invalid = turned back without boarding.",
+use:"All store/update routes with more than 2 validation rules.",
+answer:"DocumentUploadRequest validates file type, size, title uniqueness, and checks authorization — controller receives only valid, clean data.",
+code:`class DocumentUploadRequest extends FormRequest {
+    public function authorize(): bool {
+        return auth()->user()->can('upload-documents');
+    }
+
+    public function rules(): array {
+        return [
+            'title'      => 'required|unique:documents|max:255',
+            'file'       => 'required|file|mimes:pdf|max:10240',
+            'category'   => 'required|exists:categories,id',
+            'publish_at' => 'nullable|date|after:now',
+        ];
+    }
+
+    public function messages(): array {
+        return [
+            'file.mimes' => 'Only PDF files are allowed.',
+        ];
+    }
+}`,
+mistake:"Using $request->all() after validation — always use $request->validated() to get ONLY validated fields. Never trust unvalidated input.",
+iq:"Difference between authorize() and rules() in FormRequest?",
+ia:"authorize() checks if user is ALLOWED to make this request — returns bool, gives 403 if false. rules() defines what data must look like — gives 422 if fails. Two separate concerns: permission vs data integrity."
+},
+{n:7,title:"Middleware",tag:"HTTP",theme:"theme-blue",
+def:"Code that runs before/after an HTTP request reaches your controller — a filterable pipeline.",
+analogy:"🚦 Highway checkpoints. Every car (request) passes through — some redirected, some stamped, some blocked. Destination (controller) sees only pre-filtered traffic.",
+use:"Auth checking, role verification, rate limiting, request logging, CORS headers.",
+answer:"CheckApproverRole middleware validates user has 'approver' permission before allowing access to approval endpoints. Returns 403 JSON for APIs.",
+code:`class CheckApproverRole {
+    public function handle(
+        Request $request,
+        Closure $next,
+        string $role = 'approver'
+    ) {
+        if (!$request->user()->hasRole($role)) {
+            return response()->json([
+                'error' => 'Insufficient permissions'
+            ], 403);
+        }
+
+        $response = $next($request);
+
+        // After response — add headers
+        $response->headers->set('X-Processed-By', 'cms-api');
+
+        return $response;
+    }
+}`,
+mistake:"Forgetting to call $next($request) — request never reaches the controller! Code after $next runs on the response way back.",
+iq:"How would you run code AFTER response is sent to browser?",
+ia:"Use terminable middleware with a terminate() method — runs after response is sent. Register it as singleton so same instance from handle() is used in terminate(). Good for logging and analytics."
+},
+{n:8,title:"Policies & Gates",tag:"Authorization",theme:"theme-pink",
+def:"Gates = simple closures for permissions. Policies = organized classes for model-specific authorization.",
+analogy:"🏢 Gate = security guard at main door (general rules). Policy = department manager (rules per resource). 'Can this user view THIS document?' = Policy.",
+use:"Any feature with role-based or ownership-based access control.",
+answer:"DocumentPolicy checks if user is owner or has 'approver' role before allowing approve action. Controller calls $this->authorize('approve', $document).",
+code:`class DocumentPolicy {
+    public function view(User $user, Document $doc): bool {
+        return $doc->is_published
+            || $user->id === $doc->submitted_by
+            || $user->hasRole('admin');
+    }
+
+    public function approve(User $user, Document $doc): bool {
+        return $user->hasRole('approver')
+            && $doc->status === 'pending';
+    }
+}
+
+// Controller — auto 403 if fails
+public function approve(Document $document) {
+    $this->authorize('approve', $document);
+    return $this->service->approve($document);
+}`,
+mistake:"Putting authorization logic in middleware or controllers — Policies keep it centralized, testable, reusable.",
+iq:"When would you use a Gate vs a Policy?",
+ia:"Gate for simple one-off checks not tied to a model: Gate::define('is-admin', ...). Policy for model-specific actions with multiple methods. More than 2-3 checks for a model → create a Policy."
+},
+{n:9,title:"Events & Listeners",tag:"Events",theme:"theme-orange",
+def:"Events signal something happened. Listeners react to those signals. Decouples the trigger from all reactions.",
+analogy:"📰 Newspaper (Event) published. Subscribers (Listeners) react. The newspaper doesn't know who reads it — add 1000 subscribers without changing the newspaper.",
+use:"After document submitted, user registered, payment processed — multiple independent reactions needed.",
+answer:"DocumentSubmitted event fires on submission. Three listeners react: SendNotification, LogAudit, UpdateStats — all independently, without submission code knowing.",
+code:`class DocumentSubmitted {
+    public function __construct(
+        public readonly Document $document
+    ) {}
+}
+
+class SendDocumentNotification implements ShouldQueue {
+    public function handle(DocumentSubmitted $event): void {
+        $approvers = User::role('approver')->get();
+        Notification::send(
+            $approvers,
+            new NewDocumentNotification($event->document)
+        );
+    }
+}
+
+// EventServiceProvider
+protected $listen = [
+    DocumentSubmitted::class => [
+        SendDocumentNotification::class,
+        CreateAuditLog::class,
+        UpdateDashboardStats::class,
+    ],
+];`,
+mistake:"Not implementing ShouldQueue on listeners doing heavy work — blocks the request. Always queue slow listeners.",
+iq:"Difference between synchronous and queued listeners?",
+ia:"Default listener runs synchronously — user waits. With ShouldQueue, listener dispatches to queue worker and request returns immediately. Use ShouldQueue for emails, notifications, external APIs."
+},
+{n:10,title:"Observers",tag:"Events",theme:"theme-orange",
+def:"Classes that listen to Eloquent model lifecycle events: creating, created, updating, updated, deleting, deleted.",
+analogy:"📷 Surveillance camera (Observer) watches every action in a shop (Model). Product created = automatically logged. The shop doesn't manually notify the camera.",
+use:"Auto-generating slugs, audit logs, cache clearing, sending notifications on model changes.",
+answer:"DocumentObserver auto-generates slug on creating, creates audit_log on every change, clears cache on updated/deleted.",
+code:`class DocumentObserver {
+    public function creating(Document $doc): void {
+        $doc->slug = Str::slug($doc->title).'-'.Str::random(6);
+        $doc->submitted_by = auth()->id();
+    }
+
+    public function updated(Document $doc): void {
+        AuditLog::create([
+            'model'    => 'Document',
+            'model_id' => $doc->id,
+            'action'   => 'updated',
+            'changes'  => $doc->getDirty(),
+            'user_id'  => auth()->id(),
+        ]);
+        Cache::forget("document:{$doc->id}");
+    }
+
+    public function deleted(Document $doc): void {
+        Cache::forget('published_documents');
+    }
+}`,
+mistake:"Registering observers in multiple places — only register once, in AppServiceProvider or dedicated ServiceProvider.",
+iq:"Difference between Events and Observers?",
+ia:"Observer watches model lifecycle (Eloquent events). Custom Event is manually fired for business actions. Use Observer for automatic model-level reactions; use Event for intentional business actions needing multiple independent reactions."
+},
+{n:11,title:"Jobs & Queues",tag:"Background",theme:"theme-green",
+def:"Jobs are tasks dispatched to run in background. Queues process them asynchronously — outside the HTTP lifecycle.",
+analogy:"🍔 McDonald's order. You order (dispatch), get number, sit down. Kitchen (worker) processes independently. You're not standing at counter waiting.",
+use:"PDF generation, email sending, image processing, external API calls, bulk operations.",
+answer:"ProcessDocumentPDF handles watermarking, compression, S3 upload after submission — without blocking the user's request.",
+code:`class ProcessDocumentPDF implements ShouldQueue {
+    use Dispatchable, Queueable, SerializesModels;
+
+    public int $tries = 3;
+    public int $backoff = 60;
+
+    public function __construct(
+        private Document $document
+    ) {}
+
+    public function handle(): void {
+        $pdf = PDF::loadFile($this->document->file_path);
+        $pdf->addWatermark('OFFICIAL');
+
+        $path = "documents/{$this->document->id}/final.pdf";
+        Storage::put($path, $pdf->output());
+
+        $this->document->update([
+            'processed_path' => $path,
+            'status' => 'processed'
+        ]);
+    }
+
+    public function failed(Throwable $e): void {
+        Log::error("PDF failed: {$e->getMessage()}");
+        $this->document->update(['status' => 'failed']);
+    }
+}`,
+mistake:"Not handling failed() method — silent failures are dangerous in production. Always log and update status on failure.",
+iq:"How do you retry a failed job? How prevent infinite retries?",
+ia:"Set $tries for max attempts. $backoff for delay between retries. failed() runs after all retries exhausted. Use ShouldBeUnique to prevent duplicate jobs. php artisan queue:retry {id} to manually retry."
+},
+{n:12,title:"Notifications",tag:"Background",theme:"theme-green",
+def:"Unified system to send via multiple channels (email, SMS, Slack, database, push) from a single class.",
+analogy:"📢 One announcement reaches newspaper, radio, TV simultaneously. Write it once (Notification class), broadcasts to all channels.",
+use:"Document approved/rejected alerts, user system alerts, digest emails.",
+answer:"DocumentStatusNotification sends email + stores in database channel. Users see notification history in their dashboard.",
+code:`class DocumentStatusNotification extends Notification
+    implements ShouldQueue
+{
+    public function __construct(
+        private Document $document,
+        private string $status
+    ) {}
+
+    public function via(object $notifiable): array {
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage {
+        return (new MailMessage)
+            ->subject("Document {$this->status}")
+            ->line("Your doc has been {$this->status}.")
+            ->action('View', url("/docs/{$this->document->id}"));
+    }
+
+    public function toArray(object $notifiable): array {
+        return [
+            'document_id' => $this->document->id,
+            'status'      => $this->status,
+        ];
+    }
+}`,
+mistake:"Not queuing notifications — $user->notify() is synchronous by default. Always implement ShouldQueue.",
+iq:"How do database notifications work?",
+ia:"They insert into notifications table with type, notifiable_id, data (JSON), read_at. Use $user->unreadNotifications to get unread. $notification->markAsRead() to mark. Perfect for in-app notification center."
+},
+{n:13,title:"Scheduler / Cron",tag:"Background",theme:"theme-green",
+def:"Laravel's task scheduler lets you define scheduled commands in PHP — one cron entry manages everything.",
+analogy:"⏰ Office building automation: lights on at 8am, AC adjusts at 6pm, doors lock at midnight — programmed once, run automatically.",
+use:"Auto-publishing scheduled documents, cleanup jobs, weekly reports, digest emails.",
+answer:"Scheduler runs every minute checking documents with publish_at <= now() and publishes them, clears cache.",
+code:`// Console/Kernel.php
+protected function schedule(Schedule $schedule): void {
+    $schedule->command('documents:publish-scheduled')
+        ->everyMinute()
+        ->withoutOverlapping()
+        ->onFailure(function() {
+            Log::error('Scheduled publish failed');
+        });
+
+    $schedule->command('documents:cleanup-temp-files')
+        ->daily()
+        ->at('02:00');
+
+    $schedule->job(GenerateWeeklyReport::class)
+        ->weeklyOn(1, '09:00')
+        ->emailOutputTo('admin@gov.in');
+}
+
+// Single cron entry needed on server:
+// * * * * * php /path/to/artisan schedule:run`,
+mistake:"Adding multiple server cron entries per task — with Scheduler you need only ONE entry. Everything else is managed in PHP.",
+iq:"What does withoutOverlapping() do?",
+ia:"Prevents a task from running again if the previous instance is still running. Creates a mutex lock. Critical for long-running tasks — without it, you could have 10 instances of the same command running simultaneously."
+},
+{n:14,title:"Caching",tag:"Performance",theme:"theme-cyan",
+def:"Storing expensive query/computation results in fast storage (Redis/Memcached) to avoid repeating the work.",
+analogy:"📱 Phone contacts. Instead of searching full directory every time, save frequently called numbers. Cache = saved numbers.",
+use:"Expensive DB queries, API responses, permission lists, rendered fragments, config values.",
+answer:"Published documents list cached for 1 hour. Observer clears cache on every change. Read speed improved 20x in production.",
+code:`class DocumentRepository {
+    public function getPublished(): Collection {
+        return Cache::remember(
+            'published_documents',
+            now()->addHour(),
+            fn() => Document::published()
+                ->with(['category', 'uploader'])
+                ->latest()->get()
+        );
+    }
+}
+
+// Tagged cache for bulk invalidation
+Cache::tags(['documents', 'homepage'])
+    ->remember('featured', 3600, fn() => ...);
+
+// Clear all document caches at once
+Cache::tags('documents')->flush();
+
+// Cache forever
+Cache::rememberForever('site_settings',
+    fn() => Setting::all()->pluck('value','key')
+);`,
+mistake:"Not invalidating cache when data changes — stale data is worse than no cache. Always clear related keys in Observer/Service.",
+iq:"Difference between cache tags and regular cache keys?",
+ia:"Regular keys must be cleared individually. Tags group related items — Cache::tags('documents')->flush() clears ALL document caches at once. Requires Redis or Memcached — doesn't work with file/database cache driver."
+},
+{n:15,title:"API Resources",tag:"HTTP",theme:"theme-blue",
+def:"Transformation layer between Eloquent models and JSON responses — controls exactly what data is exposed.",
+analogy:"🎁 Gift wrapping. The actual gift (model) has serial numbers you don't want shown. Resource wraps it — shows only what the recipient should see.",
+use:"All API endpoints — ensures consistent, versioned, secure response structure.",
+answer:"DocumentResource exposes only safe fields, transforms status to human-readable strings, conditionally includes relationships based on what's loaded.",
+code:`class DocumentResource extends JsonResource {
+    public function toArray(Request $request): array {
+        return [
+            'id'           => $this->id,
+            'title'        => $this->title,
+            'slug'         => $this->slug,
+            'status'       => $this->status_label,
+            'category'     => new CategoryResource(
+                                  $this->whenLoaded('category')
+                              ),
+            'file_url'     => $this->when(
+                                  $this->is_published,
+                                  fn() => Storage::url($this->file_path)
+                              ),
+            'published_at' => $this->published_at?->format('d M Y'),
+            // NEVER expose: file_path, processed_path, internal notes
+        ];
+    }
+}`,
+mistake:"Returning $model->toArray() directly — exposes sensitive fields, timestamps, internal IDs. Always use Resources for APIs.",
+iq:"Difference between Resource and ResourceCollection?",
+ia:"Resource transforms a single model. ResourceCollection wraps multiple with pagination metadata. Use $this->whenLoaded() to prevent N+1 in nested relationships — only includes relation if already eager loaded."
+},
+{n:16,title:"Traits & Helpers",tag:"Core",theme:"theme-purple",
+def:"Traits = reusable code blocks included in multiple classes. Helpers = global utility functions available everywhere.",
+analogy:"🧰 Swiss Army knife. One tool, many blades. Any class can 'use' a trait and gain capabilities without inheritance.",
+use:"HasAuditLog, HasSlug, SoftDeletes, custom global helper functions.",
+answer:"HasAuditLog trait used by Document, User, Category models — adds audit logging to all without code duplication.",
+code:`trait HasAuditLog {
+    public static function bootHasAuditLog(): void {
+        static::updated(function ($model) {
+            AuditLog::create([
+                'model'    => class_basename($model),
+                'model_id' => $model->id,
+                'changes'  => $model->getDirty(),
+                'user_id'  => auth()->id(),
+                'ip'       => request()->ip(),
+            ]);
+        });
+    }
+}
+
+class Document extends Model {
+    use HasAuditLog, SoftDeletes;
+}
+
+// Helpers — app/helpers.php (autoloaded in composer.json)
+if (!function_exists('format_file_size')) {
+    function format_file_size(int $bytes): string {
+        return round($bytes / 1048576, 2) . ' MB';
+    }
+}`,
+mistake:"Making traits too fat — if a trait has 20 methods, split it. Traits should have ONE clear responsibility.",
+iq:"When use trait vs base class vs service?",
+ia:"Trait: cross-cutting concerns shared across unrelated classes (logging, slugging). Base class: true inheritance — same type. Service: stateful business logic needing dependencies. If a class can 'have' it → trait. If it 'is' it → base class."
+},
+{n:17,title:"Eager Loading",tag:"Performance",theme:"theme-cyan",
+def:"Loading related models in a single query using with() to prevent the N+1 problem.",
+analogy:"🛒 Grocery shopping. N+1 = going to store separately for each item (100 trips). Eager loading = one trip with full list.",
+use:"Any query that accesses relationships inside a loop or on a collection.",
+answer:"Documents listing made 201 queries — 1 per document for category. Added with(['category','uploader']) → reduced to 3 queries total.",
+code:`// BAD — N+1 Problem
+$documents = Document::all(); // 1 query
+foreach ($documents as $doc) {
+    echo $doc->category->name; // 1 query per document!
+}
+// = 101 queries for 100 documents
+
+// GOOD — Eager Loading
+$documents = Document::with([
+    'category',
+    'uploader:id,name,department', // only needed columns
+    'approvals' => fn($q) => $q->latest()->limit(1),
+])->latest()->paginate(20);
+// = 3 queries total regardless of result count
+
+// Lazy eager loading (already have models)
+$documents->loadMissing('category');
+
+// withCount — no separate relation objects
+Document::withCount('comments')
+    ->having('comments_count', '>', 5)
+    ->get();`,
+mistake:"Adding with() for every relationship 'just in case' — over-fetching data you don't use. Only eager load what you ACTUALLY render.",
+iq:"What's the N+1 problem and how does with() solve it?",
+ia:"N+1: 1 query to get N records + N queries for each relation = N+1. with() uses SQL IN — 1 query gets all records, 1 query gets ALL related records with WHERE id IN (...). 101 queries → 2 queries."
+},
+{n:18,title:"Query Optimization",tag:"Performance",theme:"theme-cyan",
+def:"Techniques to make DB queries faster: select specific columns, indexes, query scopes, pagination.",
+analogy:"🗺️ GPS navigation. Bad: check every road. Optimized: use highways (indexes), skip closed roads (where clauses), go direct (select columns).",
+use:"Any slow endpoint, high-traffic pages, reporting queries.",
+answer:"Added composite index on (status, published_at), used select() to limit columns, added query scopes — query time dropped from 800ms to 40ms.",
+code:`// Optimized query
+Document::select(['id','title','slug','published_at','category_id'])
+    ->published()                    // query scope
+    ->with(['category:id,name'])
+    ->when($request->category,
+        fn($q) => $q->where('category_id', $request->category))
+    ->orderBy('published_at', 'desc')
+    ->paginate(20);
+
+// Migration: composite index
+Schema::table('documents', function (Blueprint $table) {
+    $table->index(['status', 'published_at']);
+    $table->fullText(['title', 'content']); // for search
+});
+
+// Query Scope
+public function scopePublished(Builder $query): Builder {
+    return $query->where('status', 'published')
+        ->whereDate('published_at', '<=', now());
+}
+
+// Large datasets — use chunking
+Document::chunk(500, function ($docs) {
+    foreach ($docs as $doc) { /* process */ }
+});`,
+mistake:"Using DB::raw() for things Eloquent handles. Not using chunk()/cursor() for 10k+ records — runs out of memory.",
+iq:"How do you debug a slow query in Laravel?",
+ia:"Enable DB::enableQueryLog(), check DB::getQueryLog(). Use Laravel Debugbar in dev. DB::listen() for all queries. Run EXPLAIN on raw SQL. Add indexes on WHERE/ORDER BY/JOIN columns. Use Telescope in production."
+},
+{n:19,title:"Database Transactions",tag:"Data",theme:"theme-pink",
+def:"Groups multiple DB operations so they ALL succeed or ALL rollback — ensuring data consistency.",
+analogy:"💸 Bank transfer. Debit A AND credit B must both succeed. If credit fails after debit, money disappears. Transaction = both happen or neither does.",
+use:"Any operation modifying multiple related tables (document + approval + audit log).",
+answer:"Document approval wraps status update + approval record + audit log in a transaction. Any failure = full rollback. No partial states ever.",
+code:`public function approve(Document $document): Document {
+    return DB::transaction(function () use ($document) {
+        $document->update(['status' => 'approved']);
+
+        DocumentApproval::create([
+            'document_id' => $document->id,
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
+
+        AuditLog::create([
+            'action'   => 'approved',
+            'model_id' => $document->id,
+        ]);
+
+        // If ANY of above throws — ALL rollback
+        return $document->fresh();
+    });
+}`,
+mistake:"Using transactions for single queries — unnecessary overhead. NOT using transactions for multi-table updates — risk of partial data corruption.",
+iq:"What is transaction isolation level and when does it matter?",
+ia:"Isolation level controls what a transaction sees from concurrent transactions. Default MySQL is REPEATABLE READ. For financial operations use SERIALIZABLE to prevent phantom reads. For reports that tolerate slight inconsistency, READ COMMITTED is faster."
+},
+{n:20,title:"Logging & Error Handling",tag:"Operations",theme:"theme-red",
+def:"Systematic recording of events, errors, user actions. Error handling ensures graceful failure recovery.",
+analogy:"✈️ Black box flight recorder. Records everything. When something goes wrong, you know exactly what happened, when, and why.",
+use:"Every production application — debugging, audit trail, security monitoring.",
+answer:"Structured logging with context arrays — every entry includes user_id, document_id, IP. Critical errors notify Slack. Handler returns consistent JSON for API errors.",
+code:`// Structured logging with context
+Log::channel('documents')->info('Document submitted', [
+    'document_id' => $document->id,
+    'user_id'     => auth()->id(),
+    'ip'          => request()->ip(),
+    'file_size'   => $document->file_size,
+]);
+
+// Custom exception handler
+// app/Exceptions/Handler.php
+public function register(): void {
+    $this->renderable(function (DocumentNotFoundException $e) {
+        return response()->json([
+            'error' => 'Document not found',
+            'code'  => 'DOC_NOT_FOUND',
+        ], 404);
+    });
+
+    $this->reportable(function (Throwable $e) {
+        // Send to Sentry or Slack
+    });
+}
+
+// Custom log channel — config/logging.php
+'documents' => [
+    'driver' => 'daily',
+    'path'   => storage_path('logs/documents.log'),
+    'days'   => 30,
+],`,
+mistake:"Using Log::info('Something happened') with just a string — impossible to query/filter in production. Always pass context array as second argument.",
+iq:"How would you set up error monitoring in production Laravel?",
+ia:"Integrate Sentry via Laravel package. Configure in Handler.php with $this->reportable(). Slack notifications for critical errors via Log channels. Use Telescope for local debugging. Structure logs as JSON for ELK Stack parsing."
+},
+{n:21,title:"Custom Artisan Commands",tag:"Operations",theme:"theme-red",
+def:"Custom CLI commands for maintenance, data migration, scheduled operations.",
+analogy:"🔧 Custom workshop tools. Built-in artisan = hammer/screwdriver. You build custom tools for specific jobs.",
+use:"Bulk operations, data fixes, scheduled tasks, deployment scripts.",
+answer:"documents:publish-scheduled checks documents with publish_at <= now(), publishes them, clears cache, logs results — runs every minute via Scheduler.",
+code:`class PublishScheduledDocuments extends Command {
+    protected $signature =
+        'documents:publish-scheduled
+        {--dry-run : Preview without actually publishing}';
+
+    protected $description = 'Publish documents whose date has arrived';
+
+    public function handle(DocumentService $service): int {
+        $docs = Document::where('status', 'approved')
+            ->where('publish_at', '<=', now())
+            ->get();
+
+        if ($this->option('dry-run')) {
+            $this->table(
+                ['ID', 'Title'],
+                $docs->map(fn($d) => [$d->id, $d->title])
+            );
+            return self::SUCCESS;
+        }
+
+        $bar = $this->output->createProgressBar($docs->count());
+        foreach ($docs as $doc) {
+            $service->publish($doc);
+            $bar->advance();
+        }
+        $bar->finish();
+
+        $this->info("\nPublished {$docs->count()} documents.");
+        return self::SUCCESS;
+    }
+}`,
+mistake:"Not returning self::SUCCESS or self::FAILURE — exit code matters for deployment scripts and Scheduler's error detection.",
+iq:"How do you test a custom Artisan command?",
+ia:"Use $this->artisan('documents:publish-scheduled')->assertSuccessful() and ->assertExitCode(0). Test output with ->expectsOutput('Published'). Test questions with ->expectsQuestion(...)->expectsOutput(...)."
+},
+{n:22,title:"Events vs Jobs vs Observers",tag:"Events",theme:"theme-orange",
+def:"Events: something happened, multiple listeners react. Jobs: background task, single responsibility. Observers: react to model lifecycle changes.",
+analogy:"🏙️ Observer = CCTV (auto-watches everything). Event = Emergency broadcast (many services react). Job = Delivery truck (specific task in background).",
+use:"Understanding when to use which is a senior-level skill that separates good developers.",
+answer:"Document created → Observer auto-generates slug. Document submitted → Event fires multiple listeners. PDF generation → Job (heavy background task).",
+code:`// Observer: automatic model-level reactions
+// "When THIS model changes, always do this"
+class DocumentObserver {
+    public function creating(Document $doc) {
+        $doc->slug = Str::slug($doc->title); // always
+    }
+}
+
+// Event: business action, multiple things react
+// "Document submitted — who all needs to know?"
+DocumentSubmitted::dispatch($document);
+// → NotifyApprovers (queued listener)
+// → CreateAuditLog (queued listener)
+// → UpdateDashboard (queued listener)
+
+// Job: one specific heavy task in background
+// "Do this ONE thing, retry if it fails"
+ProcessDocumentPDF::dispatch($document)
+    ->delay(now()->addSeconds(5))
+    ->onQueue('pdf-processing');`,
+mistake:"Using Jobs for things multiple systems react to (→ should be Event). Using Events for single heavy tasks (→ should be Job).",
+iq:"If you need to send email AND create audit log when document approved — what approach?",
+ia:"Fire a DocumentApproved Event. Two queued Listeners: SendApprovalEmail and CreateApprovalAuditLog. Adding more reactions doesn't touch existing code (Open/Closed Principle). Both run in background. Independently testable."
+},
+{n:23,title:"File Upload Handling",tag:"HTTP",theme:"theme-blue",
+def:"Secure handling of file uploads: validation, storage, processing, retrieval.",
+analogy:"📦 Government document intake. File arrives → validated → scanned → stored securely → indexed → accessible only to authorized.",
+use:"Document uploads, profile pictures, attachments — any user file input.",
+answer:"PDFs validated for type/size, stored with UUID names in private S3, processed via queue for watermarking. Served via temporary signed URLs.",
+code:`// Form Request validation
+'file' => 'required|file|mimes:pdf|max:10240',
+
+// Service method
+public function storeFile(UploadedFile $file): string {
+    // NEVER use original filename — security risk
+    $filename = Str::uuid() . '.' . $file->extension();
+
+    // Store in PRIVATE disk
+    $path = $file->storeAs(
+        "documents/" . date('Y/m'),
+        $filename,
+        'private'
+    );
+
+    return $path;
+}
+
+// Generate temporary signed URL (15 min)
+public function getDownloadUrl(Document $document): string {
+    return Storage::disk('private')
+        ->temporaryUrl(
+            $document->file_path,
+            now()->addMinutes(15)
+        );
+}`,
+mistake:"Storing files with original user-provided names — path traversal attack. Storing private files in public disk — anyone can access directly.",
+iq:"How do you securely serve private files in Laravel?",
+ia:"Store in private disk (not public). Use Storage::temporaryUrl() for S3 signed URLs expiring in minutes. For local: create a download route that checks authorization, reads with Storage::get(), streams with response()->streamDownload(). Never serve raw file paths."
+},
+{n:24,title:"Role Permission System",tag:"Authorization",theme:"theme-pink",
+def:"Assigning roles to users, permissions to roles — controlling what each user type can access.",
+analogy:"🏢 Office access cards. Intern = cafeteria only. Manager = office floors. Admin = server room. Card type (role) determines which doors (permissions) open.",
+use:"Every multi-user application — essential for any professional project.",
+answer:"Used Spatie Laravel Permission package. Roles: admin, approver, editor, viewer. Permissions cached per user to avoid DB hit on every request.",
+code:`// Using Spatie Permission Package
+
+// Assign role
+$user->assignRole('approver');
+$user->givePermissionTo('approve-documents');
+
+// Check in controller
+if (!$user->can('approve-documents')) abort(403);
+
+// Check in Blade
+@can('approve-documents')
+    <button>Approve</button>
+@endcan
+
+// Policy integration
+public function approve(User $user, Document $doc): bool {
+    return $user->hasRole(['admin', 'approver'])
+        && $doc->status === 'pending';
+}
+
+// Route middleware
+Route::middleware(['auth', 'role:approver'])
+    ->patch('/documents/{doc}/approve', ApproveController::class);
+
+// Clear permission cache when roles change
+app()[\Spatie\Permission\PermissionRegistrar::class]
+    ->forgetCachedPermissions();`,
+mistake:"Hardcoding role names as strings everywhere — define as constants or PHP Enum. Not caching permission checks — DB hit on every check is expensive.",
+iq:"How would you implement permission caching?",
+ia:"Spatie caches permissions automatically in a single cache key per user. Custom: cache $user->getAllPermissions() array after first load, clear on role/permission change. Cache::remember('user_perms_'.$user->id, 3600, ...)."
+},
+{n:25,title:"Audit Logs",tag:"Data",theme:"theme-red",
+def:"Recording who did what, when, to which record — complete history for compliance and debugging.",
+analogy:"📋 Government file noting. Every action on an official file gets stamped: 'Received by X on date, forwarded to Y, approved by Z.' Nothing undocumented.",
+use:"Government systems, financial apps, healthcare — any system needing accountability trail.",
+answer:"HasAuditLog trait logs every model change with user, IP, before/after values in immutable audit_logs table.",
+code:`// Migration
+Schema::create('audit_logs', function (Blueprint $table) {
+    $table->id();
+    $table->string('model');
+    $table->unsignedBigInteger('model_id');
+    $table->string('action');
+    $table->json('old_values')->nullable();
+    $table->json('new_values')->nullable();
+    $table->foreignId('user_id')->nullable()->constrained();
+    $table->string('ip_address')->nullable();
+    $table->timestamps();
+    $table->index(['model', 'model_id']);
+});
+
+// Trait
+trait HasAuditLog {
+    public static function bootHasAuditLog(): void {
+        static::updating(function ($model) {
+            AuditLog::create([
+                'model'      => class_basename($model),
+                'model_id'   => $model->id,
+                'action'     => 'updated',
+                'old_values' => $model->getOriginal(),
+                'new_values' => $model->getDirty(),
+                'user_id'    => auth()->id(),
+                'ip_address' => request()?->ip(),
+            ]);
+        });
+    }
+}`,
+mistake:"Logging inside a DB transaction without afterCommit — rollback also rolls back audit log! Use afterCommit() queued job for reliable audit logging.",
+iq:"How do you handle audit logs when a DB transaction rolls back?",
+ia:"Dispatch a queued job for the audit log. Jobs dispatched inside transactions automatically wait for commit. Or use ->afterCommit() option so job only dispatches if transaction successfully commits."
+},
+{n:26,title:"Soft Deletes",tag:"Data",theme:"theme-red",
+def:"Instead of physically deleting, set a deleted_at timestamp. Record invisible but recoverable.",
+analogy:"🗑️ Recycle bin. Deleted files go to bin (deleted_at set), not erased. Restore = deleted_at null. Permanent = forceDelete.",
+use:"Documents, users, orders — anything needing recovery capability or audit history.",
+answer:"Documents use SoftDeletes — deleting sets deleted_at, removes from listings, but can be restored by admin or referenced in audit history.",
+code:`// Migration
+$table->softDeletes(); // adds deleted_at column
+
+// Model
+class Document extends Model {
+    use SoftDeletes;
+}
+
+// Automatically excluded from ALL queries
+Document::all();       // excludes soft-deleted
+Document::find(1);     // null if soft-deleted
+
+// Include soft-deleted
+Document::withTrashed()->get();
+Document::onlyTrashed()->get(); // ONLY deleted
+
+// Restore
+$document->restore();
+$document->forceDelete(); // permanent removal
+
+// Validation with soft deletes
+'title' => Rule::unique('documents', 'slug')
+    ->where('deleted_at', null)
+    ->ignore($this->document)`,
+mistake:"Forgetting that unique constraints don't ignore soft-deleted records — two deleted records with same unique value + new record = unique violation!",
+iq:"How do you handle unique constraints with soft deletes?",
+ia:"Add Rule::unique(...)->where('deleted_at', null) in validation. Or create a composite unique index on (column, deleted_at) using a default epoch value for non-deleted records."
+},
+{n:27,title:"Rate Limiting",tag:"HTTP",theme:"theme-blue",
+def:"Limiting how many requests a user/IP can make in a time window — prevents abuse and DDoS.",
+analogy:"🚗 Toll booth. Each car gets through. But a truck convoy (bot) gets held — only 60 per minute, then wait.",
+use:"API endpoints, login forms, file uploads, email sending — any endpoint that could be abused.",
+answer:"Document download API: 100 requests/minute per user. Login: 5 attempts/IP/minute. Custom 429 JSON response for API clients.",
+code:`// routes/api.php
+Route::middleware(['auth:sanctum', 'throttle:100,1'])
+    ->get('/documents/{id}/download', ...);
+
+// Custom rate limiter — AppServiceProvider
+RateLimiter::for('api', function (Request $request) {
+    return Limit::perMinute(60)
+        ->by($request->user()?->id ?: $request->ip())
+        ->response(function () {
+            return response()->json([
+                'error'       => 'Too many requests',
+                'retry_after' => 60,
+            ], 429);
+        });
+});
+
+// Different limits per role
+RateLimiter::for('uploads', function (Request $request) {
+    return $request->user()->isAdmin()
+        ? Limit::none()
+        : Limit::perHour(10)->by($request->user()->id);
+});`,
+mistake:"Same rate limit for authenticated and unauthenticated users — bots share IP limits, legitimate users get affected. Always limit by user ID when authenticated.",
+iq:"How would you implement dynamic rate limits based on user plan?",
+ia:"RateLimiter::for() with conditional: check $request->user()->plan and return different Limit values. Runs on every request so always uses current plan. Store plan in user record for DB-backed dynamic limits."
+},
+{n:28,title:"Mail System",tag:"Background",theme:"theme-green",
+def:"Mailable classes for composing, queuing, and sending emails with multiple driver support.",
+analogy:"📮 Post office. You write letter (Mailable), address it, drop at office (send/queue). Office delivers via various carriers (SMTP, Mailgun, SES).",
+use:"Welcome emails, approval notifications, digest emails, password resets.",
+answer:"DocumentApprovedMail is a queued Mailable using Blade template. Mailgun in production, log driver in testing.",
+code:`class DocumentApprovedMail extends Mailable
+    implements ShouldQueue
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(
+        public Document $document,
+        public User $approver
+    ) {}
+
+    public function envelope(): Envelope {
+        return new Envelope(
+            subject: "Approved: {$this->document->title}",
+        );
+    }
+
+    public function content(): Content {
+        return new Content(
+            view: 'emails.document-approved',
+            with: [
+                'downloadUrl' => Storage::temporaryUrl(
+                    $this->document->file_path,
+                    now()->addDay()
+                ),
+            ]
+        );
+    }
+}
+
+// Send
+Mail::to($document->submitter)
+    ->queue(new DocumentApprovedMail($document, $approver));`,
+mistake:"Not queuing emails — Mail::send() is synchronous. Users wait for email to send. Always implement ShouldQueue and use Mail::queue().",
+iq:"How do you test emails were sent without actually sending?",
+ia:"Mail::fake() at test start — intercepts all mail. Assert with Mail::assertQueued(MyMail::class, fn($m) => $m->document->id === $id). Never real emails in tests."
+},
+{n:29,title:"Laravel Sanctum / API Auth",tag:"Security",theme:"theme-pink",
+def:"API token authentication for SPAs and mobile apps — simpler than Passport for most use cases.",
+analogy:"🎫 Event wristband. Register → get wristband (token). Show at each area (API call). Lost wristband? Revoke it, get new one.",
+use:"Mobile apps, SPA frontends, third-party API integrations.",
+answer:"CMS mobile app uses Sanctum tokens with specific abilities. Tokens expire after 24h. Logout revokes only that device's token.",
+code:`// Login endpoint
+public function login(LoginRequest $request): JsonResponse {
+    if (!Auth::attempt($request->only('email','password'))) {
+        return response()->json(['error' => 'Invalid credentials'], 401);
+    }
+
+    $user = User::find(Auth::id());
+
+    // Delete old tokens for this device
+    $user->tokens()
+        ->where('name', $request->device_name)
+        ->delete();
+
+    $token = $user->createToken(
+        $request->device_name ?? 'api',
+        ['documents:read', 'documents:upload'], // abilities
+        now()->addDay()                          // expiry
+    );
+
+    return response()->json([
+        'token' => $token->plainTextToken,
+        'user'  => new UserResource($user),
+    ]);
+}
+
+// Check ability
+if (!$request->user()->tokenCan('documents:upload')) {
+    abort(403, 'Token cannot upload documents');
+}`,
+mistake:"Not setting token expiry — tokens live forever by default. Always set expiry and implement token rotation for sensitive operations.",
+iq:"Difference between Sanctum and Passport?",
+ia:"Sanctum: lightweight, for SPAs and simple token auth, cookie-based auth for same-domain SPAs. Passport: full OAuth2 server for third-party authorization. Mobile app needing auth = Sanctum. Building 'Login with YourApp' = Passport."
+},
+{n:30,title:"Testing Basics",tag:"Quality",theme:"theme-purple",
+def:"Automated testing: Feature tests (HTTP requests), Unit tests (isolated classes), ensuring code correctness.",
+analogy:"✅ Car safety tests. Unit = test each part (brakes, engine). Feature = test whole car in controlled conditions. Both needed before shipping.",
+use:"Every feature — especially critical paths like auth, payments, approvals.",
+answer:"Feature tests for all API endpoints, Unit tests for Services. Factories for data, RefreshDatabase for clean state, Mail/Queue fakes.",
+code:`class DocumentApprovalTest extends TestCase {
+    use RefreshDatabase;
+
+    public function test_approver_can_approve_document(): void {
+        $approver = User::factory()->create()
+                        ->assignRole('approver');
+        $document = Document::factory()->pending()->create();
+
+        Mail::fake();
+        Queue::fake();
+
+        $response = $this->actingAs($approver, 'sanctum')
+            ->patchJson("/api/documents/{$document->id}/approve");
+
+        $response->assertOk()
+            ->assertJsonPath('data.status', 'approved');
+
+        $this->assertDatabaseHas('documents', [
+            'id'     => $document->id,
+            'status' => 'approved',
+        ]);
+
+        Mail::assertQueued(DocumentApprovedMail::class);
+        Queue::assertPushed(ProcessDocumentPDF::class);
+    }
+
+    public function test_non_approver_gets_forbidden(): void {
+        $editor = User::factory()->create()->assignRole('editor');
+        $doc    = Document::factory()->pending()->create();
+
+        $this->actingAs($editor, 'sanctum')
+            ->patchJson("/api/documents/{$doc->id}/approve")
+            ->assertForbidden();
+    }
+}`,
+mistake:"Writing tests that test Laravel's internals rather than YOUR business rules. Test your logic, not that ->where() works.",
+iq:"Difference between Feature test and Unit test in Laravel?",
+ia:"Feature test: full HTTP lifecycle — real request → middleware → controller → service → DB → response. Slower but tests integration. Unit test: single class in isolation with mocked dependencies. Faster, more focused. Rule: Unit for complex Service logic. Feature for endpoints and user flows."
+}
+];
+
+const flows = [
+{title:"Admin uploads document",desc:"FormRequest validates: PDF only, max 10MB, title unique, publish_at in future. authorize() checks 'upload' permission via Policy.",t:"theme-purple"},
+{title:"DocumentService.create() handles business logic",desc:"Generates slug, sets submitted_by, stores file with UUID name to private S3. Returns Document model.",t:"theme-cyan"},
+{title:"DocumentRepository saves to database",desc:"All Eloquent operations centralized here. No DB queries in controllers or services. Returns hydrated model.",t:"theme-cyan"},
+{title:"DocumentObserver triggers on 'created'",desc:"Auto-creates audit_log entry with user_id and IP. Sets initial metadata fields automatically.",t:"theme-orange"},
+{title:"DocumentSubmitted Event fires",desc:"Service calls event(new DocumentSubmitted($document)). Decouples submission from all downstream reactions.",t:"theme-orange"},
+{title:"Multiple Listeners react to the Event",desc:"SendNotification: queued, notifies all approvers. CreateAuditLog: records submission. UpdateDashboardStats: increments pending count.",t:"theme-orange"},
+{title:"Job processes PDF file in background",desc:"ProcessDocumentPDF dispatched to 'pdf' queue. Adds watermark, compresses, uploads to S3. Retries 3x on failure.",t:"theme-green"},
+{title:"Policy checks approval permission",desc:"DocumentPolicy.approve() verifies user has 'approver' role AND document status is 'pending'.",t:"theme-pink"},
+{title:"Admin approves or rejects",desc:"DB Transaction wraps: update status + create approval record + audit log. Full rollback if any step fails.",t:"theme-pink"},
+{title:"Notification sent to document submitter",desc:"DocumentStatusNotification via 'mail' and 'database' channels. User sees it in their notification center.",t:"theme-green"},
+{title:"Scheduler auto-publishes on publish_at date",desc:"documents:publish-scheduled runs every minute. withoutOverlapping() prevents duplicate runs.",t:"theme-blue"},
+{title:"Cache cleared, frontend shows fresh data",desc:"DocumentObserver.updated() calls Cache::forget(). Next request rebuilds cache from DB.",t:"theme-cyan"},
+{title:"Complete audit trail maintained",desc:"HasAuditLog trait on Document model records every change. Immutable audit_logs table for compliance.",t:"theme-red"},
+];
+
+const dbs = [
+{name:"documents",cols:"id, title, slug, category_id, file_path, processed_path,\nstatus (enum), submitted_by, publish_at, published_at,\ndeleted_at, created_at, updated_at"},
+{name:"document_approvals",cols:"id, document_id, approved_by, status,\nremarks, created_at, updated_at"},
+{name:"audit_logs",cols:"id, model, model_id, action,\nold_values (json), new_values (json),\nuser_id, ip_address, user_agent, created_at"},
+{name:"categories",cols:"id, name, slug, parent_id,\ndescription, is_active, timestamps"},
+{name:"users",cols:"id, name, email, department,\npassword, remember_token, timestamps"},
+{name:"roles / permissions",cols:"Spatie tables: roles, permissions,\nmodel_has_roles, model_has_permissions,\nrole_has_permissions"},
+{name:"notifications",cols:"id (uuid), type, notifiable_type,\nnotifiable_id, data (json), read_at, created_at"},
+{name:"jobs / failed_jobs",cols:"Standard Laravel queue tables for\njob processing and failure tracking"},
+];
+
+const days = [
+{d:1,title:"Foundation — Container, DI, Providers, Repository",t:"theme-purple",
+tasks:["Study Service Container: bind/singleton/instance","Build custom ServiceProvider with bindings","Create DocumentRepositoryInterface + implementation","Build mock UserRepository, test it","Explain each concept aloud without notes"]},
+{d:2,title:"HTTP Layer — FormRequest, Middleware, Resources",t:"theme-blue",
+tasks:["Build DocumentUploadRequest with custom rules","Create CheckApproverRole middleware","Build DocumentResource with conditional fields","Test with Postman: 422 invalid, 403 unauthorized","Practice explaining N+1 and fix with with()"]},
+{d:3,title:"Events, Observers, Jobs",t:"theme-orange",
+tasks:["Create DocumentSubmitted event + 2 listeners","Build DocumentObserver (slug, audit)","Create ProcessDocumentPDF job with failed()","Test queue: dispatch job, check queue:work","Draw the complete event flow on paper"]},
+{d:4,title:"Authorization — Policies, Gates, Permissions",t:"theme-pink",
+tasks:["Build DocumentPolicy with 4 methods","Register Gates in AuthServiceProvider","Integrate Spatie Permission package","Test: approver can approve, editor cannot","Implement Sanctum token auth with abilities"]},
+{d:5,title:"Performance — Caching, Eager Loading, Optimization",t:"theme-cyan",
+tasks:["Add Cache::remember to repository","Find/fix N+1 queries using Debugbar","Add composite database indexes","Implement query scopes","Benchmark before/after with DB::getQueryLog()"]},
+{d:6,title:"Operations — Scheduler, Logging, Artisan",t:"theme-green",
+tasks:["Build documents:publish-scheduled command","Schedule with withoutOverlapping()","Set up structured logging with context","Add proper error handling in Handler.php","Test scheduler locally with schedule:test"]},
+{d:7,title:"Testing + Full Project Review",t:"theme-red",
+tasks:["Write Feature test for complete approval flow","Write Unit test for DocumentService","Use Mail::fake(), Queue::fake(), Event::fake()","Record yourself explaining the full project","Practice the story answer without any notes"]},
+];
+
+const qaData = [
+{cat:"Core",q:"What is Laravel Service Container and why is it important?",
+a:"Service Container is Laravel's IoC container — manages class dependencies. Important because: (1) Automatically resolves dependencies via type-hints, (2) Lets you swap implementations by binding interfaces, (3) Makes testing easy by mocking bindings. Real answer: 'In our project, I bound DocumentRepositoryInterface to DocumentRepository. Any class needing it gets it auto-injected — in tests I inject a mock.'"},
+{cat:"Core",q:"Explain Dependency Injection with a real example from your project.",
+a:"DI = passing dependencies from outside instead of creating inside. In DocumentService, I inject DocumentRepositoryInterface via constructor — not new DocumentRepository() inside. Why? In tests I inject MockRepository — no real DB. Also flexible — can inject RedisRepository tomorrow without changing service."},
+{cat:"Architecture",q:"What is Repository Pattern and why use it over direct Eloquent?",
+a:"Repository = abstraction over data access. Without it, query logic scatters across controllers, services, jobs. Repository centralizes it. Benefits: (1) All queries in one place, easy to optimize, (2) Mockable for tests, (3) Swap Eloquent for API/raw SQL without touching business logic."},
+{cat:"Architecture",q:"What goes in a Service class vs a Repository class?",
+a:"Repository = data access ONLY (queries, eager loading, pagination). Service = business logic (events, notifications, cache, validation). Controller → Service → Repository → Database. Each layer has one job. If it's 'what the app does' → Service. If it's 'how data is stored' → Repository."},
+{cat:"Events",q:"What's the difference between Events, Observers, and Jobs?",
+a:"Observer: automatically watches Eloquent lifecycle (creating, updated, deleted) — slug generation, auto-logging. Event: manually fired for business actions — multiple independent reactions needed. Job: single background task with retry logic — heavy processing like PDF generation, external API calls."},
+{cat:"Performance",q:"What is the N+1 query problem? How do you detect and fix it?",
+a:"N+1: 1 query to get N records + N queries for each relation = N+1 total. 100 documents loading category each = 101 queries. Fix: Document::with('category')->get() = 2 queries total. Detect: Laravel Debugbar in dev shows query count. Telescope in production. Fix with with() for all accessed relationships."},
+{cat:"Performance",q:"How does caching improve performance in Laravel?",
+a:"Cache stores expensive results in Redis/Memcached. First request = DB query + store. Subsequent = cache hit, no DB. Our listing: 150ms → 5ms after caching. Key practice: ALWAYS invalidate cache when data changes via Observer or Service. Use Cache::tags() for grouped invalidation."},
+{cat:"Security",q:"How do you handle file uploads securely in Laravel?",
+a:"(1) Validate mimes + max size in FormRequest. (2) Never use original filename — path traversal risk. Use UUID. (3) Store in private disk, not public. (4) Serve via Storage::temporaryUrl() — expires in 15 min. (5) Scan for viruses in queued job. (6) Check MIME type server-side."},
+{cat:"Security",q:"Explain Laravel Sanctum vs Passport — when to use which?",
+a:"Sanctum: lightweight, API tokens + SPA cookie auth. For mobile apps, SPAs. Simple setup. Passport: full OAuth2 server. For when YOU are the OAuth provider — third parties log in with your app. 90% of projects need Sanctum. Only use Passport if building 'Login with YourApp' functionality."},
+{cat:"Authorization",q:"What's the difference between a Gate and a Policy?",
+a:"Gate: simple closure for general permissions not tied to a model — Gate::define('is-admin', ...). Policy: class organizing permissions for a specific model with multiple methods (view, create, update, delete, approve). 1-2 checks → Gate. Multiple actions on a model → Policy."},
+{cat:"HTTP",q:"What is FormRequest and why use it instead of $request->validate()?",
+a:"FormRequest = dedicated class for validation + authorization. Benefits: (1) authorize() separates permission check, (2) Reusable across multiple controllers, (3) Thin controllers, (4) Independently testable, (5) Custom messages(). Rule: any route with more than 2 validation rules = FormRequest."},
+{cat:"HTTP",q:"How does Laravel middleware work? Give a real example.",
+a:"Middleware wraps the request pipeline. Can: block and return response, modify request before passing on, modify response after creation. Example: CheckApproverRole checks user role. No 'approver' role = 403 JSON. Otherwise calls $next($request). Code after $next runs on the way back out."},
+{cat:"Background",q:"How do you handle job failures in Laravel queues?",
+a:"(1) Set $tries for max attempts. (2) $backoff for delay between retries. (3) Implement failed(Throwable $e) — called after all retries exhausted. (4) In failed(): log error, update status to 'failed', notify admins. (5) Jobs go to failed_jobs table. (6) Set $timeout to prevent stuck jobs."},
+{cat:"Background",q:"What is the difference between queuing a listener vs dispatching a job?",
+a:"Queued Listener: conceptually 'reaction to something that happened', tied to an event, implements ShouldQueue. Job: dedicated background task with its own identity, retry logic, priority queue. Use Job for: complex multi-step processing, needs unique ID, specific queue priority."},
+{cat:"Data",q:"Why use database transactions? Give a real example.",
+a:"Transactions ensure multiple operations ALL succeed or ALL rollback. Example: approval = (1) update status, (2) create approval record, (3) log audit. If step 3 fails, steps 1+2 must rollback — otherwise document shows 'approved' with no approval record. DB::transaction(closure) handles all three automatically."},
+{cat:"Data",q:"How do soft deletes work and what are the gotchas?",
+a:"SoftDeletes adds deleted_at column. $model->delete() sets deleted_at = now(). Eloquent adds WHERE deleted_at IS NULL automatically. Gotcha 1: unique constraints still trigger on soft-deleted records. Gotcha 2: foreign keys — child records still exist even if parent soft-deleted. Gotcha 3: need deleted_at index for performance."},
+{cat:"Data",q:"How do you implement audit logging in Laravel?",
+a:"Create audit_logs table (model, model_id, action, old_values JSON, new_values JSON, user_id, ip). HasAuditLog trait using Eloquent model events. $model->getOriginal() for before values, $model->getDirty() for changes. If inside transaction: use afterCommit() queued job — rollback would also rollback synchronous log."},
+{cat:"Operations",q:"How does Laravel Scheduler work? What is withoutOverlapping()?",
+a:"Single cron entry runs every minute. Kernel.php defines schedule in PHP — version controlled. withoutOverlapping() creates mutex lock — prevents task running again if previous instance still running. Critical for long tasks. Scheduler also supports: onFailure hooks, email output, runInBackground(), onOneServer() for multi-server setups."},
+{cat:"Core",q:"What's the difference between bind() and singleton() in Service Container?",
+a:"bind(): creates new instance every resolution — stateless. singleton(): creates once, reuses same instance throughout request — shared state. Use singleton for: config objects, shared cache wrappers, DB connection wrappers. Use bind for: repositories, services — stateless and fresh each time."},
+{cat:"Performance",q:"How would you optimize a slow Laravel API endpoint?",
+a:"Step 1: DB::getQueryLog() — find slow/N+1 queries. Step 2: Add with() for eager loading. Step 3: select() to limit columns. Step 4: Database indexes on WHERE/ORDER BY columns. Step 5: Cache::remember() for expensive queries. Step 6: paginate() instead of get(). Step 7: Queue heavy processing. Measure before/after each change."},
+{cat:"Architecture",q:"How do you structure a large Laravel project?",
+a:"Domain-Driven approach: group by feature not technical type. app/Domains/Documents/ containing Model, Controller, Service, Repository, Policy, Events, Jobs. Key principles: Controllers thin (HTTP handling only), Services for business logic, Repositories for data, Events for decoupling. Each domain is independently deployable."},
+{cat:"Background",q:"What are different ways to dispatch jobs in Laravel?",
+a:"SomeJob::dispatch($data) — immediately. ->delay(now()->addMinutes(5)) — delayed. ->onQueue('priority') — specific queue. SomeJob::dispatchSync() — synchronous (tests). SomeJob::dispatchAfterResponse() — after response sent. Bus::chain([Job1::class, Job2::class])->dispatch() — sequential chain."},
+{cat:"HTTP",q:"What are API Resources and why use them instead of $model->toArray()?",
+a:"Resources = transformation layer. Why: (1) Hide sensitive fields (passwords, internal paths), (2) Consistent structure, (3) $this->when($condition, $value) for conditional fields, (4) $this->whenLoaded() prevents N+1 in nested relations, (5) Easy versioning: V1/DocumentResource vs V2/DocumentResource."},
+{cat:"Security",q:"How do you implement rate limiting in Laravel?",
+a:"RateLimiter::for('api', fn($request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip())). Apply: Route::middleware('throttle:api'). Different limits by role: return $user->isPro() ? Limit::perMinute(1000) : Limit::perMinute(60). Always limit by user ID when authenticated — IP limits hurt legitimate office users."},
+{cat:"Core",q:"Explain the Laravel request lifecycle.",
+a:"Request → public/index.php → loads Composer autoload + bootstraps app → HTTP Kernel resolves → global middleware runs → routes match → route middleware runs → controller called → response returns through middleware → sent to browser. Service providers register/boot BEFORE any request is handled."},
+{cat:"Quality",q:"How do you write tests for code that sends emails or dispatches jobs?",
+a:"Use fakes: Mail::fake(), Queue::fake(), Event::fake(), Notification::fake(), Storage::fake(). After action assert: Mail::assertQueued(MyMail::class), Queue::assertPushed(MyJob::class), Event::assertDispatched(MyEvent::class). Makes tests fast (no real sending) and deterministic (no network dependency)."},
+{cat:"Operations",q:"What is the difference between Log channels and log levels?",
+a:"Levels (severity): debug < info < notice < warning < error < critical < alert < emergency. Channels (destination): stack, single, daily, slack, papertrail. Log::channel('documents')->error(...) sends to specific channel. In production set LOG_LEVEL=warning to suppress debug/info noise. Create per-domain channels for easy filtering."},
+{cat:"Authorization",q:"How would you implement a complete RBAC system in Laravel?",
+a:"Spatie Permission package: Users → Roles (many-to-many), Roles → Permissions (many-to-many), Users can also have direct permissions. Implement: assignRole(), givePermissionTo(), can(), hasRole(). Register role/permission middleware. Cache permissions. Gate::before() to allow admins bypass all. Define permissions as PHP Enum for type safety."},
+{cat:"Core",q:"What are Observers vs model events? Which is better?",
+a:"Both watch Eloquent lifecycle. Model events: $model->creating = closure, defined in model itself — clutters model. Observer: separate class, all events in one place, independently testable, can be toggled: Document::withoutObservers(fn() => ...) during seeding. Observer is better for production code."},
+];
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+const themeColors = {
+  "theme-purple":"#a29bfe","theme-cyan":"#00cec9","theme-blue":"#54a0ff",
+  "theme-orange":"#ff9f43","theme-green":"#1dd1a1","theme-pink":"#fd79a8",
+  "theme-red":"#ff6b6b"
+};
+const themeBgs = {
+  "theme-purple":"rgba(162,155,254,0.12)","theme-cyan":"rgba(0,206,201,0.12)",
+  "theme-blue":"rgba(84,160,255,0.12)","theme-orange":"rgba(255,159,67,0.12)",
+  "theme-green":"rgba(29,209,161,0.12)","theme-pink":"rgba(253,121,168,0.12)",
+  "theme-red":"rgba(255,107,107,0.12)"
+};
+
+function buildConcepts(){
+  const grid = document.getElementById('concept-grid');
+  grid.innerHTML = concepts.map(c => {
+    const col = themeColors[c.theme] || '#9ba3b8';
+    const bg  = themeBgs[c.theme]   || 'rgba(155,163,184,0.1)';
+    return `<div class="concept-card" id="card-${c.n}" onclick="toggleCard(${c.n})">
+      <div class="card-header">
+        <div class="card-num" style="background:${bg};color:${col}">${String(c.n).padStart(2,'0')}</div>
+        <div class="card-title">${c.title}</div>
+        <div class="card-tag" style="background:${bg};color:${col}">${c.tag}</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-preview">${c.def.substring(0,85)}...</div>
+      <div class="card-body">
+        <div class="detail-block">
+          <div class="detail-label">📖 Definition</div>
+          <div class="detail-text">${c.def}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">💡 Real-life analogy</div>
+          <div class="analogy-box">${c.analogy}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">🔧 When to use in projects</div>
+          <div class="detail-text">${c.use}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">🎤 How to answer "Where have you used it?"</div>
+          <div class="detail-text">${c.answer}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">💻 Laravel code example</div>
+          <div class="code-box">${esc(c.code)}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">⚠️ Common mistake beginners make</div>
+          <div class="mistake-box">${c.mistake}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label">🎯 Interview Q&A</div>
+          <div class="iq-box">Q: ${c.iq}</div>
+          <div class="ia-box">A: ${c.ia}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(n){
+  document.getElementById('card-'+n).classList.toggle('open');
+}
+
+function filterConcepts(q){
+  const v = q.toLowerCase();
+  document.querySelectorAll('.concept-card').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+}
+
+function buildProject(){
+  document.getElementById('flow-list').innerHTML = flows.map((f,i)=>{
+    const col = themeColors[f.t]||'#9ba3b8';
+    const bg  = themeBgs[f.t]||'rgba(155,163,184,0.1)';
+    return `<div class="flow-item">
+      <div class="flow-left">
+        <div class="flow-num" style="background:${bg};color:${col}">${i+1}</div>
+        <div class="flow-line"></div>
+      </div>
+      <div class="flow-content">
+        <div class="flow-title">${f.title}</div>
+        <div class="flow-desc">${f.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('db-grid').innerHTML = dbs.map(d =>
+    `<div class="db-card">
+      <div class="db-head">${d.name}</div>
+      <div class="db-cols">${d.cols}</div>
+    </div>`
+  ).join('');
+}
+
+function buildPlan(){
+  document.getElementById('day-cards').innerHTML = days.map(d=>{
+    const col = themeColors[d.t]||'#9ba3b8';
+    const bg  = themeBgs[d.t]||'rgba(155,163,184,0.1)';
+    return `<div class="day-card">
+      <div class="day-header">
+        <div class="day-badge" style="background:${bg};color:${col}">Day ${d.d}</div>
+        <div class="day-title-text">${d.title}</div>
+      </div>
+      <div class="day-tasks">
+        ${d.tasks.map(t=>`<div class="task-item"><span class="task-check">✓</span>${t}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildQA(){
+  const cats = ['All', ...new Set(qaData.map(q=>q.cat))];
+  document.getElementById('filter-bar').innerHTML = cats.map(c=>
+    `<button class="filter-btn${c==='All'?' active':''}" onclick="filterQA('${c}',this)">${c}${c==='All'?' ('+qaData.length+')':''}</button>`
+  ).join('');
+  renderQA(qaData);
+}
+
+function filterQA(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderQA(cat==='All'?qaData:qaData.filter(q=>q.cat===cat));
+}
+
+function renderQA(items){
+  const catColors = {
+    Core:"theme-purple",Architecture:"theme-cyan",Events:"theme-orange",
+    Performance:"theme-cyan",Security:"theme-pink",Authorization:"theme-pink",
+    HTTP:"theme-blue",Background:"theme-green",Data:"theme-red",
+    Operations:"theme-red",Quality:"theme-purple"
+  };
+  document.getElementById('qa-list').innerHTML = items.map((q,i)=>{
+    const t = catColors[q.cat]||'theme-blue';
+    const col = themeColors[t]||'#54a0ff';
+    const bg  = themeBgs[t]||'rgba(84,160,255,0.1)';
+    return `<div class="qa-item" id="qa-${i}">
+      <div class="qa-question" onclick="toggleQA('qa-${i}')">
+        <div class="qa-q-text">${q.q}</div>
+        <div class="qa-cat" style="background:${bg};color:${col}">${q.cat}</div>
+        <div class="qa-chevron">▼</div>
+      </div>
+      <div class="qa-answer">${q.a}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleQA(id){document.getElementById(id).classList.toggle('open');}
+
+function buildStory(){
+  document.getElementById('story-content').innerHTML = `
+    <div class="story-card">
+      <p class="story-para">"In my last project — a <strong style="color:var(--text)">Government Document Approval & Publishing CMS</strong> — I used almost every advanced Laravel concept. Let me walk you through it."</p>
+      <p class="story-para">"The architecture was built around <span class="hl">Service Container</span> and <span class="hl">Dependency Injection</span>. I bound <code>DocumentRepositoryInterface</code> to its implementation in a custom <span class="hl">Service Provider</span>. Every class got the repository auto-injected — in tests I inject a mock."</p>
+      <p class="story-para">"I followed <span class="hl">Service Layer + Repository Pattern</span>. Controller handled HTTP only — called <code>DocumentService</code> for business logic, which called <code>DocumentRepository</code> for DB operations. Controllers were 20-line thin wrappers."</p>
+      <p class="story-para">"For uploads, <span class="hl">Form Request Validation</span> validated PDF type, size, title uniqueness. Files stored with UUID names in private S3. Downloads served via temporary signed URLs expiring in 15 minutes."</p>
+      <p class="story-para">"On submission, a <span class="hl">DocumentSubmitted Event</span> fired. Three queued <span class="hl">Listeners</span> reacted independently: notify approvers, create audit log, update dashboard stats. Adding a new reaction = new listener, zero changes to existing code."</p>
+      <p class="story-para">"Heavy processing — PDF watermarking and S3 upload — went into a queued <span class="hl">Job</span> with 3 retries and a <code>failed()</code> method that updated status on final failure."</p>
+      <p class="story-para">"For authorization, <span class="hl">Policies</span> — <code>DocumentPolicy.approve()</code> checked 'approver' role + 'pending' status. Controller had one <code>$this->authorize('approve', $document)</code> — auto 403 if failed. <span class="hl">Spatie Permissions</span> handled roles with permission caching."</p>
+      <p class="story-para">"Document approval was wrapped in a <span class="hl">DB Transaction</span> — status update + approval record + audit log together. Any failure = full rollback. No partial states ever reached production."</p>
+      <p class="story-para">"A <span class="hl">Scheduler</span> ran every minute checking <code>publish_at &lt;= now()</code> and published documents. <span class="hl">DocumentObserver</span> cleared <span class="hl">Cache</span> on every update — frontend always got fresh data automatically."</p>
+      <p class="story-para">"<span class="hl">API Resources</span> controlled exactly what data was exposed. <span class="hl">Sanctum</span> handled mobile auth with per-device tokens and abilities. <span class="hl">Rate Limiting</span> prevented abuse — 100 requests/minute per user with custom 429 JSON response."</p>
+      <p class="story-para">"<span class="hl">HasAuditLog trait</span> on Document auto-logged every change with before/after values, user ID, and IP. <span class="hl">Soft Deletes</span> ensured documents were never permanently lost. Structured <span class="hl">Logging</span> with context arrays made debugging in production fast."</p>
+      <p class="story-para" style="margin-bottom:0">"Every critical path had <span class="hl">Feature Tests</span> using <code>Mail::fake()</code>, <code>Queue::fake()</code>, <code>actingAs()</code>. The test suite gave us confidence to deploy 2-3 times a day without manual testing."</p>
+    </div>
+    <div style="font-size:13px;font-weight:600;color:var(--purple);margin:20px 0 12px;text-transform:uppercase;letter-spacing:0.06em;">🇮🇳 Hinglish Version</div>
+    <div class="story-card">
+      <div class="hinglish-card">"Mere project mein maine Laravel ka poora ecosystem use kiya — Government Document Approval CMS tha. Admin document upload karta tha — Form Request se validation, Service Layer mein business logic, Repository mein DB queries. Ek saaf architecture tha: Controller sirf HTTP handle karta, Service business logic, Repository database."</div>
+      <div class="hinglish-card">"Jab document submit hota, DocumentSubmitted Event fire hota. Teen queued Listeners react karte — ek approvers ko notify karta, ek audit log banata, ek dashboard update karta. Nayi cheez add karni ho? Bas naya Listener banao — existing code touch nahi."</div>
+      <div class="hinglish-card">"PDF processing heavy tha toh Queue Job mein bheja — 3 retries ke saath, failed() method se status update hota failure pe. Observer se slug auto-generate hota, cache clear hota. Scheduler se documents apne aap publish ho jaate the publish_at time pe."</div>
+      <div class="hinglish-card">"Policy se approval permission check hoti, DB Transaction se approval atomic tha — koi bhi step fail hone pe sab rollback. Har cheez tested tha Mail::fake() aur Queue::fake() se. Ye project interview mein easy hai explain karna — har concept naturally fit hota isme."</div>
+    </div>`;
+}
+
+function showSection(name, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+buildConcepts();
+buildProject();
+buildPlan();
+buildQA();
+buildStory();
+</script>
+</body>
+</html>
