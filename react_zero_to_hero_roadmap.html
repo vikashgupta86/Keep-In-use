@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8"/>
@@ -337,14 +337,69 @@ let completedMap = JSON.parse(localStorage.getItem('rz2h_checks') || '{}');
 let currentFilter = 'all';
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function colorHtml(code) {
-  return esc(code)
-    .replace(/&lt;(!--.*?--)/g,'<span class="hc">&lt;$1</span>')
-    .replace(/&lt;(\/?[\w-]+)/g,'<span class="ht">&lt;$1</span>')
-    .replace(/&gt;/g,'<span class="ht">&gt;</span>')
-    .replace(/(class|src|type|href|role|placeholder|width|height|style)=/g,'<span class="ha">$1</span>=')
-    .replace(/"([^"]*)"/g,'<span class="hv">"$1"</span>')
-    .replace(/\/\/.*/g,'<span class="hc">$&</span>');
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function colorHtml(raw) {
+  const tokens = [];
+  let i = 0;
+  while (i < raw.length) {
+    if (raw[i] === '<') {
+      if (raw.slice(i,i+4) === '<!--') {
+        const end = raw.indexOf('-->',i);
+        const chunk = end === -1 ? raw.slice(i) : raw.slice(i, end+3);
+        tokens.push('<span class="hc">' + esc(chunk) + '</span>');
+        i += chunk.length;
+      } else {
+        const end = raw.indexOf('>',i);
+        const tag = end === -1 ? raw.slice(i) : raw.slice(i, end+1);
+        tokens.push(colorTag(tag));
+        i += tag.length;
+      }
+    } else if (raw[i] === '/' && raw[i+1] === '/') {
+      const end = raw.indexOf('\n',i);
+      const chunk = end === -1 ? raw.slice(i) : raw.slice(i,end);
+      tokens.push('<span class="hc">' + esc(chunk) + '</span>');
+      i += chunk.length;
+    } else {
+      let j = i;
+      while (j < raw.length && raw[j] !== '<' && !(raw[j]==='/' && raw[j+1]==='/')) j++;
+      tokens.push(esc(raw.slice(i,j)));
+      i = j;
+    }
+  }
+  return tokens.join('');
+}
+
+function colorTag(tag) {
+  let out = '';
+  let i = 0;
+  if (tag[0] === '<') { out += '<span class="ht">&lt;</span>'; i = 1; }
+  let j = i;
+  while (j < tag.length && tag[j] !== ' ' && tag[j] !== '>' && tag[j] !== '/') j++;
+  out += '<span class="ht">' + esc(tag.slice(i,j)) + '</span>';
+  i = j;
+  while (i < tag.length) {
+    if (tag[i] === '>') { out += '<span class="ht">&gt;</span>'; i++; }
+    else if (tag[i] === '/' && tag[i+1] === '>') { out += '<span class="ht">/&gt;</span>'; i+=2; }
+    else if (tag[i] === '"') {
+      let end = tag.indexOf('"', i+1);
+      if (end === -1) end = tag.length - 1;
+      out += '<span class="hv">"' + esc(tag.slice(i+1, end)) + '"</span>';
+      i = end + 1;
+    } else {
+      const attrM = tag.slice(i).match(/^([\w-]+)(=?)/);
+      if (attrM) {
+        const attrs = ['class','id','src','type','href','role','placeholder','width','height','style','alt','for','name','value','target','rel','method','action','data-'];
+        const isAttr = attrs.some(a => attrM[1].startsWith(a));
+        out += isAttr
+          ? '<span class="ha">' + esc(attrM[1]) + '</span>' + attrM[2]
+          : esc(attrM[1]) + attrM[2];
+        i += attrM[0].length;
+      } else {
+        out += esc(tag[i]); i++;
+      }
+    }
+  }
+  return out;
 }
 
 function renderTasks() {
@@ -385,7 +440,18 @@ function renderTasks() {
         </div>
         <div class="info-block mb-3">
           <div class="info-label">📐 HTML Bootstrap Template — Dekhkar React mein banao</div>
-          <div class="html-template"><pre>${colorHtml(t.html)}</pre></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+            <div>
+              <div style="font-size:11px;color:#6c757d;margin-bottom:4px;font-weight:600;">CODE</div>
+              <div class="html-template" style="height:220px;overflow:auto"><pre>${colorHtml(t.html)}</pre></div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:#6c757d;margin-bottom:4px;font-weight:600;">LIVE PREVIEW</div>
+              <iframe class="preview-frame" data-html="${escAttr(t.html)}"
+                style="width:100%;height:220px;border:1px solid #dee2e6;border-radius:8px;background:#fff"
+                sandbox="allow-scripts" loading="lazy"></iframe>
+            </div>
+          </div>
         </div>
         <div class="interview-box mb-3">
           <div class="info-label">🎤 Interview Mein Kaise Explain Karein</div>
@@ -406,7 +472,16 @@ function renderTasks() {
 }
 
 function toggleCard(level) {
-  document.getElementById(`task-${level}`).classList.toggle('open');
+  const card = document.getElementById(`task-${level}`);
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    card.querySelectorAll('.preview-frame').forEach(iframe => {
+      if (!iframe.srcdoc) {
+        const html = iframe.dataset.html || '';
+        iframe.srcdoc = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/><body style="padding:12px;background:#fff;font-size:13px">${html}</body>`;
+      }
+    });
+  }
 }
 
 function toggleCheck(level, idx, el) {
