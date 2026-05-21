@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>React Zero to Hero — Complete Roadmap</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f8f9fa; color: #212529; }
+
+  .roadmap-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+
+  .header-section { text-align: center; padding: 2rem 1rem 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #dee2e6; margin-bottom: 1.5rem; }
+  .header-section h1 { font-size: 24px; font-weight: 600; margin-bottom: 0.5rem; }
+  .header-section p { font-size: 14px; color: #6c757d; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-card { background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 600; }
+  .stat-label { font-size: 12px; color: #6c757d; margin-top: 2px; }
+  .stat-card.blue .stat-num { color: #0d6efd; }
+  .stat-card.green .stat-num { color: #198754; }
+  .stat-card.amber .stat-num { color: #fd7e14; }
+  .stat-card.red .stat-num { color: #dc3545; }
+  .stat-card.purple .stat-num { color: #6f42c1; }
+
+  .progress-section { background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: 500; }
+  .progress-label span:last-child { color: #6c757d; font-weight: 400; }
+  .progress { height: 8px; border-radius: 4px; background: #e9ecef; }
+  .progress-bar { background: #198754; border-radius: 4px; transition: width 0.3s; }
+
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .filter-btn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #dee2e6; cursor: pointer; background: #fff; color: #6c757d; transition: all 0.15s; }
+  .filter-btn:hover { border-color: #adb5bd; color: #212529; }
+  .filter-btn.active { font-weight: 500; }
+  .filter-btn.all.active { background: #212529; color: #fff; border-color: #212529; }
+  .filter-btn.ph1.active { background: #cfe2ff; color: #084298; border-color: #9ec5fe; }
+  .filter-btn.ph2.active { background: #d1e7dd; color: #0a3622; border-color: #a3cfbb; }
+  .filter-btn.ph3.active { background: #fff3cd; color: #664d03; border-color: #ffda6a; }
+  .filter-btn.ph4.active { background: #ffe5d0; color: #6a2c0a; border-color: #ffb380; }
+  .filter-btn.ph5.active { background: #e8d5f5; color: #4a1c7c; border-color: #c49ee0; }
+  .filter-btn.ph6.active { background: #ffd6e0; color: #7c1c35; border-color: #f5a0b5; }
+  .filter-btn.ph7.active { background: #d0f0ff; color: #0c4a6e; border-color: #7dd3fc; }
+  .filter-btn.ph8.active { background: #dcfce7; color: #14532d; border-color: #86efac; }
+
+  .phase-divider { font-size: 12px; font-weight: 600; color: #6c757d; padding: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+
+  .task-card { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; }
+  .task-card:hover { border-color: #adb5bd; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+  .task-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; user-select: none; }
+  .level-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .ph1 .level-badge { background: #cfe2ff; color: #084298; }
+  .ph2 .level-badge { background: #d1e7dd; color: #0a3622; }
+  .ph3 .level-badge { background: #fff3cd; color: #664d03; }
+  .ph4 .level-badge { background: #ffe5d0; color: #6a2c0a; }
+  .ph5 .level-badge { background: #e8d5f5; color: #4a1c7c; }
+  .ph6 .level-badge { background: #ffd6e0; color: #7c1c35; }
+  .ph7 .level-badge { background: #d0f0ff; color: #0c4a6e; }
+  .ph8 .level-badge { background: #dcfce7; color: #14532d; }
+
+  .task-title { flex: 1; font-size: 14px; font-weight: 500; }
+  .concept-tag { font-size: 11px; padding: 3px 10px; border-radius: 12px; background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; }
+  .industry-tag { font-size: 11px; padding: 3px 10px; border-radius: 12px; background: #fff3cd; color: #664d03; border: 1px solid #ffda6a; font-weight: 600; }
+  .expand-icon { font-size: 18px; color: #adb5bd; transition: transform 0.2s; display: inline-block; }
+  .task-card.open .expand-icon { transform: rotate(180deg); }
+
+  .task-body { display: none; border-top: 1px solid #dee2e6; padding: 18px; }
+  .task-card.open .task-body { display: block; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .info-block { background: #f8f9fa; border-radius: 8px; padding: 12px 14px; }
+  .info-block.full { grid-column: 1 / -1; }
+  .info-label { font-size: 11px; color: #6c757d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .info-value { font-size: 13px; color: #212529; line-height: 1.6; }
+
+  .html-template { background: #1e1e2e; border-radius: 8px; padding: 14px; margin: 10px 0; overflow-x: auto; }
+  .html-template pre { font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; color: #cdd6f4; white-space: pre; line-height: 1.7; margin: 0; }
+  .ht { color: #f38ba8; }
+  .ha { color: #a6e3a1; }
+  .hv { color: #fab387; }
+  .hc { color: #6c7086; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; font-size: 13px; border-bottom: 1px solid #f1f3f5; }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box { width: 18px; height: 18px; border: 2px solid #ced4da; border-radius: 4px; flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .check-box:hover { border-color: #198754; }
+  .check-box.checked { background: #198754; border-color: #198754; color: #fff; font-size: 11px; }
+
+  .interview-box { background: #f0f0ff; border-radius: 8px; padding: 12px 14px; border-left: 4px solid #6f42c1; margin-bottom: 12px; }
+  .interview-box .info-label { color: #6f42c1; }
+  .interview-box .info-value { color: #3d2a6e; }
+
+  .resources-box { background: #fff8e1; border-radius: 8px; padding: 12px 14px; border-left: 4px solid #fd7e14; margin-bottom: 12px; }
+  .resources-box .info-label { color: #c85a00; }
+  .resources-box .info-value { color: #5c3800; }
+
+  .action-btn { display: inline-block; margin-top: 14px; font-size: 13px; padding: 8px 20px; border-radius: 8px; border: 1px solid #0d6efd; background: #0d6efd; color: #fff; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .action-btn:hover { background: #0b5ed7; color: #fff; }
+
+  /* Industry section banner */
+  .industry-banner { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius: 12px; padding: 1.5rem; margin: 2rem 0 1.5rem; color: #fff; text-align: center; }
+  .industry-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .industry-banner p { font-size: 13px; color: #a0aec0; margin-bottom: 1rem; }
+  .industry-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .industry-stat { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; text-align: center; }
+  .industry-stat .num { font-size: 20px; font-weight: 700; color: #68d391; }
+  .industry-stat .lbl { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+
+  .truth-alert { background: #fff8e1; border: 1px solid #ffda6a; border-radius: 10px; padding: 12px 16px; margin-bottom: 1.5rem; font-size: 13px; color: #5c3800; }
+  .truth-alert strong { color: #c85a00; }
+
+  @media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .task-header { flex-wrap: wrap; gap: 8px; }
+    .industry-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="roadmap-container">
+
+  <div class="header-section">
+    <h1>⚛️ React Zero to Hero — Complete Roadmap</h1>
+    <p>32 tasks &nbsp;·&nbsp; Foundation se Industry-Ready tak &nbsp;·&nbsp; Hinglish guidance</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card blue"><div class="stat-num">20</div><div class="stat-label">Foundation Tasks</div></div>
+    <div class="stat-card purple"><div class="stat-num">12</div><div class="stat-label">Industry Tasks</div></div>
+    <div class="stat-card green"><div class="stat-num" id="done-count">0</div><div class="stat-label">Completed</div></div>
+    <div class="stat-card amber"><div class="stat-num">8</div><div class="stat-label">Total Phases</div></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label"><span>Overall Progress</span><span id="progress-pct">0 / 32 tasks</span></div>
+    <div class="progress"><div class="progress-bar" id="progress-fill" style="width:0%" role="progressbar"></div></div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn all active" onclick="filterPhase('all', this)">All</button>
+    <button class="filter-btn ph1" onclick="filterPhase(1, this)">🔵 Phase 1: Foundation</button>
+    <button class="filter-btn ph2" onclick="filterPhase(2, this)">🟢 Phase 2: Interaction</button>
+    <button class="filter-btn ph3" onclick="filterPhase(3, this)">🟡 Phase 3: Data & Routing</button>
+    <button class="filter-btn ph4" onclick="filterPhase(4, this)">🟠 Phase 4: Advanced</button>
+    <button class="filter-btn ph5" onclick="filterPhase(5, this)">🟣 Phase 5: TypeScript</button>
+    <button class="filter-btn ph6" onclick="filterPhase(6, this)">🔴 Phase 6: Testing</button>
+    <button class="filter-btn ph7" onclick="filterPhase(7, this)">🩵 Phase 7: Next.js</button>
+    <button class="filter-btn ph8" onclick="filterPhase(8, this)">🟩 Phase 8: Interview Prep</button>
+  </div>
+
+  <div id="tasks-container"></div>
+
+</div>
+
+<script>
+const tasks = [
+  /* ───── ORIGINAL 20 TASKS ───── */
+  {
+    level:1, phase:1, concept:"JSX", prev:"—",
+    name:"My Visiting Card",
+    scenario:"Ek simple visiting card banana hai jisme naam, designation, aur contact info ho — bilkul real business card jaisa.",
+    html:`<div class="card text-center p-4 shadow-sm">\n  <h2>Rahul Sharma</h2>\n  <p class="text-muted">Full Stack Developer</p>\n  <p>📧 rahul@email.com</p>\n  <p>📱 +91 98765 43210</p>\n</div>`,
+    goal:"Sirf JSX use karke ek functional component banao jo visiting card render kare. className use karo, multiple elements return karo ek parent div mein.",
+    interview:"JSX ek syntax extension hai jo JavaScript mein HTML likhne deta hai. Ye React.createElement() mein compile hota hai. Main isme className use karta hoon kyunki class JavaScript mein reserved word hai. JSX expressions curly braces {} mein likhte hain.",
+    checklist:["JSX return kiya component se?","className use kiya class ki jagah?","Ek hi root element wrap kiya?","Component name capital letter se start?","Fragment (<>) try kiya?"],
+    output:"Screen pe visiting card dikhna chahiye with name, role, email — styled."
+  },
+  {
+    level:2, phase:1, concept:"Components",prev:"JSX",
+    name:"Product Card App",
+    scenario:"Amazon jaisi app mein product cards alag-alag components mein todna — reusable architecture.",
+    html:`<div class="card mb-3" style="max-width:300px">\n  <img src="https://via.placeholder.com/300x200" class="card-img-top"/>\n  <div class="card-body">\n    <h5 class="card-title">Wireless Headphones</h5>\n    <p class="text-muted">Rs. 2,499</p>\n    <button class="btn btn-primary">Buy Now</button>\n  </div>\n</div>`,
+    goal:"App, ProductCard, aur ProductList — teen alag components banao. App → ProductList → ProductCard hierarchy maintain karo. Sirf hardcoded data use karo abhi.",
+    interview:"Components React ke building blocks hain. Main UI ko chhote-chhote reusable pieces mein todta hoon. Har component ek kaam karta hai — Single Responsibility Principle. Functional components prefer karta hoon class components pe.",
+    checklist:["3 alag component files banaye?","Component dusre mein import kiya?","Component tree banaya (App > List > Card)?","Har component ek kaam karta?","Components reusable hain?"],
+    output:"3 product cards ek grid mein dikhe, alag-alag components se render hon."
+  },
+  {
+    level:3, phase:1, concept:"Props", prev:"JSX + Components",
+    name:"Reusable Alert Box",
+    scenario:"Success, Warning, Error — ek hi component se alag-alag alerts banana. Notification system jaisa.",
+    html:`<div class="alert alert-success" role="alert">\n  ✅ Order placed successfully!\n</div>\n<div class="alert alert-danger" role="alert">\n  ❌ Payment failed. Try again.\n</div>\n<div class="alert alert-warning" role="alert">\n  ⚠️ Low stock remaining.\n</div>`,
+    goal:"Ek Alert component banao jo type='success'|'warning'|'danger' aur message prop le. Props se color aur icon dynamically change ho. Default props bhi define karo.",
+    interview:"Props parent se child ko data bhejne ka tarika hai — unidirectional data flow. Ye read-only hote hain, child inhe change nahi kar sakta. Main inhe destructure karta hoon clarity ke liye. PropTypes ya TypeScript se type safety add karta hoon.",
+    checklist:["Component props accept karta hai?","Parent se alag-alag values pass kiye?","Props destructure kiya?","Default prop value di?","3 alag alert types kaam kar rahe?"],
+    output:"Teen alag colored alert boxes — ek hi component se, alag props se."
+  },
+  {
+    level:4, phase:1, concept:"useState", prev:"JSX + Components + Props",
+    name:"Like Button Counter",
+    scenario:"Twitter/Instagram jaisa Like button jisme click count badhta rahe.",
+    html:`<div class="text-center p-5">\n  <button class="btn btn-outline-danger btn-lg">\n    ❤️ Like &nbsp;<span class="badge bg-danger">0</span>\n  </button>\n  <p class="text-muted mt-2">Be the first to like!</p>\n</div>`,
+    goal:"useState hook se like count track karo. Button click pe count +1 ho. State change pe component re-render ho automatically. Unlike functionality bhi add karo.",
+    interview:"useState ek Hook hai jo functional component mein state store karta hai. Jab state change hoti hai React sirf us component ko re-render karta hai. useState array destructuring return karta hai — [value, setter]. State directly mutate nahi karte, setter function use karte hain.",
+    checklist:["useState import kiya?","Initial state set ki?","Setter function use kiya?","State directly mutate nahi ki?","Re-render ho raha state change pe?"],
+    output:"Button click pe number badhta dikhna chahiye. Unlike pe ghatna chahiye."
+  },
+  {
+    level:5, phase:2, concept:"Events", prev:"JSX + Components + Props + useState",
+    name:"Color Theme Switcher",
+    scenario:"Dark/Light/Blue mode toggle — settings panel jaisa.",
+    html:`<div class="container p-4">\n  <h2 class="mb-3">Theme Switcher</h2>\n  <div class="btn-group mb-3">\n    <button class="btn btn-dark">🌙 Dark</button>\n    <button class="btn btn-light border">☀️ Light</button>\n    <button class="btn btn-primary">🔵 Blue</button>\n  </div>\n  <div class="p-4 rounded bg-dark text-white">\n    <h4>Preview Area</h4>\n    <p>Theme change hone pe ye box update hoga.</p>\n  </div>\n</div>`,
+    goal:"onClick event handlers likho. Button click pe state change ho, background color dynamically update ho. Event object (e) bhi use karo. Ek handler mein multiple themes handle karo.",
+    interview:"React mein events camelCase mein likhte hain — onClick, onChange, onSubmit. Handler function directly call nahi karte (onClick={fn()} galat hai), reference dete hain (onClick={fn}). Arrow function se arguments pass karte hain: onClick={() => handleTheme('dark')}. React Synthetic Event system use karta hai.",
+    checklist:["onClick handler attach kiya?","Arrow function vs reference try kiya?","Event object (e) use kiya?","State update se UI change dikh raha?","Multiple buttons pe alag behavior?"],
+    output:"Buttons click karne pe background aur text color change ho immediately."
+  },
+  {
+    level:6, phase:2, concept:"Conditional Rendering", prev:"Previous 5 concepts",
+    name:"Login/Logout Dashboard",
+    scenario:"Jab user logged in ho — dashboard dikhao. Logged out ho — login prompt.",
+    html:`<!-- Logged Out State -->\n<div class="card p-4 text-center">\n  <h4>🔒 Please Login</h4>\n  <p class="text-muted">Access your dashboard</p>\n  <button class="btn btn-primary">Login</button>\n</div>\n<!-- Logged In State -->\n<div class="alert alert-success d-flex justify-content-between">\n  <span>👋 Welcome back, Rahul!</span>\n  <button class="btn btn-sm btn-danger">Logout</button>\n</div>`,
+    goal:"isLoggedIn state ke basis pe alag-alag UI render karo. Ternary operator, && operator, aur alag component — teeno try karo. Null return karna bhi seekho.",
+    interview:"Conditional rendering ke liye ternary (? :) use karta hoon chhoti conditions mein, aur && operator tab jab sirf ek case render karna ho. Complex cases mein early return ya alag component better rahta hai. null return karne pe kuch render nahi hota.",
+    checklist:["Ternary operator use kiya?","&& short-circuit try kiya?","isLoggedIn toggle ho raha?","Dono states ka UI alag hai?","null return karna seekha?"],
+    output:"Login button pe dashboard aaye, Logout pe wapas form dikhaye."
+  },
+  {
+    level:7, phase:2, concept:"List Rendering (.map())", prev:"Previous 6 concepts",
+    name:"Movie Watchlist",
+    scenario:"Netflix jaisa movie list jisme rating aur genre filter bhi ho.",
+    html:`<div class="container py-3">\n  <div class="btn-group mb-3">\n    <button class="btn btn-sm btn-outline-secondary">All</button>\n    <button class="btn btn-sm btn-outline-primary">Action</button>\n    <button class="btn btn-sm btn-outline-success">Drama</button>\n  </div>\n  <ul class="list-group">\n    <li class="list-group-item d-flex justify-content-between">\n      <span>🎬 Inception</span>\n      <span class="badge bg-warning text-dark">⭐ 8.8 · Sci-Fi</span>\n    </li>\n  </ul>\n</div>`,
+    goal:"Movies array ko .map() se render karo. Har item ka unique key prop do. Genre filter buttons se filtered list dikhao. Empty state bhi handle karo.",
+    interview:"List rendering mein .map() use karta hoon jo array ko JSX elements mein convert karta hai. Key prop React ko batata hai kaunsa element change hua — index use karna avoid karta hoon kyunki reordering pe bugs aate hain, unique id better hai.",
+    checklist:["Array.map() use kiya?","Key prop diya har item ko?","Key unique hai (id, not index)?","Filter functionality kaam karti?","Empty list case handle kiya?"],
+    output:"Movie list render ho. Genre buttons se filter kaam kare. Koi match nahi toh message dikhaye."
+  },
+  {
+    level:8, phase:2, concept:"Forms", prev:"Previous 7 concepts",
+    name:"User Registration Form",
+    scenario:"Signup form with validation — real apps jaisa controlled form.",
+    html:`<form class="p-4 border rounded bg-white shadow-sm">\n  <h4 class="mb-3">Create Account</h4>\n  <div class="mb-3">\n    <label class="form-label">Full Name</label>\n    <input type="text" class="form-control" placeholder="Enter name"/>\n  </div>\n  <div class="mb-3">\n    <label class="form-label">Email</label>\n    <input type="email" class="form-control" placeholder="you@email.com"/>\n  </div>\n  <div class="mb-3">\n    <label class="form-label">Password</label>\n    <input type="password" class="form-control"/>\n  </div>\n  <button type="submit" class="btn btn-success w-100">Register</button>\n</form>`,
+    goal:"Controlled components banao — har input ka state ho. onChange se state update ho. onSubmit se data console mein print ho aur validation errors dikhao.",
+    interview:"Controlled component mein input ki value state se aati hai, onChange se state update hoti hai — React single source of truth hai. e.preventDefault() form submit pe page reload rokta hai. Uncontrolled components mein DOM ref use hoti hai — wo avoid karta hoon jab tak zarurat na ho.",
+    checklist:["Har input ka alag state?","onChange handler kaam karta?","e.preventDefault() lagaya?","Validation errors dikh rahe?","Submit pe data console mein?"],
+    output:"Form fill karo, submit pe data print ho. Errors real-time dikhein."
+  },
+  {
+    level:9, phase:2, concept:"Lifting State Up", prev:"Previous 8 concepts",
+    name:"Shopping Cart Preview",
+    scenario:"Product list aur Cart Summary — dono mein sync data. Sibling communication.",
+    html:`<div class="row g-3">\n  <div class="col-8">\n    <h5>Products</h5>\n    <div class="card p-3 mb-2 d-flex flex-row justify-content-between">\n      <span>Laptop Bag — Rs. 799</span>\n      <button class="btn btn-sm btn-primary">+ Add</button>\n    </div>\n  </div>\n  <div class="col-4">\n    <div class="card p-3 border-primary">\n      <h6>🛒 Cart (2 items)</h6>\n      <hr/>\n      <p class="mb-1">Laptop Bag × 1</p>\n      <hr/>\n      <strong>Total: Rs. 1,598</strong>\n    </div>\n  </div>\n</div>`,
+    goal:"cartItems state parent (App) mein rakho. ProductList aur CartSummary dono siblings ko props se data aur handler pass karo. Add/Remove buttons se cart real-time update ho.",
+    interview:"Jab do sibling components ko same data chahiye, state ko unke common parent mein lift karte hain — State Lifting pattern. Props down, events up. Ye React ka unidirectional data flow maintain karta hai aur single source of truth deta hai.",
+    checklist:["State parent mein hai?","Handler function props se pass?","Dono siblings sync mein?","Prop drilling samjha?","Cart total calculate hota?"],
+    output:"Product add karo — dono panels immediately sync mein update hon."
+  },
+  {
+    level:10, phase:3, concept:"useEffect", prev:"Previous 9 concepts",
+    name:"Live Clock Widget",
+    scenario:"Dashboard pe real-time clock jo har second tick kare — memory leak nahi honi chahiye.",
+    html:`<div class="card text-center p-5 shadow">\n  <p class="text-muted mb-1">Current Time</p>\n  <h1 class="display-3 fw-bold">12:34:56</h1>\n  <p class="text-muted">Wednesday, 20 May 2026</p>\n  <span class="badge bg-success">🟢 Live</span>\n</div>`,
+    goal:"useEffect se setInterval setup karo. Component unmount pe clearInterval cleanup karo. Dependency array [] samjho. Date formatting bhi add karo.",
+    interview:"useEffect se side effects handle karta hoon — data fetch, subscriptions, timers, DOM manipulation. Cleanup function return karta hoon memory leaks rokne ke liye. Empty [] matlab effect sirf mount pe chale. Dependencies list mein wo values daalo jinpe effect depend kare.",
+    checklist:["useEffect import kiya?","setInterval andar set kiya?","Cleanup function return kiya?","[] dependency array use kiya?","Time seconds mein update hota?"],
+    output:"Clock real-time mein tick kare. Browser tab change karne ke baad bhi kaam kare."
+  },
+  {
+    level:11, phase:3, concept:"API Fetching", prev:"Previous 10 concepts",
+    name:"GitHub User Search",
+    scenario:"GitHub jaisa user search — real API se live data fetch karo.",
+    html:`<div class="container p-4">\n  <div class="input-group mb-3">\n    <input class="form-control" placeholder="Enter GitHub username"/>\n    <button class="btn btn-dark">Search</button>\n  </div>\n  <div class="card p-3 d-flex flex-row gap-3 align-items-center">\n    <img src="..." class="rounded-circle" width="70" height="70"/>\n    <div>\n      <h5 class="mb-0">octocat</h5>\n      <p class="text-muted mb-1">The Octocat</p>\n      <small>👥 Followers: 9,000 · 📦 Repos: 8</small>\n    </div>\n  </div>\n</div>`,
+    goal:"fetch() se GitHub API (api.github.com/users/{username}) call karo. useEffect ya button click pe trigger karo. Response se state update karo. Real data display karo.",
+    interview:"API fetch ke liye useEffect mein async function define karta hoon — useEffect callback directly async nahi ho sakta isliye andar IIFE ya named async function use karta hoon. Response ko .json() se convert karta hoon, then state set karta hoon. try-catch se errors handle karta hoon.",
+    checklist:["fetch() API call ki?","Async function useEffect mein?","Response .json() kiya?","State mein data store?","Real GitHub profile dikh raha?"],
+    output:"Username search karo — real GitHub data (avatar, followers, repos) aaye."
+  },
+  {
+    level:12, phase:3, concept:"Loading / Error State", prev:"Previous 11 concepts",
+    name:"News Feed with Skeleton",
+    scenario:"Real news app jaisa — loading skeleton, error retry, aur data display.",
+    html:`<!-- Loading Skeleton -->\n<div class="card p-3 mb-2 placeholder-glow">\n  <div class="d-flex gap-2">\n    <span class="placeholder col-2 rounded"></span>\n    <div class="flex-1 w-100">\n      <span class="placeholder col-8 d-block mb-1"></span>\n      <span class="placeholder col-5 d-block"></span>\n    </div>\n  </div>\n</div>\n<!-- Error State -->\n<div class="alert alert-danger d-flex justify-content-between">\n  <span>❌ Failed to load news</span>\n  <button class="btn btn-sm btn-outline-danger">Retry</button>\n</div>`,
+    goal:"isLoading, error, data — teen states manage karo. Loading mein skeleton cards dikhao. Error mein retry button. Retry pe dobara fetch karo. Success pe articles render karo.",
+    interview:"Production apps mein teen states hoti hain — loading, error, success. isLoading=true set karta hoon pehle, try block mein data fetch, catch mein error set, finally mein loading false. Skeleton loading user ko better experience deta hai blank screen se.",
+    checklist:["isLoading state hai?","Error state catch hoti?","Skeleton 3 cards dikh rahe?","Retry button kaam karta?","Success pe data render?"],
+    output:"Load hote waqt skeleton, error aane pe message + retry, data pe articles."
+  },
+  {
+    level:13, phase:3, concept:"React Router v6", prev:"Previous 12 concepts",
+    name:"Multi-page Portfolio Site",
+    scenario:"Home, About, Projects, Contact — URL change pe alag pages, page reload nahi.",
+    html:`<nav class="navbar navbar-expand-lg bg-dark navbar-dark px-4">\n  <a class="navbar-brand">🧑‍💻 Portfolio</a>\n  <div class="navbar-nav ms-auto">\n    <a class="nav-link text-white" href="/">Home</a>\n    <a class="nav-link text-white" href="/about">About</a>\n    <a class="nav-link text-white" href="/projects">Projects</a>\n    <a class="nav-link text-white" href="/contact">Contact</a>\n  </div>\n</nav>\n<div class="container py-4">\n  <!-- Page content here -->\n</div>`,
+    goal:"React Router v6 install karo. BrowserRouter, Routes, Route, Link use karo. useParams se /project/:id dynamic route banao. useNavigate se programmatic navigation karo.",
+    interview:"React Router v6 mein Routes aur Route components use karta hoon. Link tag HTML anchor ki jagah use karta hoon — page reload nahi hota, SPA intact rehta hai. useParams se URL ke dynamic segments extract karta hoon. useNavigate se programmatic redirect karta hoon jaise form submit ke baad.",
+    checklist:["react-router-dom install?","BrowserRouter wrap kiya?","Multiple routes define?","Link tag use kiya?","useParams se id extract?"],
+    output:"Navbar links click pe URL change ho, alag content aaye — reload nahi."
+  },
+  {
+    level:14, phase:3, concept:"Context API", prev:"Previous 13 concepts",
+    name:"Global Theme + User Context",
+    scenario:"App-wide dark/light mode aur logged-in user data — prop drilling ke bina.",
+    html:`<div class="d-flex justify-content-between align-items-center p-3 bg-dark text-white">\n  <span>👤 Rahul Sharma</span>\n  <div class="d-flex gap-2">\n    <span class="badge bg-secondary">Admin</span>\n    <button class="btn btn-sm btn-outline-light">☀️ Light Mode</button>\n  </div>\n</div>\n<div class="container py-4">\n  <p>Theme aur user data kisi bhi component se accessible hai!</p>\n</div>`,
+    goal:"ThemeContext aur UserContext banao. Provider se poori app wrap karo. Deeply nested component mein bhi useContext se data access karo bina props chain ke. Theme toggle globally kaam kare.",
+    interview:"Context API prop drilling solve karta hai — globally shared data ke liye ideal hai. createContext se context banata hoon, Provider se value wrap karta hoon, useContext hook se consume karta hoon. Bohot frequent updates ke liye Context avoid karta hoon — performance hit ho sakti hai, wahan Redux ya Zustand better hote hain.",
+    checklist:["createContext use kiya?","Provider component banaya?","useContext se consume kiya?","Prop drilling avoid hua?","Theme toggle globally kaam karta?"],
+    output:"Kisi bhi component se theme toggle karo — poori app mein instantly change ho."
+  },
+  {
+    level:15, phase:4, concept:"Custom Hooks", prev:"Previous 14 concepts",
+    name:"useFetch & useLocalStorage Hooks",
+    scenario:"Reusable logic — har component mein baar-baar same code nahi likhna.",
+    html:`<div class="container py-4">\n  <h4>Custom Hooks Demo</h4>\n  <div class="card p-3 mb-3">\n    <h6>useFetch Demo</h6>\n    <div id="fetch-result">Loading...</div>\n  </div>\n  <div class="card p-3">\n    <h6>useLocalStorage Demo</h6>\n    <input class="form-control" placeholder="Type here — persists on reload!"/>\n  </div>\n</div>`,
+    goal:"useFetch(url) custom hook banao jo {data, loading, error} return kare. useLocalStorage(key, initialValue) banao jo state ko localStorage mein sync kare. Multiple components mein reuse karo.",
+    interview:"Custom Hook ek normal JavaScript function hai jo 'use' se start hota hai aur other React hooks call kar sakta hai. Ye logic reuse karne ka React way hai — class inheritance nahi. Ek hi hook mein multiple hooks combine kar sakte hain. useFetch, useDebounce, useForm, useWindowSize — ye industry mein common patterns hain.",
+    checklist:["Hook name 'use' se start?","Dusre hooks andar call kiye?","Return value meaningful?","Multiple components mein reuse?","Logic component se bahar nicely?"],
+    output:"useFetch se data aaye. useLocalStorage se page refresh ke baad bhi data persist kare."
+  },
+  {
+    level:16, phase:4, concept:"useReducer", prev:"Previous 15 concepts",
+    name:"Shopping Cart with Reducer",
+    scenario:"Complex cart — add, remove, update quantity, clear cart — sab reducers se.",
+    html:`<div class="container py-3">\n  <h4>🛒 Cart (3 items) — Rs. 4,497</h4>\n  <div class="card p-3 mb-2">\n    <div class="d-flex align-items-center justify-content-between">\n      <span>Wireless Headphones</span>\n      <div class="d-flex align-items-center gap-2">\n        <button class="btn btn-sm btn-outline-secondary">−</button>\n        <span class="fw-bold">2</span>\n        <button class="btn btn-sm btn-outline-secondary">+</button>\n        <button class="btn btn-sm btn-danger">🗑</button>\n      </div>\n    </div>\n  </div>\n  <button class="btn btn-outline-danger btn-sm">Clear Cart</button>\n</div>`,
+    goal:"cartReducer function banao with actions: ADD_ITEM, REMOVE_ITEM, UPDATE_QTY, CLEAR_CART. useReducer hook use karo. dispatch se actions bhejo. Total price automatically calculate karo.",
+    interview:"useReducer tab use karta hoon jab multiple related state updates hain, ya next state previous pe depend kare. Redux jaisa pattern hai — action dispatch karo, reducer pure function se new state return kare. useState ki jagah predictable state transitions milte hain aur complex logic centralized rehti hai.",
+    checklist:["Reducer function pure hai?","4 action types handle?","dispatch se actions bheje?","State directly mutate nahi ki?","Total price correct calculate?"],
+    output:"Cart mein items add/remove karo, qty update karo — sab reducer actions se."
+  },
+  {
+    level:17, phase:4, concept:"Memoization", prev:"Previous 16 concepts",
+    name:"Heavy List with Performance Fix",
+    scenario:"1000+ items ki list — unnecessary re-renders rokna.",
+    html:`<div class="container py-3">\n  <div class="row g-3 mb-3">\n    <div class="col">\n      <input class="form-control" placeholder="🔍 Search items..."/>\n    </div>\n    <div class="col-auto">\n      <select class="form-select">…</select>\n    </div>\n  </div>\n  <p class="text-muted small">Showing 1,000 items · Re-renders: <span id="count">0</span></p>\n  <ul class="list-group" style="max-height:400px;overflow-y:auto">\n    <!-- Heavy list -->\n  </ul>\n</div>`,
+    goal:"React.memo se ListItem component memoize karo. useMemo se filtered+sorted list cache karo. useCallback se handler stable rakho. Re-render counter se improvement verify karo.",
+    interview:"useMemo expensive calculations ko cache karta hai — sirf tab recalculate karta hai jab dependencies change hon. useCallback function reference stable rakhta hai taaki child components unnecessarily re-render na karein. React.memo component output memoize karta hai — sirf props change pe re-render. Premature optimization avoid karta hoon — pehle measure karo.",
+    checklist:["React.memo use kiya?","useMemo se list cache?","useCallback se handler stable?","Dependencies array correct?","Re-renders reduced verify kiya?"],
+    output:"Search type karo — sirf filtered results re-render hon. Re-render count kam ho."
+  },
+  {
+    level:18, phase:4, concept:"Protected Routes", prev:"Previous 17 concepts",
+    name:"Auth Guard System",
+    scenario:"Dashboard sirf logged-in users ke liye — baaki redirect to login.",
+    html:`<!-- Unauthorized Access Attempt -->\n<div class="container py-5 text-center">\n  <div class="card p-5 shadow">\n    <h1>🔒</h1>\n    <h4>Access Denied</h4>\n    <p class="text-muted">You must be logged in to view this page.</p>\n    <a href="/login" class="btn btn-primary">Go to Login</a>\n  </div>\n</div>`,
+    goal:"ProtectedRoute wrapper component banao. useContext se auth check karo. Unauthorized hone pe /login pe Navigate karo. Login hone pe original page pe wapas aao. Token localStorage mein persist karo.",
+    interview:"Protected routes ke liye ek wrapper component banata hoon jo pehle auth state check karta hai. React Router v6 mein Navigate component se redirect karta hoon. AuthContext mein user/token store karta hoon. location state mein original URL save karta hoon taaki login ke baad wahan return kar sakein.",
+    checklist:["ProtectedRoute component banaya?","Auth context se user check?","Unauthorized pe redirect?","Login ke baad original page pe aaya?","Token localStorage mein persist?"],
+    output:"/dashboard directly jaane pe /login aaye. Login ke baad dashboard pe redirect."
+  },
+  {
+    level:19, phase:4, concept:"CRUD App", prev:"Previous 18 concepts",
+    name:"Task Manager — Full CRUD",
+    scenario:"Trello jaisa task board — tasks add, edit, delete, status change karo.",
+    html:`<div class="container py-4">\n  <div class="row g-3">\n    <div class="col-4">\n      <h6 class="badge bg-secondary w-100 p-2 text-start">📋 Todo (2)</h6>\n      <div class="card p-2 mb-2">\n        <p class="mb-1">Design homepage</p>\n        <div class="d-flex gap-1">\n          <button class="btn btn-xs btn-outline-warning btn-sm">Edit</button>\n          <button class="btn btn-xs btn-outline-success btn-sm">→ Progress</button>\n          <button class="btn btn-xs btn-outline-danger btn-sm">Delete</button>\n        </div>\n      </div>\n    </div>\n    <div class="col-4">\n      <h6 class="badge bg-primary w-100 p-2 text-start">🔄 In Progress (1)</h6>\n    </div>\n    <div class="col-4">\n      <h6 class="badge bg-success w-100 p-2 text-start">✅ Done (3)</h6>\n    </div>\n  </div>\n</div>`,
+    goal:"Full CRUD: Create task (form), Read list (map), Update (edit modal + status change), Delete (confirmation). useReducer se state, Context se global access, localStorage se persist. Saare previous concepts naturally use hon.",
+    interview:"Is CRUD app mein maine useReducer for complex state management, Context API for global access without prop drilling, custom hooks for localStorage persistence, aur React Router for separate pages use kiye hain. Ye real-world production app architecture demonstrate karta hai.",
+    checklist:["Tasks create ho rahe?","List correctly render?","Edit modal kaam karta?","Delete ke baad list update?","Status columns change kaam karta?","Data reload pe persist?"],
+    output:"Puri CRUD functionality kaam kare — add/edit/delete tasks, status columns mein move."
+  },
+  {
+    level:20, phase:4, concept:"Final Project — Complete App", prev:"All 19 concepts",
+    name:"ShopReact — E-commerce App",
+    scenario:"Complete e-commerce: Products, Cart, Auth, Admin panel, Orders — sab ek saath.",
+    html:`<nav class="navbar bg-dark navbar-dark px-4">\n  <span class="navbar-brand fw-bold">🛒 ShopReact</span>\n  <div class="d-flex gap-2 ms-auto">\n    <span class="badge bg-warning text-dark">Cart (3)</span>\n    <span class="badge bg-success">👤 Rahul</span>\n    <button class="btn btn-sm btn-outline-light">Admin</button>\n  </div>\n</nav>\n<div class="container py-4">\n  <div class="row g-3">\n    <div class="col-md-4">\n      <div class="card h-100">\n        <img src="https://via.placeholder.com/300x200" class="card-img-top"/>\n        <div class="card-body">\n          <h6>Wireless Headphones</h6>\n          <div class="d-flex justify-content-between align-items-center">\n            <strong>Rs. 2,499</strong>\n            <button class="btn btn-sm btn-primary">Add to Cart</button>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>`,
+    goal:"Pages: / (products), /product/:id, /cart, /login, /dashboard (protected), /admin (role-based). Context: auth + cart. useReducer: cart actions. Custom hooks: useFetch, useLocalStorage. Memoization: product list. API: real or mock. Loading/Error states.",
+    interview:"Is final project mein maine React ke saare core concepts ek saath use kiye — component hierarchy, Context + useReducer for state management, React Router v6 with protected and role-based routes, custom hooks for reusability, useMemo/useCallback for performance, aur API integration with proper loading/error states. Ye architecture production-ready hai aur scalable bhi.",
+    checklist:["6+ routes implement kiye?","Auth + cart context kaam karta?","Protected routes block karte?","Product detail page dynamic?","Cart total aur count correct?","Admin panel role-based?","Loading/error states hain?","Custom hooks banaye?","LocalStorage persist karta?","Mobile responsive hai?"],
+    output:"Browse → Product Detail → Cart → (Login) → Order. Admin mein products manage karo."
+  },
+
+  /* ───── INDUSTRY 12 TASKS ───── */
+  {
+    level:21, phase:5, concept:"TypeScript Basics", prev:"All React concepts",
+    isIndustry: true,
+    name:"TypeScript mein Migrate karo",
+    scenario:"Company codebase hamesha TypeScript mein hoti hai — pure JS se migrate karna padta hai. 80%+ jobs TypeScript maangti hain.",
+    html:`// Before (JavaScript)\nfunction ProductCard({ name, price, inStock }) {\n  return (\n    <div>\n      <h3>{name}</h3>\n      <p>Rs. {price}</p>\n      {inStock && <button>Buy Now</button>}\n    </div>\n  );\n}\n\n// After (TypeScript)\ninterface ProductCardProps {\n  name: string;\n  price: number;\n  inStock: boolean;\n  onBuy?: () => void;\n}\n\nconst ProductCard: React.FC<ProductCardProps> = ({ name, price, inStock, onBuy }) => {\n  return (\n    <div>\n      <h3>{name}</h3>\n      <p>Rs. {price}</p>\n      {inStock && <button onClick={onBuy}>Buy Now</button>}\n    </div>\n  );\n};`,
+    goal:"Task 2 ka ProductCard app TypeScript mein convert karo. Interface define karo props ke liye. useState ko generic type do: useState<number>(0). API response type banao. tsconfig.json samjho.",
+    interview:"TypeScript main isliye use karta hoon kyunki compile time pe errors mil jaate hain runtime pe nahi. Interface se component ka contract clear hota hai — koi bhi developer bina documentation padhe samajh jaata hai ki kya props chahiye. React.FC<Props> se function component properly typed hoti hai. Generic types useState<Type>() se inference better hoti hai.",
+    checklist:["tsconfig.json setup kiya?","Interface banaya props ke liye?","useState<Type> generics use kiya?","API response ka type banaya?","Koi 'any' type use nahi kiya?","VS Code mein type hints aa rahe?"],
+    output:"Poora ProductCard app TypeScript mein compile ho bina errors ke. VS Code autocomplete aur type checking kaam kare.",
+    resources:"TypeScript Handbook: typescriptlang.org/docs · React TypeScript Cheatsheet: react-typescript-cheatsheet.netlify.app",
+    preview:`<div class="p-3">
+  <h6 class="mb-3 text-primary">TypeScript — Before vs After</h6>
+  <div class="row g-2">
+    <div class="col-6">
+      <div class="card border-danger h-100">
+        <div class="card-header bg-danger text-white py-1 px-2" style="font-size:11px">❌ JavaScript (koi type safety nahi)</div>
+        <div class="card-body p-2" style="font-size:12px;font-family:monospace;background:#fff8f8">
+          <div>function Card(<span class="text-danger">{ name, price }</span>) {</div>
+          <div class="ms-2 text-muted">// price string hai ya number?</div>
+          <div class="ms-2 text-muted">// pata nahi chalega!</div>
+          <div>}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card border-success h-100">
+        <div class="card-header bg-success text-white py-1 px-2" style="font-size:11px">✅ TypeScript (type safe!)</div>
+        <div class="card-body p-2" style="font-size:12px;font-family:monospace;background:#f8fff8">
+          <div><span class="text-primary">interface</span> Props {</div>
+          <div class="ms-2">name: <span class="text-success">string</span>;</div>
+          <div class="ms-2">price: <span class="text-success">number</span>;</div>
+          <div>}</div>
+          <div>function Card(<span class="text-success">{ name, price }: Props</span>) {}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="alert alert-info mt-3 py-2 px-3 mb-0" style="font-size:12px">
+    💡 VS Code mein galat type likhne pe <strong>red underline</strong> aa jaata hai — runtime error se pehle hi pata chal jaata hai!
+  </div>
+</div>`
+  },
+  {
+    level:22, phase:5, concept:"TypeScript Advanced", prev:"TypeScript Basics",
+    isIndustry: true,
+    name:"Generics aur Utility Types",
+    scenario:"Large codebases mein reusable typed functions likhna — DRY principle with type safety.",
+    html:`// Generic useFetch hook\nfunction useFetch<T>(url: string): {\n  data: T | null;\n  loading: boolean;\n  error: string | null;\n} {\n  const [data, setData] = useState<T | null>(null);\n  // ...\n}\n\n// Usage\nconst { data } = useFetch<GitHubUser>('https://api.github.com/users/octocat');\n// data is automatically typed as GitHubUser | null\n\n// Utility Types\ntype PartialUser = Partial<User>; // Sab fields optional\ntype ReadonlyUser = Readonly<User>; // Sab fields readonly\ntype UserPreview = Pick<User, 'id' | 'name' | 'avatar'>; // Sirf kuch fields`,
+    goal:"useFetch hook ko generic banao: useFetch<T>(url). Utility types use karo — Partial, Required, Pick, Omit. Union types aur type guards likhna seekho. Enum banao order status ke liye.",
+    interview:"Generics TypeScript ka sabse powerful feature hai — reusable code with type safety. useFetch<User> likhne se automatically data User type ka ho jaata hai, alag-alag functions nahi likhne padte. Utility types existing types se naye types derive karne dete hain — Partial<User> se sab fields optional ho jaate hain, jo form editing ke liye perfect hai.",
+    checklist:["Generic function likhi?","useFetch<T> kaam karta?","Partial/Pick utility types use?","Union types try kiye?","Type guard function banaya?","Enum use kiya?"],
+    output:"useFetch<GitHubUser>() se automatically typed data mile. TypeScript compile without errors.",
+    resources:"TypeScript Generics docs · TotalTypeScript.com free tutorials",
+    preview:`<div class="p-3"><h6 class="mb-3 text-primary">Generics + Utility Types Visual</h6><div class="card mb-2 border-primary"><div class="card-header bg-primary text-white py-1 px-2" style="font-size:11px">Generic useFetch&lt;T&gt; — ek function, koi bhi type</div><div class="card-body p-2" style="font-size:12px"><div class="d-flex gap-2 flex-wrap"><span class="badge bg-info text-dark">useFetch&lt;User&gt;(url) → data: User</span><span class="badge bg-success">useFetch&lt;Product[]&gt;(url) → data: Product[]</span><span class="badge bg-warning text-dark">useFetch&lt;Order&gt;(url) → data: Order</span></div></div></div><div class="card border-secondary"><div class="card-header py-1 px-2" style="font-size:11px">Utility Types — ek type se naye types</div><div class="card-body p-2"><table class="table table-sm table-bordered mb-0" style="font-size:11px"><thead class="table-dark"><tr><th>Type</th><th>Kya karta hai</th><th>Use case</th></tr></thead><tbody><tr><td>Partial&lt;User&gt;</td><td>Sab fields optional</td><td>Edit form</td></tr><tr><td>Pick&lt;User,'id','name'&gt;</td><td>Sirf kuch fields</td><td>Preview card</td></tr><tr><td>Omit&lt;User,'password'&gt;</td><td>Kuch fields hataao</td><td>Public profile</td></tr><tr><td>Readonly&lt;User&gt;</td><td>Changes nahi</td><td>Constants</td></tr></tbody></table></div></div></div>`
+  },
+  {
+    level:23, phase:6, concept:"Jest + React Testing Library", prev:"TypeScript concepts",
+    isIndustry: true,
+    name:"Component Tests Likhna",
+    scenario:"Company mein PR merge hone ke liye tests pass hone chahiye — bina tests ke koi code accept nahi karta.",
+    html:`// Like Button ka test\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport LikeButton from './LikeButton';\n\ndescribe('LikeButton', () => {\n  test('initially shows 0 likes', () => {\n    render(<LikeButton />);\n    expect(screen.getByText('0')).toBeInTheDocument();\n  });\n\n  test('increments on click', () => {\n    render(<LikeButton />);\n    const button = screen.getByRole('button');\n    fireEvent.click(button);\n    expect(screen.getByText('1')).toBeInTheDocument();\n  });\n\n  test('shows unlike after liking', () => {\n    render(<LikeButton />);\n    fireEvent.click(screen.getByRole('button'));\n    expect(screen.getByText(/unlike/i)).toBeInTheDocument();\n  });\n});`,
+    goal:"Task 4 (LikeButton) aur Task 8 (Form) ke tests likho. render, screen, fireEvent, userEvent use karo. Async tests likhna seekho waitFor se. 70%+ code coverage achieve karo.",
+    interview:"Testing Library ka philosophy hai — test karo jaise user use karta hai, implementation details nahi. getByRole aria roles se elements dhundta hai jo accessible bhi hai. userEvent fireEvent se better hai kyunki real user interactions simulate karta hai. Async operations ke liye waitFor ya findBy queries use karta hoon.",
+    checklist:["@testing-library/react install?","Ek component ka 3+ tests likhe?","getByRole use kiya?","Async test with waitFor?","70% coverage achieve kiya?","Tests CI pe bhi pass hoein?"],
+    output:"npm test run karo — sab tests green. Coverage report mein 70%+ dikhe.",
+    resources:"testing-library.com/docs · Kent C. Dodds ka 'Testing JavaScript' course (free basics)",
+    preview:`<div class="p-3"><h6 class="mb-2 text-danger">Testing — Pass vs Fail</h6><div class="card border-success mb-2"><div class="card-header bg-success text-white py-1 px-2" style="font-size:11px">✅ 3 tests PASSED</div><div class="card-body p-2" style="font-size:12px"><div class="text-success">✓ initially shows 0 likes (5ms)</div><div class="text-success">✓ increments on click (3ms)</div><div class="text-success">✓ shows unlike after liking (4ms)</div><div class="mt-2 text-muted">Test Suites: 1 passed · Tests: 3 passed</div></div></div><div class="card border-info"><div class="card-header bg-info text-white py-1 px-2" style="font-size:11px">📊 Coverage Report</div><div class="card-body p-2"><div class="progress mb-1" style="height:16px"><div class="progress-bar bg-success" style="width:87%">Statements: 87%</div></div><div class="progress mb-1" style="height:16px"><div class="progress-bar bg-warning" style="width:72%">Branches: 72%</div></div><div class="progress" style="height:16px"><div class="progress-bar bg-success" style="width:90%">Functions: 90%</div></div></div></div></div>`
+  },
+  {
+    level:24, phase:6, concept:"API Mocking + Integration Tests", prev:"Jest basics",
+    isIndustry: true,
+    name:"MSW se API Mock karo",
+    scenario:"Real API ke bina tests likhna — test environment mein actual network calls expensive aur unreliable hoti hain.",
+    html:`// MSW handler setup\nimport { http, HttpResponse } from 'msw';\nimport { setupServer } from 'msw/node';\n\nconst server = setupServer(\n  http.get('https://api.github.com/users/:username', ({ params }) => {\n    return HttpResponse.json({\n      login: params.username,\n      name: 'Test User',\n      followers: 100,\n      public_repos: 25\n    });\n  })\n);\n\nbeforeAll(() => server.listen());\nafterEach(() => server.resetHandlers());\nafterAll(() => server.close());\n\ntest('shows github user data', async () => {\n  render(<GitHubSearch />);\n  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'octocat' } });\n  fireEvent.click(screen.getByRole('button', { name: /search/i }));\n  await screen.findByText('Test User');\n});`,
+    goal:"MSW (Mock Service Worker) setup karo. GitHub Search component (task 11) ka integration test likho. Error scenarios bhi test karo — network failure, 404. Loading state test karo.",
+    interview:"MSW network level pe requests intercept karta hai — component ko pata nahi ki mock hai ya real API. Ye best practice hai kyunki component ka actual behavior test hota hai. setupServer se test suite ke liye mock server banata hoon, individual tests mein override kar sakta hoon specific scenarios ke liye.",
+    checklist:["MSW install aur setup?","Successful API response mock?","Error case mock kiya?","Loading state test likha?","afterEach mein handlers reset?","Tests real API call nahi karte?"],
+    output:"GitHubSearch ke integration tests network ke bina pass hon. Error aur loading states bhi tested hon.",
+    resources:"mswjs.io/docs — official MSW documentation",
+    preview:`<div class="p-3"><h6 class="mb-2 text-warning">MSW — Network Request Interceptor</h6><div class="d-flex align-items-center gap-2 mb-3" style="font-size:12px"><div class="badge bg-primary p-2">Component</div><div>→</div><div class="badge bg-warning text-dark p-2">MSW intercepts</div><div>→</div><div class="badge bg-success p-2">Mock Response</div></div><div class="card border-success mb-2"><div class="card-header bg-success text-white py-1 px-2" style="font-size:11px">✅ Mock response (test mein)</div><div class="card-body p-2" style="font-size:12px"><div>login: "octocat"</div><div>name: "Test User"</div><div>followers: 100</div><div>public_repos: 25</div></div></div><div class="alert alert-info py-2 px-3 mb-0" style="font-size:12px">💡 Real server start karne ki zarurat nahi — tests fast aur reliable hote hain!</div></div>`
+  },
+  {
+    level:25, phase:7, concept:"Next.js App Router", prev:"React + Testing concepts",
+    isIndustry: true,
+    name:"Portfolio Site Next.js mein",
+    scenario:"50%+ React jobs ab Next.js maangti hain — SSR, SSG, file-based routing sab Next.js deta hai.",
+    html:`// app/page.tsx — Home page (Server Component)\nexport default function HomePage() {\n  return <h1>Welcome to my Portfolio</h1>;\n}\n\n// app/projects/[id]/page.tsx — Dynamic route\nexport default async function ProjectPage({ params }: { params: { id: string } }) {\n  const project = await fetchProject(params.id); // Server-side fetch!\n  return <ProjectDetail project={project} />;\n}\n\n// app/api/contact/route.ts — API Route\nexport async function POST(request: Request) {\n  const body = await request.json();\n  // Handle contact form submission\n  return Response.json({ success: true });\n}`,
+    goal:"Task 13 ka Portfolio React Router se Next.js App Router mein migrate karo. Server Components vs Client Components samjho. API route banao contact form ke liye. Vercel pe deploy karo.",
+    interview:"Next.js App Router mein Server Components by default hain — ye server pe render hote hain, JavaScript bundle mein nahi jaate. 'use client' directive se Client Component banate hain jahan interactivity chahiye. Server Components mein directly database ya API call kar sakte hain bina useEffect ke — ye performance ke liye bahut better hai.",
+    checklist:["Next.js project create kiya?","app/ directory structure samjha?","Server vs Client component pehchana?","Dynamic route /projects/[id] banaya?","API route working?","Vercel pe deploy hua?"],
+    output:"Portfolio site Next.js mein kaam kare aur Vercel pe live URL ho.",
+    resources:"nextjs.org/docs · Vercel free deployment",
+    preview:`<div class="p-3"><h6 class="mb-2 text-dark">Next.js App Router — File = Route</h6><div class="card border-0 bg-light mb-2"><div class="card-body p-2" style="font-size:12px;font-family:monospace"><div class="text-muted">app/</div><div class="ms-3">├── <span class="text-primary">page.tsx</span> <span class="text-muted">→ yoursite.com/</span></div><div class="ms-3">├── <span class="text-primary">about/page.tsx</span> <span class="text-muted">→ /about</span></div><div class="ms-3">├── <span class="text-primary">projects/[id]/page.tsx</span> <span class="text-muted">→ /projects/1</span></div><div class="ms-3">└── <span class="text-primary">api/contact/route.ts</span> <span class="text-muted">→ API endpoint</span></div></div></div><div class="row g-2"><div class="col-6"><div class="card border-info h-100"><div class="card-header bg-info text-white py-1 px-2" style="font-size:10px">Server Component (default)</div><div class="card-body p-2" style="font-size:11px">Server pe render hota hai. No useState. Direct DB call. Faster load.</div></div></div><div class="col-6"><div class="card border-warning h-100"><div class="card-header bg-warning py-1 px-2" style="font-size:10px">"use client" Component</div><div class="card-body p-2" style="font-size:11px">Browser pe chalta hai. useState use karo. onClick, forms.</div></div></div></div></div>`
+  },
+  {
+    level:26, phase:7, concept:"Next.js + Database", prev:"Next.js basics",
+    isIndustry: true,
+    name:"Full-Stack App — Notes with Auth",
+    scenario:"Real production app: user login kare, apne notes create kare, dusron ke nahi dikhen.",
+    html:`// Supabase + Next.js setup\nimport { createClient } from '@supabase/supabase-js';\n\n// Server Action — form submit directly server pe\nasync function createNote(formData: FormData) {\n  'use server';\n  const supabase = createServerClient();\n  const { data: { user } } = await supabase.auth.getUser();\n  \n  await supabase.from('notes').insert({\n    title: formData.get('title') as string,\n    content: formData.get('content') as string,\n    user_id: user?.id\n  });\n  \n  revalidatePath('/notes');\n}\n\nexport default async function NotesPage() {\n  const notes = await getNotes(); // Direct DB call in Server Component!\n  return <NotesList notes={notes} createNote={createNote} />;\n}`,
+    goal:"Supabase free tier setup karo. Next.js + Supabase + Clerk Auth integrate karo. Notes CRUD banao — user sirf apne notes dekhe. Row Level Security (RLS) samjho. Production pe deploy karo.",
+    interview:"Is project mein Next.js Server Actions use kiye jo form submission directly server pe handle karta hai — koi separate API route nahi chahiye. Supabase Row Level Security se database level pe authorization implement ki — sirf logged-in user ke notes return hote hain. Ye pattern secure hai kyunki authorization client pe nahi, database pe hoti hai.",
+    checklist:["Supabase project create kiya?","Auth (Clerk/NextAuth) kaam karta?","Notes create/read/delete?","RLS policy set ki?","User sirf apne notes dekhe?","Deployed with live URL?"],
+    output:"Live app jahan signup karo, notes banao, doosre users ke notes nahi dikhein.",
+    resources:"supabase.com/docs · clerk.com/docs · Free tiers dono ke liye",
+    preview:`<div class="p-3"><h6 class="mb-2">Full-Stack Architecture</h6><div class="d-flex flex-column gap-2" style="font-size:12px"><div class="card border-primary"><div class="card-body p-2 d-flex align-items-center gap-2"><span class="badge bg-primary">1</span><div><strong>Clerk Auth</strong> — User login/signup handle karta hai</div></div></div><div class="card border-success"><div class="card-body p-2 d-flex align-items-center gap-2"><span class="badge bg-success">2</span><div><strong>Next.js Server Action</strong> — Form directly server pe submit</div></div></div><div class="card border-warning"><div class="card-body p-2 d-flex align-items-center gap-2"><span class="badge bg-warning text-dark">3</span><div><strong>Supabase DB</strong> — Data store, RLS se user sirf apna data dekhe</div></div></div><div class="card border-info"><div class="card-body p-2 d-flex align-items-center gap-2"><span class="badge bg-info text-dark">4</span><div><strong>Vercel Deploy</strong> — Live URL with free hosting</div></div></div></div></div>`
+  },
+  {
+    level:27, phase:7, concept:"React Query (TanStack)", prev:"Next.js + API concepts",
+    isIndustry: true,
+    name:"Server State Management",
+    scenario:"Production apps mein API state ka management useEffect + useState se nahi hota — React Query industry standard hai.",
+    html:`// Before (manual, error-prone)\nconst [data, setData] = useState(null);\nconst [loading, setLoading] = useState(false);\nconst [error, setError] = useState(null);\n\nuseEffect(() => {\n  setLoading(true);\n  fetch('/api/posts')\n    .then(r => r.json())\n    .then(setData)\n    .catch(setError)\n    .finally(() => setLoading(false));\n}, []);\n\n// After (React Query — clean!)\nconst { data, isLoading, error } = useQuery({\n  queryKey: ['posts'],\n  queryFn: () => fetch('/api/posts').then(r => r.json()),\n  staleTime: 5 * 60 * 1000, // 5 min cache\n});\n\nconst { mutate: createPost } = useMutation({\n  mutationFn: (newPost) => fetch('/api/posts', { method: 'POST', body: JSON.stringify(newPost) }),\n  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['posts'] }),\n});`,
+    goal:"Task 11 (GitHub Search) ko React Query se rebuild karo. useQuery se data fetch, useMutation se create/update/delete. Cache, staleTime, refetchOnWindowFocus samjho. Optimistic updates implement karo.",
+    interview:"React Query server state ko client state se alag treat karta hai — ye sahi approach hai. Automatic caching se same data baar-baar fetch nahi hota. staleTime se control karta hoon kitni der purana data acceptable hai. useMutation ke onSuccess mein queryClient.invalidateQueries se related queries refresh hoti hain automatically — ye manual state sync se kaafi better hai.",
+    checklist:["@tanstack/react-query install?","QueryClient setup kiya?","useQuery se data fetch?","useMutation se data update?","Cache kaam karta (network tab check)?","Optimistic update try kiya?"],
+    output:"GitHub Search React Query se kaam kare. Dobara same user search pe network call nahi, cache se aaye.",
+    resources:"tanstack.com/query/latest/docs — TanStack Query documentation",
+    preview:`<div class="p-3"><h6 class="mb-2 text-primary">React Query — Auto Cache Magic</h6><div class="row g-2 mb-2"><div class="col-6"><div class="card border-danger h-100"><div class="card-header bg-danger text-white py-1 px-2" style="font-size:10px">❌ Manual (old way)</div><div class="card-body p-2" style="font-size:11px">useState x3<br/>useEffect<br/>setLoading<br/>setError<br/>8+ lines</div></div></div><div class="col-6"><div class="card border-success h-100"><div class="card-header bg-success text-white py-1 px-2" style="font-size:10px">✅ React Query</div><div class="card-body p-2" style="font-size:11px">useQuery() — 1 line<br/>Auto cache<br/>Auto retry<br/>Auto refetch<br/>Background sync</div></div></div></div><div class="alert alert-success py-2 px-3 mb-0" style="font-size:12px">💡 Same user dobara search karo — network call nahi hogi! Cache se aayega.</div></div>`
+  },
+  {
+    level:28, phase:8, concept:"Git Workflow", prev:"All previous concepts",
+    isIndustry: true,
+    name:"Professional Git Workflow",
+    scenario:"Team mein kaam karna — proper branches, PRs, commits. Ye day 1 expectation hai kisi bhi company mein.",
+    html:`# Professional Git workflow practice\n\n# 1. Feature branch banana\ngit checkout -b feature/add-search-functionality\n\n# 2. Conventional commits\ngit commit -m "feat: add GitHub user search component"\ngit commit -m "fix: handle 404 user not found error"\ngit commit -m "test: add unit tests for search component"\ngit commit -m "docs: update README with search feature"\n\n# 3. Before PR — rebase on main\ngit fetch origin\ngit rebase origin/main\n\n# 4. PR description template\n## What changed?\nAdded GitHub user search with loading/error states\n\n## How to test?\n1. Enter username in search box\n2. Click Search button\n3. Verify user data appears\n\n## Screenshots\n[before/after screenshots]`,
+    goal:"GitHub pe ek project fork karo. Feature branches banao. Conventional commits follow karo. Self-review ke liye PR banao. GitHub Actions se basic CI setup karo — lint + test on push. README properly likhna seekho.",
+    interview:"Main Git Flow ya GitHub Flow follow karta hoon — main branch hamesha deployable hoti hai. Har feature alag branch pe hoti hai, PR se merge hoti hai. Conventional commits se automated changelog generate hoti hai aur history clear rehti hai. Squash merge karta hoon taaki main branch ki history clean rahe. Rebase vs merge decision: feature branches rebase karta hoon, hotfixes merge karta hoon.",
+    checklist:["Feature branches banaye?","Conventional commits follow kiya?","PR description properly likhi?","GitHub Actions CI setup?","README mein setup instructions?","Branch protection rule samjha?"],
+    output:"GitHub repo pe properly structured history ho. CI green ho. Professional README ho.",
+    resources:"conventionalcommits.org · GitHub Actions docs · ohshitgit.com (common mistakes fix karna)",
+    preview:`<div class="p-3"><h6 class="mb-2">Professional Git Workflow</h6><div class="d-flex flex-column gap-1 mb-3" style="font-size:12px"><div class="d-flex align-items-center gap-2"><span class="badge bg-success">main</span><span class="text-muted">Production branch — always deployable</span></div><div class="ms-3 border-start border-2 ps-2"><div class="d-flex align-items-center gap-2 mb-1"><span class="badge bg-primary">feature/search</span><span class="text-muted">New feature</span></div><div class="d-flex align-items-center gap-2 mb-1"><span class="badge bg-warning text-dark">fix/login-bug</span><span class="text-muted">Bug fix</span></div><div class="d-flex align-items-center gap-2"><span class="badge bg-info text-dark">chore/update-deps</span><span class="text-muted">Maintenance</span></div></div></div><div class="card border-secondary"><div class="card-header py-1 px-2" style="font-size:11px">Conventional Commits Format</div><div class="card-body p-2" style="font-size:11px;font-family:monospace"><div class="text-success">feat: add GitHub user search</div><div class="text-danger">fix: handle 404 error</div><div class="text-info">test: add login component tests</div><div class="text-warning">docs: update README</div></div></div></div>`
+  },
+  {
+    level:29, phase:8, concept:"Performance Optimization", prev:"All concepts",
+    isIndustry: true,
+    name:"Lighthouse 90+ Score",
+    scenario:"Company ke products pe performance metrics track hoti hain — slow app = bad user experience = lost revenue.",
+    html:`// Code splitting with lazy loading\nimport { lazy, Suspense } from 'react';\n\nconst AdminPanel = lazy(() => import('./AdminPanel'));\nconst Charts = lazy(() => import('./Charts'));\n\nfunction App() {\n  return (\n    <Suspense fallback={<LoadingSpinner />}>\n      <Routes>\n        <Route path="/admin" element={<AdminPanel />} />\n        <Route path="/analytics" element={<Charts />} />\n      </Routes>\n    </Suspense>\n  );\n}\n\n// Image optimization (Next.js)\nimport Image from 'next/image';\n<Image src="/hero.jpg" width={800} height={400} priority alt="Hero" />\n\n// Web Vitals monitoring\nimport { onCLS, onFID, onLCP } from 'web-vitals';\nonLCP(console.log); // Largest Contentful Paint`,
+    goal:"Task 20 (ShopReact) pe Lighthouse audit karo. Code splitting se initial bundle size kam karo. Images optimize karo. Web Vitals samjho — LCP, CLS, FID. 90+ performance score achieve karo.",
+    interview:"Performance optimization mein pehle measure karta hoon — Lighthouse audit aur React DevTools Profiler se. Uske baad fix karta hoon: React.lazy se route-based code splitting se initial JS kam hota hai, images next/image se automatically optimize hoti hain, useMemo/useCallback se unnecessary re-renders rokta hoon. Premature optimization avoid karta hoon — sirf measured bottlenecks fix karta hoon.",
+    checklist:["Lighthouse audit kiya?","Initial Lighthouse score note kiya?","Code splitting implement kiya?","Bundle analyzer run kiya?","Images optimized?","Final score 90+ hai?"],
+    output:"ShopReact Lighthouse Performance score 90+ aaye. Bundle size 50%+ reduce ho.",
+    resources:"web.dev/performance · bundlephobia.com · Chrome DevTools Performance tab",
+    preview:`<div class="p-3"><h6 class="mb-2">Lighthouse Score — Before vs After</h6><div class="row g-2 mb-3"><div class="col-6"><div class="card border-danger"><div class="card-header bg-danger text-white py-1 px-2" style="font-size:11px">Before optimization</div><div class="card-body p-2"><div class="mb-1" style="font-size:12px">Performance</div><div class="progress mb-2" style="height:20px"><div class="progress-bar bg-danger" style="width:45%">45</div></div><div class="mb-1" style="font-size:12px">Bundle Size</div><div class="progress" style="height:20px"><div class="progress-bar bg-danger" style="width:80%">800KB</div></div></div></div></div><div class="col-6"><div class="card border-success"><div class="card-header bg-success text-white py-1 px-2" style="font-size:11px">After optimization</div><div class="card-body p-2"><div class="mb-1" style="font-size:12px">Performance</div><div class="progress mb-2" style="height:20px"><div class="progress-bar bg-success" style="width:94%">94</div></div><div class="mb-1" style="font-size:12px">Bundle Size</div><div class="progress" style="height:20px"><div class="progress-bar bg-success" style="width:35%">350KB</div></div></div></div></div></div><div class="alert alert-info py-2 px-3 mb-0" style="font-size:12px">💡 React.lazy + code splitting se initial load 50%+ fast ho jaata hai</div></div>`
+  },
+  {
+    level:30, phase:8, concept:"DSA for Frontend", prev:"All concepts",
+    isIndustry: true,
+    name:"LeetCode Easy — 20 Problems",
+    scenario:"Product companies (Flipkart, Swiggy, etc.) frontend roles mein bhi coding rounds hoti hain.",
+    html:`// Common patterns jo interviews mein aate hain\n\n// 1. Two Sum (Array + HashMap)\nfunction twoSum(nums: number[], target: number): number[] {\n  const map = new Map<number, number>();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (map.has(complement)) return [map.get(complement)!, i];\n    map.set(nums[i], i);\n  }\n  return [];\n}\n\n// 2. Valid Parentheses (Stack)\nfunction isValid(s: string): boolean {\n  const stack: string[] = [];\n  const map: Record<string, string> = { ')': '(', '}': '{', ']': '[' };\n  for (const char of s) {\n    if ('({['.includes(char)) stack.push(char);\n    else if (stack.pop() !== map[char]) return false;\n  }\n  return stack.length === 0;\n}`,
+    goal:"LeetCode pe 20 Easy problems solve karo — Arrays, Strings, HashMap, Stack categories se. Time complexity explain karna seekho. TypeScript mein solutions likho. NeetCode 75 list se shuru karo.",
+    interview:"Mujhe laga DSA sirf backend ke liye hai, but frontend interviews mein bhi hota hai especially product companies mein. Main problems ko brute force se shuru karta hoon, fir optimize karta hoon. Time/space complexity hamesha explain karta hoon. Patterns seekhe hain — sliding window, two pointer, HashMap for O(1) lookup — ye baar baar aate hain.",
+    checklist:["LeetCode account banaya?","20 Easy problems solve kiye?","Har problem ka time complexity pata?","Arrays + Strings + HashMap covered?","Stack problems try kiye?","Solutions TypeScript mein?"],
+    output:"LeetCode profile pe 20+ solved problems dikhen. Easy problems 15 min mein solve ho jaayein.",
+    resources:"neetcode.io (free roadmap) · leetcode.com/studyplan/top-interview-150",
+    preview:`<div class="p-3"><h6 class="mb-2">DSA — Common Patterns</h6><div class="row g-2"><div class="col-6"><div class="card border-primary mb-2"><div class="card-header bg-primary text-white py-1 px-2" style="font-size:10px">HashMap Pattern — O(n)</div><div class="card-body p-2" style="font-size:11px">Two Sum, Group Anagrams, Top K Frequent — value dhundhne ke liye map use karo</div></div></div><div class="col-6"><div class="card border-success mb-2"><div class="card-header bg-success text-white py-1 px-2" style="font-size:10px">Two Pointer — O(n)</div><div class="card-body p-2" style="font-size:11px">Valid Palindrome, 3Sum, Container With Water — sorted array pe start+end se</div></div></div><div class="col-6"><div class="card border-warning"><div class="card-header bg-warning py-1 px-2" style="font-size:10px">Sliding Window — O(n)</div><div class="card-body p-2" style="font-size:11px">Max Subarray, Longest Substring — window maintain karo</div></div></div><div class="col-6"><div class="card border-info"><div class="card-header bg-info text-white py-1 px-2" style="font-size:10px">Stack — O(n)</div><div class="card-body p-2" style="font-size:11px">Valid Parentheses, Min Stack — LIFO order matters</div></div></div></div></div>`
+  },
+  {
+    level:31, phase:8, concept:"System Design (Frontend)", prev:"All concepts",
+    isIndustry: true,
+    name:"Frontend Architecture Questions",
+    scenario:"Senior/mid interviews mein: 'Design a Twitter Feed' ya 'Design an Autocomplete' — component architecture explain karna padta hai.",
+    html:`// Interview answer structure for "Design a Twitter Feed"\n\n// 1. Components breakdown\n// FeedContainer (state management)\n//   ├── FeedFilter (tabs: Following, For You)\n//   ├── TweetComposer (create new tweet)\n//   ├── InfiniteScroll (virtualized list)\n//   │   └── TweetCard (individual tweet)\n//   │       ├── TweetActions (like, retweet, reply)\n//   │       └── MediaAttachment (images, video)\n//   └── LoadingSkeletons\n\n// 2. State management choice\n// - Server state: React Query (tweets, user data)\n// - Client state: Zustand (UI state, composer)\n// - URL state: React Router (active tab, tweet id)\n\n// 3. Performance considerations\n// - Virtualization for 1000+ tweets (react-window)\n// - Image lazy loading\n// - Optimistic updates for likes`,
+    goal:"5 common frontend design questions practice karo: Twitter Feed, Autocomplete Search, Image Gallery, Shopping Cart, Notification System. Framework seekho: components → state → data flow → performance → accessibility.",
+    interview:"Frontend system design mein main structure follow karta hoon: pehle requirements clarify karta hoon, fir component hierarchy sketch karta hoon, state management decision explain karta hoon (kya server state hai, kya client state), fir performance considerations — virtualization, caching, lazy loading. Accessibility bhi mention karta hoon kyunki ye production mein mandatory hai.",
+    checklist:["5 design questions practice kiye?","Components breakdown karna aata?","State management justify kar sakte?","Performance solutions pata?","Accessibility basics mention kiye?","Framework (requirements → components → state → perf)?"],
+    output:"Koi bhi frontend design question pe 15-20 min structured answer de sakna.",
+    resources:"greatfrontend.com/system-design · frontendinterviewhandbook.com",
+    preview:`<div class="p-3"><h6 class="mb-2">Twitter Feed — Component Design</h6><div class="card border-0 bg-light mb-2" style="font-size:12px;font-family:monospace"><div class="card-body p-2"><div class="text-primary">FeedContainer (Zustand store)</div><div class="ms-3">├── <span class="text-success">FeedFilter</span> <span class="text-muted">(Following | For You)</span></div><div class="ms-3">├── <span class="text-success">TweetComposer</span> <span class="text-muted">(create tweet)</span></div><div class="ms-3">├── <span class="text-success">VirtualList</span> <span class="text-muted">(react-window)</span></div><div class="ms-4">└── <span class="text-warning">TweetCard</span> <span class="text-muted">× 1000</span></div><div class="ms-5">└── <span class="text-warning">TweetActions</span> <span class="text-muted">(like/rt/reply)</span></div></div></div><div class="d-flex gap-2 flex-wrap" style="font-size:11px"><span class="badge bg-info text-dark">React Query — server state</span><span class="badge bg-primary">Zustand — UI state</span><span class="badge bg-success">Virtualization — 1000+ tweets</span><span class="badge bg-warning text-dark">Optimistic updates</span></div></div>`
+  },
+  {
+    level:32, phase:8, concept:"Mock Interviews + Portfolio", prev:"All 31 concepts",
+    isIndustry: true,
+    name:"Hire-Ready Final Checklist",
+    scenario:"Sab kuch seekh liya — ab properly present karna aur interviews crack karna baaki hai.",
+    html:`# Portfolio Checklist\n✅ GitHub profile — green contributions graph\n✅ 2-3 deployed projects (live URLs)\n✅ Each project has:\n   - Proper README with screenshots\n   - Tech stack mentioned\n   - Features list\n   - Live demo link\n   - 'How to run locally' instructions\n\n# Resume Checklist  \n✅ Skills: React, TypeScript, Next.js, Jest, Git\n✅ Projects section with impact (not just description)\n✅ "Built X that does Y" format\n✅ GitHub + LinkedIn + deployed project links\n\n# Interview Prep\n✅ Top 50 React questions revise karo\n✅ 2 mock interviews karo (pramp.com or friend)\n✅ STAR format ke 3 behavioral stories ready karo\n✅ "Tell me about yourself" 2-min version ready`,
+    goal:"2 projects properly polish karo aur deploy karo. Resume update karo. Top 50 React interview questions revise karo. 2 mock interviews karo. LinkedIn profile update karo. Applications shuru karo — 10 companies/week.",
+    interview:"Portfolio mein sirf completed, deployed projects daalta hoon — incomplete projects worse impression dete hain. Har project ka README mein screenshots hain aur 'live demo' link hai. Resume mein impact likhta hoon: 'Built e-commerce app with 20+ products, cart, auth' — sirf 'Made React app' nahi. Mock interviews se realize hua ki concepts pata hote hain but explain karna alag skill hai.",
+    checklist:["2 projects live deployed?","GitHub profile professional?","Resume updated with all skills?","Top 50 React Q&A revised?","2 mock interviews done?","LinkedIn updated?","10 applications bheje?"],
+    output:"Hire-ready! Actively interviewing. Offer in 2-4 weeks if consistent.",
+    resources:"pramp.com (free mock interviews) · interviewing.io · linkedin.com/jobs",
+    preview:`<div class="p-3"><h6 class="mb-3">Hire-Ready Checklist</h6><div class="list-group" style="font-size:13px"><div class="list-group-item list-group-item-success d-flex align-items-center gap-2"><span>✅</span><div><strong>2+ Projects deployed</strong> — live URL with GitHub repo</div></div><div class="list-group-item list-group-item-success d-flex align-items-center gap-2"><span>✅</span><div><strong>TypeScript</strong> — sab projects mein</div></div><div class="list-group-item list-group-item-success d-flex align-items-center gap-2"><span>✅</span><div><strong>Tests likhe</strong> — 70%+ coverage</div></div><div class="list-group-item list-group-item-success d-flex align-items-center gap-2"><span>✅</span><div><strong>Next.js app deployed</strong> — Vercel pe live</div></div><div class="list-group-item list-group-item-warning d-flex align-items-center gap-2"><span>⏳</span><div><strong>20 LeetCode Easy</strong> — solved</div></div><div class="list-group-item list-group-item-warning d-flex align-items-center gap-2"><span>⏳</span><div><strong>Mock interviews</strong> — 2 done</div></div><div class="list-group-item d-flex align-items-center gap-2"><span>🎯</span><div><strong>Apply karna shuru karo</strong> — 10 companies/week</div></div></div></div>`
+  }
+];
+
+const phaseNames = {
+  1:'🔵 Phase 1 — Foundation',
+  2:'🟢 Phase 2 — Interaction',
+  3:'🟡 Phase 3 — Data & Routing',
+  4:'🟠 Phase 4 — Advanced React',
+  5:'🟣 Phase 5 — TypeScript (Industry)',
+  6:'🔴 Phase 6 — Testing (Industry)',
+  7:'🩵 Phase 7 — Next.js & Full-Stack (Industry)',
+  8:'🟩 Phase 8 — Interview Ready (Industry)'
+};
+const phaseClass = {1:'ph1',2:'ph2',3:'ph3',4:'ph4',5:'ph5',6:'ph6',7:'ph7',8:'ph8'};
+const totalTasks = tasks.length;
+
+let completedMap = JSON.parse(localStorage.getItem('rz2h_checks_v2') || '{}');
+let currentFilter = 'all';
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function colorHtml(raw) {
+  const tokens = [];
+  let i = 0;
+  while (i < raw.length) {
+    if (raw[i] === '<') {
+      if (raw.slice(i,i+4) === '<!--') {
+        const end = raw.indexOf('-->',i);
+        const chunk = end === -1 ? raw.slice(i) : raw.slice(i, end+3);
+        tokens.push('<span class="hc">' + esc(chunk) + '</span>');
+        i += chunk.length;
+      } else {
+        const end = raw.indexOf('>',i);
+        const tag = end === -1 ? raw.slice(i) : raw.slice(i, end+1);
+        tokens.push(colorTag(tag));
+        i += tag.length;
+      }
+    } else if (raw[i] === '/' && raw[i+1] === '/') {
+      const end = raw.indexOf('\n',i);
+      const chunk = end === -1 ? raw.slice(i) : raw.slice(i,end);
+      tokens.push('<span class="hc">' + esc(chunk) + '</span>');
+      i += chunk.length;
+    } else {
+      let j = i;
+      while (j < raw.length && raw[j] !== '<' && !(raw[j]==='/' && raw[j+1]==='/')) j++;
+      tokens.push(esc(raw.slice(i,j)));
+      i = j;
+    }
+  }
+  return tokens.join('');
+}
+
+function colorTag(tag) {
+  let out = '';
+  let i = 0;
+  if (tag[0] === '<') { out += '<span class="ht">&lt;</span>'; i = 1; }
+  let j = i;
+  while (j < tag.length && tag[j] !== ' ' && tag[j] !== '>' && tag[j] !== '/') j++;
+  out += '<span class="ht">' + esc(tag.slice(i,j)) + '</span>';
+  i = j;
+  while (i < tag.length) {
+    if (tag[i] === '>') { out += '<span class="ht">&gt;</span>'; i++; }
+    else if (tag[i] === '/' && tag[i+1] === '>') { out += '<span class="ht">/&gt;</span>'; i+=2; }
+    else if (tag[i] === '"') {
+      let end = tag.indexOf('"', i+1);
+      if (end === -1) end = tag.length - 1;
+      out += '<span class="hv">"' + esc(tag.slice(i+1, end)) + '"</span>';
+      i = end + 1;
+    } else {
+      const attrM = tag.slice(i).match(/^([\w-]+)(=?)/);
+      if (attrM) {
+        const attrs = ['class','id','src','type','href','role','placeholder','width','height','style','alt','for','name','value','target','rel','method','action','data-'];
+        const isAttr = attrs.some(a => attrM[1].startsWith(a));
+        out += isAttr
+          ? '<span class="ha">' + esc(attrM[1]) + '</span>' + attrM[2]
+          : esc(attrM[1]) + attrM[2];
+        i += attrM[0].length;
+      } else {
+        out += esc(tag[i]); i++;
+      }
+    }
+  }
+  return out;
+}
+
+function renderTasks() {
+  const container = document.getElementById('tasks-container');
+  container.innerHTML = '';
+  let lastPhase = null;
+
+  // Industry section banner
+  let industryBannerAdded = false;
+
+  tasks.forEach(t => {
+    if (currentFilter !== 'all' && t.phase !== currentFilter) return;
+
+    // Add industry section banner before phase 5
+    if (t.phase >= 5 && !industryBannerAdded && (currentFilter === 'all' || currentFilter >= 5)) {
+      industryBannerAdded = true;
+      const banner = document.createElement('div');
+      banner.innerHTML = `
+        <div class="industry-banner">
+          <h2>🏢 Industry-Level Tasks</h2>
+          <p>Ye 12 tasks wo cheezein hain jo teri existing roadmap mein nahi hain — lekin companies hire karte waqt expect karti hain</p>
+          <div class="industry-stats">
+            <div class="industry-stat"><div class="num">80%</div><div class="lbl">Jobs need TypeScript</div></div>
+            <div class="industry-stat"><div class="num">70%</div><div class="lbl">Expect tests</div></div>
+            <div class="industry-stat"><div class="num">50%</div><div class="lbl">Want Next.js</div></div>
+            <div class="industry-stat"><div class="num">100%</div><div class="lbl">Need Git workflow</div></div>
+          </div>
+        </div>
+        <div class="truth-alert">
+          ⚠️ <strong>Honest baat:</strong> Phases 1–4 React sikhate hain. Phases 5–8 tujhe <strong>hireable</strong> banate hain. Dono zaruri hain.
+        </div>`;
+      container.appendChild(banner);
+      lastPhase = null;
+    }
+
+    if (t.phase !== lastPhase) {
+      const d = document.createElement('div');
+      d.className = 'phase-divider';
+      d.textContent = phaseNames[t.phase];
+      container.appendChild(d);
+      lastPhase = t.phase;
+    }
+
+    const key = `task_${t.level}`;
+    const checks = completedMap[key] || [];
+    const allDone = t.checklist.length > 0 && checks.length >= t.checklist.length && t.checklist.every((_,i) => checks[i]);
+    const card = document.createElement('div');
+    card.className = `task-card ${phaseClass[t.phase]}`;
+    card.id = `task-${t.level}`;
+
+    const checkHtml = t.checklist.map((item,i) => {
+      const chk = checks[i] ? 'checked' : '';
+      return `<li><div class="check-box ${chk}" onclick="toggleCheck(${t.level},${i},this)">${chk ? '✓' : ''}</div><span>${esc(item)}</span></li>`;
+    }).join('');
+
+    const conceptTagHtml = t.isIndustry
+      ? `<span class="industry-tag">🏢 ${esc(t.concept)}</span>`
+      : `<span class="concept-tag">${esc(t.concept)}</span>`;
+
+    const resourcesHtml = t.resources
+      ? `<div class="resources-box mb-3"><div class="info-label">📚 Resources — Kahan Se Seekho</div><div class="info-value">${esc(t.resources)}</div></div>`
+      : '';
+
+    // Both industry and original tasks: CODE + LIVE PREVIEW side by side
+    // Industry tasks: code is JS/TS so preview shows a visual explanation card
+    const previewHtml = t.isIndustry ? t.preview : t.html;
+    const labelText = t.isIndustry
+      ? '💻 Code Example — Concept samjho aur React mein implement karo'
+      : '📐 HTML Bootstrap Template — Dekhkar React mein banao';
+    const codeSection = `<div class="info-block mb-3">
+          <div class="info-label">${labelText}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+            <div>
+              <div style="font-size:11px;color:#6c757d;margin-bottom:4px;font-weight:600;">CODE</div>
+              <div class="html-template" style="height:260px;overflow:auto"><pre>${colorHtml(t.html)}</pre></div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:#6c757d;margin-bottom:4px;font-weight:600;">LIVE PREVIEW</div>
+              <iframe class="preview-frame" data-html="${escAttr(previewHtml)}"
+                style="width:100%;height:260px;border:1px solid #dee2e6;border-radius:8px;background:#fff"
+                sandbox="allow-scripts" loading="lazy"></iframe>
+            </div>
+          </div>
+        </div>`;
+
+    card.innerHTML = `
+      <div class="task-header" onclick="toggleCard(${t.level})">
+        <span class="level-badge">Level ${t.level}</span>
+        <span class="task-title">${allDone ? '✅ ' : ''}${esc(t.name)}</span>
+        ${conceptTagHtml}
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="task-body">
+        <div class="info-grid">
+          <div class="info-block"><div class="info-label">🎯 Real-world Scenario</div><div class="info-value">${esc(t.scenario)}</div></div>
+          <div class="info-block"><div class="info-label">⚙️ Concept</div><div class="info-value"><strong>${esc(t.concept)}</strong><br/><small class="text-muted">Previous: ${esc(t.prev)}</small></div></div>
+          <div class="info-block full"><div class="info-label">🎯 Implementation Goal</div><div class="info-value">${esc(t.goal)}</div></div>
+        </div>
+        ${codeSection}
+        <div class="interview-box mb-3">
+          <div class="info-label">🎤 Interview Mein Kaise Explain Karein</div>
+          <div class="info-value">${esc(t.interview)}</div>
+        </div>
+        ${resourcesHtml}
+        <div class="info-block mb-3">
+          <div class="info-label">✅ Task Completion Checklist</div>
+          <ul class="checklist">${checkHtml}</ul>
+        </div>
+        <div class="info-block">
+          <div class="info-label">👁️ Expected Output</div>
+          <div class="info-value">${esc(t.output)}</div>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function toggleCard(level) {
+  const card = document.getElementById(`task-${level}`);
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    card.querySelectorAll('.preview-frame').forEach(iframe => {
+      if (!iframe.srcdoc) {
+        const html = iframe.dataset.html || '';
+        iframe.srcdoc = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/><body style="padding:12px;background:#fff;font-size:13px">${html}</body>`;
+      }
+    });
+  }
+}
+
+function toggleCheck(level, idx, el) {
+  el.classList.toggle('checked');
+  const isChecked = el.classList.contains('checked');
+  el.textContent = isChecked ? '✓' : '';
+  const key = `task_${level}`;
+  if (!completedMap[key]) completedMap[key] = [];
+  completedMap[key][idx] = isChecked;
+  localStorage.setItem('rz2h_checks_v2', JSON.stringify(completedMap));
+  updateProgress();
+}
+
+function updateProgress() {
+  let done = 0;
+  tasks.forEach(t => {
+    const key = `task_${t.level}`;
+    const checks = completedMap[key] || [];
+    if (t.checklist.length > 0 && t.checklist.every((_,i) => checks[i])) done++;
+  });
+  document.getElementById('done-count').textContent = done;
+  const pct = Math.round((done / totalTasks) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = `${done} / ${totalTasks} tasks complete (${pct}%)`;
+}
+
+function filterPhase(phase, btn) {
+  currentFilter = phase === 'all' ? 'all' : parseInt(phase);
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+renderTasks();
+</script>
+</body>
+</html>
