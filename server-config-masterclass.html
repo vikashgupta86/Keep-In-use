@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apache PHP MySQL phpMyAdmin Masterclass</title>
+    <style>
+        :root {
+            --bg: #f7f0e4;
+            --bg-soft: #fffaf2;
+            --panel: rgba(255, 250, 242, 0.92);
+            --ink: #22211d;
+            --muted: #615c52;
+            --line: #d5c7ab;
+            --accent: #b24a2f;
+            --accent-strong: #8f2d1c;
+            --accent-soft: #f4d8b0;
+            --olive: #52643c;
+            --blue: #2a5d77;
+            --shadow: 0 18px 45px rgba(69, 47, 19, 0.12);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --mono: "Consolas", "Courier New", monospace;
+            --sans: "Trebuchet MS", "Segoe UI", sans-serif;
+            --serif: Georgia, "Times New Roman", serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--sans);
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(178, 74, 47, 0.11), transparent 30%),
+                radial-gradient(circle at top right, rgba(82, 100, 60, 0.12), transparent 25%),
+                linear-gradient(180deg, #fbf6ed 0%, #f3eadb 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(178, 74, 47, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(178, 74, 47, 0.03) 1px, transparent 1px);
+            background-size: 22px 22px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 90%);
+        }
+
+        a {
+            color: var(--accent-strong);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            gap: 24px;
+            width: min(1480px, calc(100% - 32px));
+            margin: 24px auto 64px;
+            position: relative;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            align-self: start;
+            background: var(--panel);
+            border: 1px solid rgba(178, 74, 47, 0.18);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 22px 18px;
+            backdrop-filter: blur(14px);
+        }
+
+        .brand {
+            margin-bottom: 18px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(178, 74, 47, 0.1);
+            color: var(--accent-strong);
+            font-size: 0.84rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        h1,
+        h2 {
+            font-family: var(--serif);
+        }
+
+        .brand h1 {
+            font-size: 1.6rem;
+            margin-top: 14px;
+        }
+
+        .brand p,
+        .muted {
+            color: var(--muted);
+        }
+
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font: inherit;
+            background: #fffdf8;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: rgba(82, 100, 60, 0.12);
+            color: var(--olive);
+        }
+
+        .nav-links {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ink);
+            padding: 10px 12px;
+            border-radius: 12px;
+            transition: background 0.18s ease, color 0.18s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(178, 74, 47, 0.09);
+            color: var(--accent-strong);
+        }
+
+        main {
+            display: grid;
+            gap: 24px;
+        }
+
+        .hero,
+        .section,
+        .callout {
+            background: var(--panel);
+            border: 1px solid rgba(178, 74, 47, 0.18);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+
+        .hero {
+            overflow: hidden;
+        }
+
+        .hero-top {
+            padding: 32px 32px 18px;
+            background:
+                radial-gradient(circle at top right, rgba(178, 74, 47, 0.18), transparent 28%),
+                radial-gradient(circle at left, rgba(42, 93, 119, 0.16), transparent 20%),
+                linear-gradient(135deg, #fff7ed, #fbefe1);
+        }
+
+        .hero h2 {
+            font-size: clamp(2.1rem, 4vw, 3.4rem);
+            max-width: 10ch;
+        }
+
+        .hero p {
+            max-width: 78ch;
+            color: var(--muted);
+            margin: 14px 0 0;
+            line-height: 1.65;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            padding: 18px 32px 32px;
+        }
+
+        .mini-card {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(82, 100, 60, 0.14);
+            border-radius: var(--radius-md);
+            padding: 18px;
+        }
+
+        .mini-card h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .section {
+            padding: 28px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .section-head p {
+            margin: 10px 0 0;
+            max-width: 72ch;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(42, 93, 119, 0.1);
+            color: var(--blue);
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .grid-2,
+        .grid-3 {
+            display: grid;
+            gap: 16px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .card,
+        details {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(82, 100, 60, 0.16);
+            border-radius: var(--radius-md);
+            padding: 18px;
+        }
+
+        details {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        details[open] {
+            box-shadow: inset 0 1px 0 rgba(178, 74, 47, 0.08);
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 18px 20px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .details-body {
+            padding: 0 20px 20px;
+        }
+
+        .details-body p,
+        .details-body li,
+        .card p,
+        .card li,
+        td,
+        th {
+            line-height: 1.65;
+        }
+
+        .two-col-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .meta-item {
+            background: rgba(244, 216, 176, 0.32);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .meta-item strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .path-chip {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(42, 93, 119, 0.08);
+            color: var(--blue);
+            font-family: var(--mono);
+            font-size: 0.86rem;
+            word-break: break-all;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.76);
+            border: 1px solid rgba(82, 100, 60, 0.14);
+        }
+
+        th,
+        td {
+            padding: 14px 14px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(82, 100, 60, 0.14);
+        }
+
+        th {
+            background: rgba(82, 100, 60, 0.1);
+            font-size: 0.92rem;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        code,
+        pre {
+            font-family: var(--mono);
+        }
+
+        pre {
+            margin: 14px 0 0;
+            padding: 16px;
+            background: #1f1d1a;
+            color: #f7f0e4;
+            border-radius: 16px;
+            overflow-x: auto;
+            line-height: 1.55;
+        }
+
+        .flow {
+            margin-top: 16px;
+            padding: 18px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(82, 100, 60, 0.1), rgba(42, 93, 119, 0.1));
+            border: 1px dashed rgba(82, 100, 60, 0.28);
+            font-family: var(--mono);
+            white-space: pre-wrap;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: rgba(178, 74, 47, 0.1);
+            color: var(--accent-strong);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.86rem;
+            font-weight: 700;
+        }
+
+        .command-block {
+            position: relative;
+            margin-top: 14px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(247, 240, 228, 0.94);
+            color: var(--ink);
+            padding: 7px 12px;
+            font-size: 0.86rem;
+        }
+
+        .command-block pre {
+            margin-top: 0;
+            padding-top: 48px;
+        }
+
+        .timeline {
+            display: grid;
+            gap: 14px;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 84px minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(82, 100, 60, 0.16);
+        }
+
+        .day {
+            background: rgba(178, 74, 47, 0.12);
+            color: var(--accent-strong);
+            border-radius: 14px;
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .qa {
+            display: grid;
+            gap: 12px;
+        }
+
+        .qa strong {
+            color: var(--accent-strong);
+        }
+
+        .callout {
+            padding: 22px 24px;
+            border-left: 6px solid var(--accent);
+        }
+
+        .hidden-by-search {
+            display: none !important;
+        }
+
+        .footer-note {
+            color: var(--muted);
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 1180px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .hero-grid,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .section,
+            .hero-top,
+            .hero-grid {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .grid-2,
+            .two-col-meta,
+            .timeline-item {
+                grid-template-columns: 1fr;
+            }
+
+            .section-head {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="eyebrow">XAMPP First, Linux Next</span>
+                <h1>Server Config Masterclass</h1>
+                <p>Apache, PHP, MySQL/MariaDB, phpMyAdmin, aur Laravel ko ek practical cheat sheet ki tarah padho.</p>
+            </div>
+
+            <div class="search-box">
+                <label for="searchInput"><strong>Quick Search</strong></label>
+                <input id="searchInput" type="text" placeholder="Search karo: php.ini, vhost, upload, 500, phpmyadmin...">
+                <div class="button-row">
+                    <button class="btn-primary" id="expandAll">Expand All</button>
+                    <button class="btn-secondary" id="collapseAll">Collapse All</button>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <a href="#overview">Overview</a>
+                <a href="#apache">Apache Files</a>
+                <a href="#php">PHP Files & Settings</a>
+                <a href="#mysql">MySQL / MariaDB</a>
+                <a href="#phpmyadmin">phpMyAdmin</a>
+                <a href="#laravel">Laravel Setup</a>
+                <a href="#files-table">Most-Used Files</a>
+                <a href="#scenarios">Practical Scenarios</a>
+                <a href="#commands">Commands</a>
+                <a href="#roadmap">15-Day Roadmap</a>
+                <a href="#interview">Interview Angle</a>
+            </nav>
+        </aside>
+
+        <main>
+            <section class="hero searchable" id="overview" data-search="overview xampp linux apache php mysql mariadb phpmyadmin laravel flow diagram">
+                <div class="hero-top">
+                    <span class="eyebrow">One File Study Page</span>
+                    <h2>Server samajhne ka seedha practical map</h2>
+                    <p>
+                        Agar aap PHP/Laravel developer ho aur ab "server files ka dar" khatam karna chahte ho,
+                        to ye page aapko exactly wahi help karega. Mental model simple rakho: Apache request handle karta hai,
+                        PHP code run karta hai, MySQL data store karta hai, aur phpMyAdmin in teenon ke upar ek browser UI hai.
+                    </p>
+                    <div class="flow">Browser
+  -&gt; Apache (port 80/443 listen)
+  -&gt; VirtualHost select
+  -&gt; DocumentRoot
+  -&gt; .htaccess / rewrite
+  -&gt; index.php
+  -&gt; PHP runtime
+  -&gt; Laravel boot
+  -&gt; MySQL / MariaDB</div>
+                </div>
+                <div class="hero-grid">
+                    <article class="mini-card">
+                        <h3>Apache kya control karta hai?</h3>
+                        <p>Ports, virtual hosts, SSL, URL rewrites, modules, logs, headers, aur kaunsa folder web se serve hoga.</p>
+                    </article>
+                    <article class="mini-card">
+                        <h3>PHP kya control karta hai?</h3>
+                        <p>Memory limit, upload size, execution time, extensions, error display/logging, sessions, aur opcache.</p>
+                    </article>
+                    <article class="mini-card">
+                        <h3>MySQL kya control karta hai?</h3>
+                        <p>Connections, storage engine performance, charset, packet size, query logs, backup/import behavior.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section searchable" id="apache" data-search="apache httpd.conf apache2.conf virtual host .htaccess ports.conf mods-available mods-enabled ssl.conf access.log error.log">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 1</span>
+                        <h2>Apache Configuration Files</h2>
+                        <p>XAMPP pe pehle `httpd.conf` aur `httpd-vhosts.conf` se dost banao. Linux pe `apache2.conf`, `sites-available`, `ports.conf`, `mods-enabled`, aur SSL configs zyada common milte hain.</p>
+                    </div>
+                    <span class="pill">Restart rule: global config change = restart/reload</span>
+                </div>
+
+                <div class="grid-2">
+                    <details open class="searchable" data-search="httpd.conf apache xampp windows linux listen loadmodule directory documentroot">
+                        <summary><span>`httpd.conf`</span><span>Global Apache Brain</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Main Apache config. Yahin se global behavior, modules, directories, includes, aur ports control hote hain.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP Path</strong>
+                                    <span class="path-chip">C:\xampp\apache\conf\httpd.conf</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/etc/httpd/conf/httpd.conf</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `Listen`, `LoadModule`, `Include`, default `DocumentRoot`, `<Directory>` rules.</p>
+                            <p><strong>Effect:</strong> Pure Apache ke behavior par effect hota hai. Galat syntax se Apache start hi nahi hoga.</p>
+                            <p><strong>Restart:</strong> Haan, almost always.</p>
+                            <p><strong>Real-world example:</strong> `mod_rewrite` enable karna ya default port 80 ko 8080 karna.</p>
+                            <pre># Example
+Listen 8080
+LoadModule rewrite_module modules/mod_rewrite.so</pre>
+                        </div>
+                    </details>
+
+                    <details open class="searchable" data-search="httpd-vhosts.conf virtual host xampp servername documentroot multiple projects">
+                        <summary><span>`httpd-vhosts.conf`</span><span>Multiple Local Projects</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Ek machine par multiple domains/projects chalane ke liye virtual hosts define karta hai.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP Path</strong>
+                                    <span class="path-chip">C:\xampp\apache\conf\extra\httpd-vhosts.conf</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Equivalent</strong>
+                                    <span class="path-chip">/etc/apache2/sites-available/*.conf</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `ServerName`, `DocumentRoot`, `<Directory>`, logs.</p>
+                            <p><strong>Effect:</strong> `project1.test`, `crm.test`, `api.test` alag folders se serve honge.</p>
+                            <p><strong>Restart:</strong> Haan.</p>
+                            <pre>&lt;VirtualHost *:80&gt;
+    ServerName laravel-demo.test
+    DocumentRoot "C:/xampp/htdocs/laravel-demo/public"
+
+    &lt;Directory "C:/xampp/htdocs/laravel-demo/public"&gt;
+        AllowOverride All
+        Require all granted
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;</pre>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search=".htaccess rewrite allowoverride laravel routes redirect auth headers">
+                        <summary><span>`.htaccess`</span><span>Folder-level Override</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Directory-level Apache config. Rewrites, redirects, auth, headers yahin se.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP Path</strong>
+                                    <span class="path-chip">project\public\.htaccess</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/var/www/app/public/.htaccess</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `RewriteEngine On`, auth rules, `Header set`, deny rules.</p>
+                            <p><strong>Effect:</strong> Laravel pretty URLs, `/public` remove, redirects, CORS/CSP.</p>
+                            <p><strong>Restart:</strong> Usually nahi, provided `AllowOverride All` allowed ho.</p>
+                            <pre>&lt;IfModule mod_rewrite.c&gt;
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+&lt;/IfModule&gt;</pre>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search="apache2.conf ubuntu debian allowoverride directory include">
+                        <summary><span>`apache2.conf`</span><span>Debian/Ubuntu Main Config</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Debian/Ubuntu systems ka main Apache config. Global includes aur defaults yahin se आते hain.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP</strong>
+                                    <span class="path-chip">Usually not used</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/etc/apache2/apache2.conf</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `<Directory /var/www/>`, `AllowOverride`, security defaults.</p>
+                            <p><strong>Effect:</strong> Agar yahan `.htaccess` deny ho gaya to Laravel rewrites break ho jayengi.</p>
+                            <p><strong>Restart:</strong> Haan.</p>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search="sites-available sites-enabled a2ensite virtual host debian ubuntu">
+                        <summary><span>`sites-available` / `sites-enabled`</span><span>Per-site Linux Config</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Debian family me har site ka config ek file hota hai, enable karne par symlink `sites-enabled` me banta hai.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP</strong>
+                                    <span class="path-chip">Usually not used</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/etc/apache2/sites-available/ and /etc/apache2/sites-enabled/</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> New `.conf` file, `a2ensite`, `a2dissite`.</p>
+                            <p><strong>Effect:</strong> Site enable/disable clean way me manage hoti hai.</p>
+                            <p><strong>Restart:</strong> Reload usually enough.</p>
+                            <pre>sudo a2ensite laravel-demo.conf
+sudo systemctl reload apache2</pre>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search="ports.conf listen 80 8080 443 apache port change">
+                        <summary><span>`ports.conf`</span><span>Apache Ports</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Debian/Ubuntu me Apache kis port par listen karega, yahan define hota hai.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP</strong>
+                                    <span class="path-chip">`Listen` usually inside httpd.conf</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/etc/apache2/ports.conf</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `Listen 80`, `Listen 8080`, `Listen 443`.</p>
+                            <p><strong>Effect:</strong> URL me port change hoga: `http://localhost:8080`.</p>
+                            <p><strong>Restart:</strong> Haan.</p>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search="mods-available mods-enabled apache modules rewrite ssl headers proxy_fcgi">
+                        <summary><span>`mods-available` / `mods-enabled`</span><span>Modules On/Off</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> Apache modules jaise `rewrite`, `ssl`, `headers`, `proxy_fcgi` enable/disable yahin se hote hain.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP</strong>
+                                    <span class="path-chip">`LoadModule` in httpd.conf</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/etc/apache2/mods-available/ and /etc/apache2/mods-enabled/</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `a2enmod rewrite`, `a2enmod ssl`, `a2enmod headers`.</p>
+                            <p><strong>Effect:</strong> Features available ya unavailable ho jaati hain.</p>
+                            <p><strong>Restart:</strong> Reload/restart required.</p>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search="ssl.conf httpd-ssl.conf https certificate private key 443">
+                        <summary><span>`ssl.conf` / SSL Site Config</span><span>HTTPS Layer</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> TLS/SSL setup, certificate path, private key, HTTPS virtual host.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP Path</strong>
+                                    <span class="path-chip">C:\xampp\apache\conf\extra\httpd-ssl.conf</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Path</strong>
+                                    <span class="path-chip">/etc/httpd/conf.d/ssl.conf or /etc/apache2/sites-available/default-ssl.conf</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> `SSLCertificateFile`, `SSLCertificateKeyFile`, `<VirtualHost *:443>`.</p>
+                            <p><strong>Effect:</strong> Site HTTPS me chalegi.</p>
+                            <p><strong>Restart:</strong> Haan.</p>
+                            <pre>&lt;VirtualHost *:443&gt;
+    ServerName laravel-demo.test
+    DocumentRoot /var/www/laravel-demo/public
+    SSLEngine on
+    SSLCertificateFile /path/to/cert.crt
+    SSLCertificateKeyFile /path/to/key.key
+&lt;/VirtualHost&gt;</pre>
+                        </div>
+                    </details>
+
+                    <details class="searchable" data-search="access.log error.log apache logs debug 404 500">
+                        <summary><span>`access.log` and `error.log`</span><span>Debugging Gold</span></summary>
+                        <div class="details-body">
+                            <p><strong>Kaam:</strong> `access.log` request history rakhta hai, `error.log` failures aur warnings batata hai.</p>
+                            <div class="two-col-meta">
+                                <div class="meta-item">
+                                    <strong>XAMPP Paths</strong>
+                                    <span class="path-chip">C:\xampp\apache\logs\access.log</span>
+                                    <span class="path-chip">C:\xampp\apache\logs\error.log</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Linux Paths</strong>
+                                    <span class="path-chip">/var/log/apache2/access.log</span>
+                                    <span class="path-chip">/var/log/apache2/error.log</span>
+                                </div>
+                            </div>
+                            <p><strong>Common changes:</strong> Log level, custom log path per vhost.</p>
+                            <p><strong>Effect:</strong> 500 errors, permission issues, bad rewrites instantly mil jate hain.</p>
+                            <p><strong>Restart:</strong> Sirf logs read karne ke liye nahi.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section class="section searchable" id="php" data-search="php php.ini conf.d php-fpm.conf www.conf memory_limit upload_max_filesize post_max_size display_errors opcache composer">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 2</span>
+                        <h2>PHP Configuration Files & Settings</h2>
+                        <p>Ye section local XAMPP aur Linux server dono ke liye सबसे zyada useful hoga, kyunki real issues often `php.ini` ki wajah se aate hain: uploads, memory, extensions, errors, timezone, aur Composer.</p>
+                    </div>
+                    <span class="pill">Rule: CLI `php.ini` aur web `php.ini` alag ho sakte hain</span>
+                </div>
+
+                <div class="grid-2">
+                    <article class="card searchable" data-search="php.ini xampp linux apache2 fpm cli">
+                        <h3>`php.ini`</h3>
+                        <p><strong>Kaam:</strong> Main PHP runtime config file.</p>
+                        <p><strong>XAMPP Path:</strong> <span class="path-chip">C:\xampp\php\php.ini</span></p>
+                        <p><strong>Linux Paths:</strong></p>
+                        <div class="tag-row">
+                            <span class="tag">/etc/php/8.x/apache2/php.ini</span>
+                            <span class="tag">/etc/php/8.x/fpm/php.ini</span>
+                            <span class="tag">/etc/php/8.x/cli/php.ini</span>
+                            <span class="tag">/etc/php.ini</span>
+                        </div>
+                        <p><strong>Common changes:</strong> memory, upload, error display, timezone, extensions.</p>
+                        <p><strong>Restart:</strong> Apache mod_php ho to Apache restart. FPM ho to PHP-FPM reload/restart.</p>
+                    </article>
+
+                    <article class="card searchable" data-search="conf.d ini php extensions opcache xdebug">
+                        <h3>`conf.d/*.ini`</h3>
+                        <p><strong>Kaam:</strong> Extension-specific ya extra PHP settings ko alag files me maintain karna.</p>
+                        <p><strong>XAMPP:</strong> Mostly `php.ini` enough hota hai.</p>
+                        <p><strong>Linux:</strong> <span class="path-chip">/etc/php/8.x/*/conf.d/</span> ya <span class="path-chip">/etc/php.d/</span></p>
+                        <p><strong>Use case:</strong> `opcache.ini`, `xdebug.ini`, `redis.ini` separate रखना.</p>
+                    </article>
+
+                    <article class="card searchable" data-search="php-fpm.conf php-fpm linux process manager master config">
+                        <h3>`php-fpm.conf`</h3>
+                        <p><strong>Kaam:</strong> PHP-FPM master config. FPM process manager ke high-level settings yahin hote hain.</p>
+                        <p><strong>Linux Path:</strong> <span class="path-chip">/etc/php/8.x/fpm/php-fpm.conf</span> or <span class="path-chip">/etc/php-fpm.conf</span></p>
+                        <p><strong>Common changes:</strong> logging, pid, global limits.</p>
+                    </article>
+
+                    <article class="card searchable" data-search="pool.d www.conf php-fpm pool max_children socket listen www-data">
+                        <h3>`pool.d/www.conf`</h3>
+                        <p><strong>Kaam:</strong> Per-site/per-pool user, group, socket/port, process limits define karta hai.</p>
+                        <p><strong>Linux Path:</strong> <span class="path-chip">/etc/php/8.x/fpm/pool.d/www.conf</span></p>
+                        <p><strong>Common changes:</strong> `listen`, `pm.max_children`, `user`, `group`, pool-specific PHP overrides.</p>
+                        <pre>[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.2-fpm.sock
+pm = dynamic
+pm.max_children = 20</pre>
+                    </article>
+                </div>
+
+                <h3 style="margin-top: 28px;">Important PHP Settings</h3>
+                <table class="searchable" data-search="memory_limit upload_max_filesize post_max_size max_execution_time max_input_vars display_errors error_reporting error_log timezone session opcache composer">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Kya karti hai</th>
+                            <th>Common value</th>
+                            <th>Kab change karo</th>
+                            <th>Wrong value issue</th>
+                            <th>Laravel / PHP use case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>memory_limit</code></td>
+                            <td>Ek PHP script kitni RAM use kar sakti hai</td>
+                            <td>128M, 256M, 512M</td>
+                            <td>Imports, image processing, heavy Composer install</td>
+                            <td><code>Allowed memory size exhausted</code></td>
+                            <td>Excel import, queue jobs, Composer install</td>
+                        </tr>
+                        <tr>
+                            <td><code>upload_max_filesize</code></td>
+                            <td>Single upload file size limit</td>
+                            <td>2M default, common 20M/64M</td>
+                            <td>Media, CSV, ZIP upload</td>
+                            <td>Upload silently fail ya validation fail</td>
+                            <td>Admin panel uploads</td>
+                        </tr>
+                        <tr>
+                            <td><code>post_max_size</code></td>
+                            <td>Total POST request size</td>
+                            <td>8M default, common 32M/128M</td>
+                            <td>Large forms + uploads</td>
+                            <td><code>$_POST</code> aur <code>$_FILES</code> empty</td>
+                            <td>Multiple file upload forms</td>
+                        </tr>
+                        <tr>
+                            <td><code>max_execution_time</code></td>
+                            <td>Script kitni der run kar sakti hai</td>
+                            <td>30, 120, 300</td>
+                            <td>Import/export, reports</td>
+                            <td>Timeout / 500</td>
+                            <td>Long reports, exports</td>
+                        </tr>
+                        <tr>
+                            <td><code>max_input_vars</code></td>
+                            <td>Form inputs ki count limit</td>
+                            <td>1000, 3000, 5000</td>
+                            <td>Huge settings form</td>
+                            <td>Kuch fields save hi nahi hongi</td>
+                            <td>Permission matrix forms</td>
+                        </tr>
+                        <tr>
+                            <td><code>display_errors</code></td>
+                            <td>Browser me error dikhani hai ya nahi</td>
+                            <td>Dev On, Prod Off</td>
+                            <td>Local debugging</td>
+                            <td>Production me info leak</td>
+                            <td>Local Laravel error inspect</td>
+                        </tr>
+                        <tr>
+                            <td><code>error_reporting</code></td>
+                            <td>Kaunsi errors report hongi</td>
+                            <td><code>E_ALL</code></td>
+                            <td>PHP upgrade or bug hunt</td>
+                            <td>Notices/warnings hide ho sakte hain</td>
+                            <td>Legacy package debug</td>
+                        </tr>
+                        <tr>
+                            <td><code>error_log</code></td>
+                            <td>PHP errors kahan write hongi</td>
+                            <td>Custom path</td>
+                            <td>Centralized debugging</td>
+                            <td>Error trace missing</td>
+                            <td>Separate PHP log maintain</td>
+                        </tr>
+                        <tr>
+                            <td><code>date.timezone</code></td>
+                            <td>Default timezone</td>
+                            <td>UTC or app timezone</td>
+                            <td>Always set karo</td>
+                            <td>Wrong timestamps, warnings</td>
+                            <td>Jobs, logs, schedules</td>
+                        </tr>
+                        <tr>
+                            <td><code>extension=...</code></td>
+                            <td>Module enable/disable</td>
+                            <td>Need-based</td>
+                            <td>Feature missing ho</td>
+                            <td><code>Class/function not found</code></td>
+                            <td><code>pdo_mysql</code>, <code>mbstring</code>, <code>zip</code>, <code>openssl</code>, <code>fileinfo</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>session.save_path</code> / <code>session.gc_maxlifetime</code></td>
+                            <td>Session files location and lifetime</td>
+                            <td>OS default / 1440</td>
+                            <td>Login/session issues</td>
+                            <td>Unexpected logout</td>
+                            <td>Admin session stability</td>
+                        </tr>
+                        <tr>
+                            <td><code>file_uploads</code></td>
+                            <td>Upload feature on/off</td>
+                            <td>On</td>
+                            <td>Rarely change</td>
+                            <td><code>$_FILES</code> empty</td>
+                            <td>Any upload feature</td>
+                        </tr>
+                        <tr>
+                            <td><code>allow_url_fopen</code></td>
+                            <td>URL ko file functions se read karna</td>
+                            <td>Often On</td>
+                            <td>Legacy integrations</td>
+                            <td>Remote file reads break</td>
+                            <td>Old package behavior</td>
+                        </tr>
+                        <tr>
+                            <td><code>allow_url_include</code></td>
+                            <td>Remote include allow karta hai</td>
+                            <td>Off</td>
+                            <td>Practically kabhi nahi</td>
+                            <td>Major security risk</td>
+                            <td>Always Off</td>
+                        </tr>
+                        <tr>
+                            <td><code>opcache.enable</code>, <code>opcache.memory_consumption</code></td>
+                            <td>Compiled PHP code cache</td>
+                            <td>On, 128 or 256</td>
+                            <td>Production performance</td>
+                            <td>Slow app or stale code</td>
+                            <td>Laravel response faster</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="callout searchable" data-search="composer php memory limit extensions cli php.ini">
+                    <h3>Composer ke time kya yaad rakho?</h3>
+                    <p>Composer browser wala PHP nahi, mostly CLI PHP use karta hai. Isliye `php --ini` check karo. Agar Composer memory error de raha hai to temporary run kar sakte ho: <code>php -d memory_limit=-1 composer.phar install</code>. Missing extensions like <code>openssl</code>, <code>mbstring</code>, <code>zip</code>, <code>fileinfo</code>, <code>intl</code> bhi common blockers hote hain.</p>
+                </div>
+            </section>
+
+            <section class="section searchable" id="mysql" data-search="mysql mariadb my.ini my.cnf mysqldump bind-address max_allowed_packet innodb_buffer_pool_size sql_mode utf8mb4 definer unknown database">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 3</span>
+                        <h2>MySQL / MariaDB Configuration</h2>
+                        <p>Database config ko sirf “DB chal raha hai” level par mat chhodo. Port, bind address, charset, packet size, slow query log, aur safe restart samajh loge to half production issues easy ho jayenge.</p>
+                    </div>
+                    <span class="pill">Best default: utf8mb4 + proper logs</span>
+                </div>
+
+                <div class="grid-2">
+                    <article class="card searchable" data-search="my.ini xampp mysql config">
+                        <h3>`my.ini` on XAMPP</h3>
+                        <p><strong>Path:</strong> <span class="path-chip">C:\xampp\mysql\bin\my.ini</span></p>
+                        <p><strong>Kaam:</strong> Windows/XAMPP MySQL server config.</p>
+                    </article>
+                    <article class="card searchable" data-search="my.cnf mysqld.cnf mariadb.conf.d linux mysql config">
+                        <h3>`my.cnf` on Linux</h3>
+                        <p><strong>Common Paths:</strong></p>
+                        <div class="tag-row">
+                            <span class="tag">/etc/my.cnf</span>
+                            <span class="tag">/etc/mysql/my.cnf</span>
+                            <span class="tag">/etc/mysql/mysql.conf.d/mysqld.cnf</span>
+                            <span class="tag">/etc/mysql/mariadb.conf.d/50-server.cnf</span>
+                        </div>
+                        <p><strong>Kaam:</strong> Linux MySQL/MariaDB main config.</p>
+                    </article>
+                    <article class="card searchable" data-search="mysql error log mysql_error.log var log mysql mysqld">
+                        <h3>MySQL Error Log</h3>
+                        <p><strong>XAMPP:</strong> <span class="path-chip">C:\xampp\mysql\data\mysql_error.log</span></p>
+                        <p><strong>Linux:</strong> <span class="path-chip">/var/log/mysql/error.log</span>, <span class="path-chip">/var/log/mysqld.log</span>, ya <span class="path-chip">journalctl -u mysql</span></p>
+                        <p>Startup fail, auth issue, crash, bad config sab yahin dikhega.</p>
+                    </article>
+                    <article class="card searchable" data-search="mysql data directory var lib mysql backup files">
+                        <h3>Data Directory</h3>
+                        <p><strong>XAMPP:</strong> <span class="path-chip">C:\xampp\mysql\data</span></p>
+                        <p><strong>Linux:</strong> <span class="path-chip">/var/lib/mysql</span></p>
+                        <p>Real database files yahin hote hain. Direct manual editing mat karo.</p>
+                    </article>
+                </div>
+
+                <h3 style="margin-top: 28px;">Important MySQL Settings</h3>
+                <table class="searchable" data-search="port bind-address max_allowed_packet innodb_buffer_pool_size sql_mode character-set-server collation-server wait_timeout max_connections log_error slow_query_log">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Kya karti hai</th>
+                            <th>Common value</th>
+                            <th>Kab change karo</th>
+                            <th>Wrong value issue</th>
+                            <th>Laravel use case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>port</code></td>
+                            <td>MySQL kis port par listen karega</td>
+                            <td>3306</td>
+                            <td>Conflict ya multiple instances</td>
+                            <td>App connect nahi karega</td>
+                            <td><code>.env DB_PORT</code> sync</td>
+                        </tr>
+                        <tr>
+                            <td><code>bind-address</code></td>
+                            <td>Kis IP par connections accept honge</td>
+                            <td>127.0.0.1</td>
+                            <td>Remote DB allow karna ho</td>
+                            <td>Security risk ya remote access fail</td>
+                            <td>App same server par ho to localhost best</td>
+                        </tr>
+                        <tr>
+                            <td><code>max_allowed_packet</code></td>
+                            <td>Packet/data size limit</td>
+                            <td>64M</td>
+                            <td>Large imports/BLOBs</td>
+                            <td><code>server has gone away</code></td>
+                            <td>Big SQL import</td>
+                        </tr>
+                        <tr>
+                            <td><code>innodb_buffer_pool_size</code></td>
+                            <td>InnoDB cache RAM</td>
+                            <td>Dedicated DB me 50-70% RAM</td>
+                            <td>Performance tuning</td>
+                            <td>Too low slow, too high RAM pressure</td>
+                            <td>Busy Laravel apps</td>
+                        </tr>
+                        <tr>
+                            <td><code>sql_mode</code></td>
+                            <td>SQL strictness define karta hai</td>
+                            <td>Strict mode recommended</td>
+                            <td>Legacy app compatibility</td>
+                            <td>Loose mode se bad data save</td>
+                            <td>Clean inserts/updates</td>
+                        </tr>
+                        <tr>
+                            <td><code>character-set-server</code></td>
+                            <td>Default charset</td>
+                            <td>utf8mb4</td>
+                            <td>Always standardize</td>
+                            <td>Emoji/data corruption</td>
+                            <td>Full Unicode</td>
+                        </tr>
+                        <tr>
+                            <td><code>collation-server</code></td>
+                            <td>Default comparison/sorting rules</td>
+                            <td>utf8mb4_unicode_ci</td>
+                            <td>Sorting consistency</td>
+                            <td>Unexpected ordering</td>
+                            <td>Search/sort consistency</td>
+                        </tr>
+                        <tr>
+                            <td><code>wait_timeout</code></td>
+                            <td>Idle connection timeout</td>
+                            <td>Often 28800</td>
+                            <td>Busy server tuning</td>
+                            <td>Unexpected disconnects</td>
+                            <td>Long-lived workers</td>
+                        </tr>
+                        <tr>
+                            <td><code>max_connections</code></td>
+                            <td>Simultaneous connections limit</td>
+                            <td>151 common default</td>
+                            <td>Peak traffic</td>
+                            <td><code>Too many connections</code></td>
+                            <td>High load moments</td>
+                        </tr>
+                        <tr>
+                            <td><code>log_error</code></td>
+                            <td>Error log path</td>
+                            <td>Custom path</td>
+                            <td>Troubleshooting</td>
+                            <td>Debug difficult</td>
+                            <td>Startup/auth issue trace</td>
+                        </tr>
+                        <tr>
+                            <td><code>slow_query_log</code></td>
+                            <td>Slow queries record karta hai</td>
+                            <td>On when tuning</td>
+                            <td>Performance analysis</td>
+                            <td>Slow query unseen</td>
+                            <td>Eloquent/query tuning</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="grid-2" style="margin-top: 18px;">
+                    <article class="card searchable" data-search="mysqldump backup export database path import export">
+                        <h3>`mysqldump` aur backup flow</h3>
+                        <p><strong>Kya hai:</strong> Logical backup tool jo tables, data, views, triggers export karta hai.</p>
+                        <div class="command-block">
+                            <button class="copy-btn" data-copy="mysqldump -u root -p --single-transaction mydb > mydb.sql">Copy</button>
+                            <pre>mysqldump -u root -p --single-transaction mydb &gt; mydb.sql</pre>
+                        </div>
+                        <p><strong>Backup path:</strong> Jahan aap command me file output do, wahi dump save hoga.</p>
+                    </article>
+                    <article class="card searchable" data-search="mysql import error definer unknown database packet size safe restart">
+                        <h3>Common import/export issues</h3>
+                        <ul>
+                            <li><strong>Unknown database:</strong> target DB pehle create karo.</li>
+                            <li><strong>Definer error:</strong> old user referenced hai, SQL me `DEFINER` replace/remove karo.</li>
+                            <li><strong>Packet issue:</strong> `max_allowed_packet` badhao.</li>
+                            <li><strong>Huge import timeout:</strong> phpMyAdmin ke bajay CLI import use karo.</li>
+                        </ul>
+                    </article>
+                </div>
+
+                <pre>[mysqld]
+port=3306
+bind-address=127.0.0.1
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+max_allowed_packet=64M
+sql_mode=STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+slow_query_log=1
+log_error=mysql_error.log</pre>
+            </section>
+
+            <section class="section searchable" id="phpmyadmin" data-search="phpmyadmin config.inc.php blowfish_secret auth_type cookie alias localhost phpmyadmin import size relation features">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 4</span>
+                        <h2>phpMyAdmin Configuration</h2>
+                        <p>phpMyAdmin ko database mat samjho. Ye sirf ek PHP app hai jo browser me chal kar MySQL se connect hoti hai. Isliye Apache, PHP, aur MySQL tino ki settings is par directly effect karti hain.</p>
+                    </div>
+                    <span class="pill">phpMyAdmin = Apache + PHP + MySQL ka junction</span>
+                </div>
+
+                <div class="flow">Browser
+  -&gt; http://localhost/phpmyadmin
+  -&gt; Apache alias / vhost
+  -&gt; phpMyAdmin index.php
+  -&gt; config.inc.php
+  -&gt; PHP mysqli / pdo_mysql extension
+  -&gt; MySQL login
+  -&gt; Databases UI</div>
+
+                <div class="grid-2" style="margin-top: 18px;">
+                    <article class="card searchable" data-search="config.inc.php blowfish_secret auth_type phpmyadmin">
+                        <h3>`config.inc.php`</h3>
+                        <p><strong>XAMPP Path:</strong> <span class="path-chip">C:\xampp\phpMyAdmin\config.inc.php</span></p>
+                        <p><strong>Linux Paths:</strong> <span class="path-chip">/etc/phpmyadmin/config.inc.php</span> or <span class="path-chip">/usr/share/phpmyadmin/config.inc.php</span></p>
+                        <p><strong>Important settings:</strong> `auth_type`, `blowfish_secret`, host, port, relation features.</p>
+                        <pre>&lt;?php
+$cfg['blowfish_secret'] = 'use-a-long-random-32-plus-char-secret';
+$i = 0;
+$i++;
+$cfg['Servers'][$i]['auth_type'] = 'cookie';
+$cfg['Servers'][$i]['host'] = '127.0.0.1';
+$cfg['Servers'][$i]['port'] = '3306';</pre>
+                    </article>
+
+                    <article class="card searchable" data-search="apache alias phpmyadmin xampp linux conf available">
+                        <h3>Apache alias config</h3>
+                        <p><strong>XAMPP:</strong> often <span class="path-chip">C:\xampp\apache\conf\extra\httpd-xampp.conf</span></p>
+                        <p><strong>Linux:</strong> <span class="path-chip">/etc/apache2/conf-available/phpmyadmin.conf</span> or <span class="path-chip">/etc/httpd/conf.d/phpMyAdmin.conf</span></p>
+                        <p><strong>Kaam:</strong> `/phpmyadmin` URL ko actual phpMyAdmin folder par map karta hai.</p>
+                    </article>
+                </div>
+
+                <table style="margin-top: 18px;" class="searchable" data-search="auth_type blowfish_secret upload limit timeout relation features advanced config">
+                    <thead>
+                        <tr>
+                            <th>Topic</th>
+                            <th>Simple explanation</th>
+                            <th>Practical note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>auth_type = cookie</code></td>
+                            <td>Login browser form se hota hai</td>
+                            <td>Most common and safer</td>
+                        </tr>
+                        <tr>
+                            <td><code>auth_type = config</code></td>
+                            <td>Credentials file me hardcoded</td>
+                            <td>Production me avoid</td>
+                        </tr>
+                        <tr>
+                            <td><code>blowfish_secret</code></td>
+                            <td>Cookie auth encryption key</td>
+                            <td>Random, long, secret value rakho</td>
+                        </tr>
+                        <tr>
+                            <td>Upload / import size</td>
+                            <td>PHP aur MySQL settings se aati hai</td>
+                            <td><code>upload_max_filesize</code>, <code>post_max_size</code>, <code>max_execution_time</code>, <code>max_allowed_packet</code> check karo</td>
+                        </tr>
+                        <tr>
+                            <td>Timeout issue</td>
+                            <td>Large import browser me slow pad sakta hai</td>
+                            <td>Huge SQL import CLI se karo</td>
+                        </tr>
+                        <tr>
+                            <td>Relation features</td>
+                            <td>Designer, relation view, bookmarks</td>
+                            <td>phpMyAdmin internal config tables required</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section searchable" id="laravel" data-search="laravel public folder documentroot mod_rewrite allowoverride storage permissions bootstrap cache app_url 500 error laravel log">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 5</span>
+                        <h2>Laravel-Specific Server Configuration</h2>
+                        <p>Laravel ka production aur local setup tabhi clean hota hai jab Apache aur PHP dono app ke expectations ke hisab se configure hon: `public` folder as DocumentRoot, `mod_rewrite`, correct permissions, aur proper logs.</p>
+                    </div>
+                    <span class="pill">Golden rule: project root nahi, `public` serve karo</span>
+                </div>
+
+                <div class="grid-3">
+                    <article class="card searchable" data-search="documentroot public folder why public">
+                        <h3>Public folder issue</h3>
+                        <p><strong>Why:</strong> `public/index.php` hi web entry point hai. Root expose karoge to `.env`, `vendor`, `app` jaise sensitive folders risk me aa sakte hain.</p>
+                    </article>
+                    <article class="card searchable" data-search="mod_rewrite htaccess allowoverride laravel routes">
+                        <h3>Rewrite rules + `mod_rewrite`</h3>
+                        <p>Pretty URLs ke liye `.htaccess` aur `mod_rewrite` dono chahiye. `AllowOverride All` bhi necessary hota hai agar rewrite `.htaccess` me hai.</p>
+                    </article>
+                    <article class="card searchable" data-search="virtual host laravel documentroot servername">
+                        <h3>Virtual host setup</h3>
+                        <p><code>ServerName laravel-demo.test</code> aur <code>DocumentRoot /path/to/project/public</code> best local/prod structure hai.</p>
+                    </article>
+                    <article class="card searchable" data-search="storage permissions bootstrap cache permissions www-data apache">
+                        <h3>Storage and cache permissions</h3>
+                        <p>Linux par `storage` aur `bootstrap/cache` web server user ke writable hone chahiye, warna 500 errors milenge.</p>
+                        <pre>sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache</pre>
+                    </article>
+                    <article class="card searchable" data-search="app_url env laravel asset route signed url">
+                        <h3>`APP_URL`</h3>
+                        <p>URL generation, assets, mails, signed routes, callback flows par effect karta hai. Vhost domain ke saath sync rakho.</p>
+                    </article>
+                    <article class="card searchable" data-search="500 error debug laravel log apache log php log">
+                        <h3>500 error debugging</h3>
+                        <p>Flow follow karo: `storage/logs/laravel.log` -> Apache `error.log` -> PHP `error_log` -> `.env` -> permissions -> cache clear.</p>
+                    </article>
+                </div>
+
+                <div class="flow" style="margin-top: 18px;">Laravel 500 debug flow
+  -&gt; Browser shows 500
+  -&gt; check storage/logs/laravel.log
+  -&gt; if empty, check Apache error.log
+  -&gt; if PHP crash, check PHP error_log
+  -&gt; verify .env, APP_KEY, DB credentials
+  -&gt; verify storage and bootstrap/cache permissions
+  -&gt; run php artisan optimize:clear</div>
+
+                <div class="command-block" style="margin-top: 18px;">
+                    <button class="copy-btn" data-copy="php artisan optimize:clear&#10;php artisan config:clear&#10;php artisan route:clear&#10;php artisan cache:clear">Copy</button>
+                    <pre>php artisan optimize:clear
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear</pre>
+                </div>
+            </section>
+
+            <section class="section searchable" id="files-table" data-search="most used files table apache php mysql phpmyadmin logs xampp linux">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 6</span>
+                        <h2>Most-Used Files Table</h2>
+                        <p>Fast revision ke liye ye table sabse useful hai. Interview se pehle ya setup ke waqt isi ko skim kar lo.</p>
+                    </div>
+                    <span class="pill">Use this like a mini map</span>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File name</th>
+                            <th>Path in XAMPP Windows</th>
+                            <th>Path in Linux</th>
+                            <th>Purpose</th>
+                            <th>Most common changes</th>
+                            <th>Restart needed?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>httpd.conf</code></td>
+                            <td><code>C:\xampp\apache\conf\httpd.conf</code></td>
+                            <td><code>/etc/httpd/conf/httpd.conf</code> or <code>/etc/apache2/apache2.conf</code></td>
+                            <td>Main Apache config</td>
+                            <td>Ports, modules, includes</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td><code>httpd-vhosts.conf</code></td>
+                            <td><code>C:\xampp\apache\conf\extra\httpd-vhosts.conf</code></td>
+                            <td><code>/etc/apache2/sites-available/*.conf</code></td>
+                            <td>Virtual hosts</td>
+                            <td>ServerName, DocumentRoot</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td><code>.htaccess</code></td>
+                            <td><code>project\public\.htaccess</code></td>
+                            <td><code>/var/www/app/public/.htaccess</code></td>
+                            <td>Directory rules, rewrites</td>
+                            <td>Laravel rewrite, headers</td>
+                            <td>Usually no</td>
+                        </tr>
+                        <tr>
+                            <td><code>ports.conf</code></td>
+                            <td>Separate nahi</td>
+                            <td><code>/etc/apache2/ports.conf</code></td>
+                            <td>Ports</td>
+                            <td>Listen 80/8080/443</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td><code>php.ini</code></td>
+                            <td><code>C:\xampp\php\php.ini</code></td>
+                            <td><code>/etc/php/8.x/.../php.ini</code> or <code>/etc/php.ini</code></td>
+                            <td>PHP runtime config</td>
+                            <td>Upload, memory, errors, extensions</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td><code>www.conf</code></td>
+                            <td>Usually N/A</td>
+                            <td><code>/etc/php/8.x/fpm/pool.d/www.conf</code></td>
+                            <td>FPM pool config</td>
+                            <td>User, socket, max children</td>
+                            <td>FPM reload</td>
+                        </tr>
+                        <tr>
+                            <td><code>my.ini</code> / <code>my.cnf</code></td>
+                            <td><code>C:\xampp\mysql\bin\my.ini</code></td>
+                            <td><code>/etc/my.cnf</code> or <code>/etc/mysql/...</code></td>
+                            <td>MySQL/MariaDB config</td>
+                            <td>Port, charset, packet, logs</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td><code>config.inc.php</code></td>
+                            <td><code>C:\xampp\phpMyAdmin\config.inc.php</code></td>
+                            <td><code>/etc/phpmyadmin/config.inc.php</code></td>
+                            <td>phpMyAdmin config</td>
+                            <td>Auth type, blowfish, host</td>
+                            <td>Usually no, reload safe</td>
+                        </tr>
+                        <tr>
+                            <td><code>error.log</code></td>
+                            <td><code>C:\xampp\apache\logs\error.log</code></td>
+                            <td><code>/var/log/apache2/error.log</code> or <code>/var/log/httpd/error_log</code></td>
+                            <td>Error debugging</td>
+                            <td>Read mostly</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td><code>laravel.log</code></td>
+                            <td><code>project\storage\logs\laravel.log</code></td>
+                            <td><code>/var/www/app/storage/logs/laravel.log</code></td>
+                            <td>Laravel app errors</td>
+                            <td>Read mostly</td>
+                            <td>No</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section searchable" id="scenarios" data-search="practical scenarios public remove upload size phpmyadmin import laravel 500 apache port 80 vhost ssl cors csp backup import error extension composer memory">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 7</span>
+                        <h2>Practical Scenarios</h2>
+                        <p>Real life me theory tab kaam aati hai jab aap “issue -> file -> fix -> restart” sochna start kar do. Neeche common cases diye hue hain.</p>
+                    </div>
+                    <span class="pill">Think in layers: Apache -> PHP -> App -> MySQL</span>
+                </div>
+
+                <div class="qa">
+                    <details class="searchable" data-search="public remove from url documentroot laravel">
+                        <summary><span>URL se `/public` remove karna</span><span>Laravel</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> Vhost ka `DocumentRoot` project root par nahi, `project/public` par point karo.</p>
+                            <p><strong>Files:</strong> `httpd-vhosts.conf` ya Linux site config.</p>
+                            <p><strong>Mistake:</strong> Project root expose kar dena.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="file upload size increase php ini post max upload max">
+                        <summary><span>File upload size badhana</span><span>PHP</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> `upload_max_filesize`, `post_max_size`, `max_execution_time`, `memory_limit` adjust karo.</p>
+                            <pre>upload_max_filesize = 64M
+post_max_size = 72M
+max_execution_time = 300
+memory_limit = 512M</pre>
+                            <p><strong>Mistake:</strong> Sirf `upload_max_filesize` badha kar ruk jana.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="phpmyadmin import size increase timeout max allowed packet">
+                        <summary><span>phpMyAdmin import size badhana</span><span>PHP + MySQL</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> PHP limits badhao, saath me MySQL `max_allowed_packet` bhi check karo.</p>
+                            <p><strong>Mistake:</strong> Huge imports browser se push karte rehna. Large file ho to CLI use better.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="laravel 500 error debug log env permissions">
+                        <summary><span>Laravel 500 error debug karna</span><span>Logs</span></summary>
+                        <div class="details-body">
+                            <p><strong>Flow:</strong> `storage/logs/laravel.log` -> Apache `error.log` -> PHP `error_log` -> `.env` -> permissions -> cache clear.</p>
+                            <p><strong>Mistake:</strong> Sirf browser me white screen dekhkar guess karna.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="apache port 80 change 8080 listen">
+                        <summary><span>Apache port 80 change karna</span><span>Listen</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> `httpd.conf` ya `ports.conf` me `Listen 8080`, vhost bhi `*:8080` par update.</p>
+                            <p><strong>Mistake:</strong> Browser URL me `:8080` add karna bhool jana.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="multiple local projects virtual hosts hosts file">
+                        <summary><span>Multiple local projects run karna</span><span>Vhosts</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> Har project ke liye अलग `ServerName`, `DocumentRoot`, aur hosts entry.</p>
+                            <p><strong>Mistake:</strong> Same domain name do sites ko de dena.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="virtual host banana steps">
+                        <summary><span>Virtual host banana</span><span>Apache</span></summary>
+                        <div class="details-body">
+                            <p><strong>Steps:</strong> vhost file banao -> `ServerName` do -> `DocumentRoot` set karo -> hosts file update -> Apache restart.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="https ssl enable apache certificate key">
+                        <summary><span>HTTPS / SSL enable karna</span><span>Certificates</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> SSL module enable karo, `:443` vhost banao, certificate aur key paths set karo.</p>
+                            <p><strong>Mistake:</strong> Cert path typo ya `Listen 443` missing.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="cors csp headers apache htaccess mod_headers">
+                        <summary><span>CORS/CSP headers set karna</span><span>Headers</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> `mod_headers` enable karo aur vhost ya `.htaccess` me headers set karo.</p>
+                            <pre>&lt;IfModule mod_headers.c&gt;
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:"
+&lt;/IfModule&gt;</pre>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="mysql backup mysqldump">
+                        <summary><span>MySQL backup lena</span><span>`mysqldump`</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> CLI se `mysqldump` use karo, especially large DB ke liye.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="mysql import error unknown database definer packet">
+                        <summary><span>MySQL import error fix karna</span><span>DB + SQL file</span></summary>
+                        <div class="details-body">
+                            <p><strong>Check list:</strong> database exists? charset same? `DEFINER` issue? `max_allowed_packet` enough? correct user?</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="apache not starting debug port conflict syntax error">
+                        <summary><span>Apache not starting issue debug karna</span><span>Logs + Ports</span></summary>
+                        <div class="details-body">
+                            <p><strong>Flow:</strong> config syntax test -> `error.log` -> port 80/443 conflict check -> wrong module or path check.</p>
+                            <p><strong>Common cause:</strong> Skype/IIS/another Apache using same port.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="php extension enable zip intl openssl mbstring">
+                        <summary><span>PHP extension enable karna</span><span>`php.ini`</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> `php.ini` me `extension=zip` ya required extension uncomment karo, then restart/reload.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="composer memory limit issue fix cli php">
+                        <summary><span>Composer memory limit issue fix karna</span><span>CLI PHP</span></summary>
+                        <div class="details-body">
+                            <p><strong>Fix:</strong> `php -d memory_limit=-1 composer.phar install` ya CLI `php.ini` me limit increase.</p>
+                            <p><strong>Mistake:</strong> Web `php.ini` change karna aur sochna Composer bhi same use karega.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section class="section searchable" id="commands" data-search="commands apache restart mysql restart php version php ini modules logs tail backup import ports">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 8</span>
+                        <h2>Useful Commands</h2>
+                        <p>Windows/XAMPP aur Linux dono ke commands side-by-side rakho. Ye aapko actual practical control denge.</p>
+                    </div>
+                    <span class="pill">Tip: Web aur CLI PHP ko alag check karo</span>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Windows / XAMPP</th>
+                            <th>Linux</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Apache restart</td>
+                            <td><code>C:\xampp\apache\bin\httpd.exe -k restart</code></td>
+                            <td><code>sudo systemctl restart apache2</code> or <code>sudo systemctl restart httpd</code></td>
+                        </tr>
+                        <tr>
+                            <td>MySQL restart</td>
+                            <td><code>net stop mysql &amp;&amp; net start mysql</code></td>
+                            <td><code>sudo systemctl restart mysql</code> or <code>sudo systemctl restart mariadb</code></td>
+                        </tr>
+                        <tr>
+                            <td>Find active CLI php.ini</td>
+                            <td><code>C:\xampp\php\php.exe --ini</code></td>
+                            <td><code>php --ini</code></td>
+                        </tr>
+                        <tr>
+                            <td>Check PHP version</td>
+                            <td><code>C:\xampp\php\php.exe -v</code></td>
+                            <td><code>php -v</code></td>
+                        </tr>
+                        <tr>
+                            <td>Check Apache modules</td>
+                            <td><code>C:\xampp\apache\bin\httpd.exe -M</code></td>
+                            <td><code>apache2ctl -M</code> or <code>httpd -M</code></td>
+                        </tr>
+                        <tr>
+                            <td>Enable mod_rewrite</td>
+                            <td><code>LoadModule rewrite_module modules/mod_rewrite.so</code></td>
+                            <td><code>sudo a2enmod rewrite &amp;&amp; sudo systemctl reload apache2</code></td>
+                        </tr>
+                        <tr>
+                            <td>Apache config syntax test</td>
+                            <td><code>C:\xampp\apache\bin\httpd.exe -t</code></td>
+                            <td><code>sudo apachectl configtest</code></td>
+                        </tr>
+                        <tr>
+                            <td>Check Apache error log</td>
+                            <td><code>Get-Content C:\xampp\apache\logs\error.log -Tail 50</code></td>
+                            <td><code>tail -n 50 /var/log/apache2/error.log</code></td>
+                        </tr>
+                        <tr>
+                            <td>Tail live logs</td>
+                            <td><code>Get-Content C:\xampp\apache\logs\error.log -Wait -Tail 50</code></td>
+                            <td><code>tail -f /var/log/apache2/error.log</code></td>
+                        </tr>
+                        <tr>
+                            <td>Backup database</td>
+                            <td><code>C:\xampp\mysql\bin\mysqldump.exe -u root --single-transaction mydb &gt; C:\backup\mydb.sql</code></td>
+                            <td><code>mysqldump -u root -p --single-transaction mydb &gt; /backups/mydb.sql</code></td>
+                        </tr>
+                        <tr>
+                            <td>Import database</td>
+                            <td><code>C:\xampp\mysql\bin\mysql.exe -u root mydb &lt; C:\backup\mydb.sql</code></td>
+                            <td><code>mysql -u root -p mydb &lt; /backups/mydb.sql</code></td>
+                        </tr>
+                        <tr>
+                            <td>Check ports</td>
+                            <td><code>netstat -ano | findstr :80</code></td>
+                            <td><code>ss -ltnp | grep :80</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section searchable" id="roadmap" data-search="15 day roadmap apache php mysql phpmyadmin practical tasks errors">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 9</span>
+                        <h2>15-Day Practical Roadmap</h2>
+                        <p>Sirf read mat karo. Har din ek mini-lab chalao, ek error intentionally create karo, aur fix karo. Isi se confidence aata hai.</p>
+                    </div>
+                    <span class="pill">Daily formula: read -> break -> fix -> note</span>
+                </div>
+
+                <div class="timeline">
+                    <article class="timeline-item searchable" data-search="day 1 apache basics httpd.conf">
+                        <div class="day">Day 1</div>
+                        <div><strong>Topic:</strong> Apache basics<br><strong>Files:</strong> `httpd.conf` / `apache2.conf`<br><strong>Task:</strong> `Listen`, `DocumentRoot`, `Directory` read karo<br><strong>Intentional error:</strong> directive typo create karo aur syntax test se pakdo</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 2 logs apache">
+                        <div class="day">Day 2</div>
+                        <div><strong>Topic:</strong> Logs<br><strong>Files:</strong> `access.log`, `error.log`<br><strong>Task:</strong> 404 URL hit karke logs read karo<br><strong>Error:</strong> missing file request trace karo</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 3 htaccess rewrite">
+                        <div class="day">Day 3</div>
+                        <div><strong>Topic:</strong> `.htaccess` basics<br><strong>Files:</strong> `.htaccess`<br><strong>Task:</strong> simple redirect/rewrite banao<br><strong>Error:</strong> rewrite loop create karke samjho</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 4 mod_rewrite">
+                        <div class="day">Day 4</div>
+                        <div><strong>Topic:</strong> `mod_rewrite`<br><strong>Files:</strong> module config<br><strong>Task:</strong> Laravel route pretty URL test<br><strong>Error:</strong> module disable karke 404 dekho</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 5 virtual hosts">
+                        <div class="day">Day 5</div>
+                        <div><strong>Topic:</strong> Virtual hosts<br><strong>Files:</strong> `httpd-vhosts.conf` / site conf<br><strong>Task:</strong> `project1.test` banao<br><strong>Error:</strong> hosts file entry miss karo</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 6 ports">
+                        <div class="day">Day 6</div>
+                        <div><strong>Topic:</strong> Ports<br><strong>Files:</strong> `httpd.conf` / `ports.conf`<br><strong>Task:</strong> Apache ko 8080 par chalao<br><strong>Error:</strong> browser URL me port miss karo</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 7 ssl https">
+                        <div class="day">Day 7</div>
+                        <div><strong>Topic:</strong> SSL/HTTPS<br><strong>Files:</strong> SSL config<br><strong>Task:</strong> self-signed cert se local HTTPS enable<br><strong>Error:</strong> wrong cert path</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 8 php ini basics">
+                        <div class="day">Day 8</div>
+                        <div><strong>Topic:</strong> PHP basics<br><strong>Files:</strong> `php.ini`<br><strong>Task:</strong> timezone aur memory change<br><strong>Error:</strong> invalid extension line</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 9 uploads sessions">
+                        <div class="day">Day 9</div>
+                        <div><strong>Topic:</strong> Uploads & sessions<br><strong>Files:</strong> `php.ini`<br><strong>Task:</strong> upload form test<br><strong>Error:</strong> `post_max_size` chhota rakho</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 10 opcache errors">
+                        <div class="day">Day 10</div>
+                        <div><strong>Topic:</strong> Errors + opcache<br><strong>Files:</strong> `php.ini`, logs<br><strong>Task:</strong> `display_errors` aur `error_log` inspect karo<br><strong>Error:</strong> stale opcache behavior observe karo</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 11 php fpm">
+                        <div class="day">Day 11</div>
+                        <div><strong>Topic:</strong> PHP-FPM<br><strong>Files:</strong> `php-fpm.conf`, `www.conf`<br><strong>Task:</strong> socket/port settings read karo<br><strong>Error:</strong> wrong listen path</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 12 mysql basics">
+                        <div class="day">Day 12</div>
+                        <div><strong>Topic:</strong> MySQL basics<br><strong>Files:</strong> `my.ini` / `my.cnf`<br><strong>Task:</strong> charset and port inspect karo<br><strong>Error:</strong> wrong bind address</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 13 import export mysql">
+                        <div class="day">Day 13</div>
+                        <div><strong>Topic:</strong> Import/export<br><strong>Files:</strong> SQL dumps, logs<br><strong>Task:</strong> backup and restore run karo<br><strong>Error:</strong> `Unknown database`</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 14 phpmyadmin">
+                        <div class="day">Day 14</div>
+                        <div><strong>Topic:</strong> phpMyAdmin<br><strong>Files:</strong> `config.inc.php`, alias config<br><strong>Task:</strong> `auth_type` inspect/change<br><strong>Error:</strong> `blowfish_secret` missing</div>
+                    </article>
+                    <article class="timeline-item searchable" data-search="day 15 laravel full setup">
+                        <div class="day">Day 15</div>
+                        <div><strong>Topic:</strong> Laravel full setup<br><strong>Files:</strong> Vhost, `.env`, permissions, logs<br><strong>Task:</strong> fresh app end-to-end run karo<br><strong>Error:</strong> wrong DocumentRoot ya storage perms</div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section searchable" id="interview" data-search="interview questions php.ini htaccess virtual host documentroot upload size phpmyadmin mod_rewrite allowoverride">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Section 10</span>
+                        <h2>Interview Angle</h2>
+                        <p>In answers ko ratne ki zarurat nahi hai. Inko samajh lo aur apne project examples ke saath बोलो, to answer naturally strong lagega.</p>
+                    </div>
+                    <span class="pill">Short, practical, confident answers</span>
+                </div>
+
+                <div class="qa">
+                    <details open class="searchable" data-search="what is php.ini">
+                        <summary><span>What is `php.ini`?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>`php.ini` PHP runtime configuration file hai. Isme memory limit, upload size, execution time, extensions, error handling, sessions, timezone jaise settings hoti hain.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="what is htaccess">
+                        <summary><span>What is `.htaccess`?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>`.htaccess` directory-level Apache config file hai jo rewrites, redirects, auth, headers, aur access rules control karti hai.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="difference between httpd.conf and htaccess">
+                        <summary><span>Difference between `httpd.conf` and `.htaccess`?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>`httpd.conf` global/server-level config hai aur faster hota hai. `.htaccess` per-directory override file hai jo zyada flexible hai, lekin har request par read ho sakti hai.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="what is virtual host">
+                        <summary><span>What is virtual host?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>Virtual host Apache config block hai jo batata hai kaunsa domain kis site/folder ko serve karega. Multiple websites ek server par chalane ke liye use hota hai.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="why laravel public folder is documentroot">
+                        <summary><span>Why Laravel `public` folder is DocumentRoot?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>Security ke liye. Sirf public assets aur `index.php` web se accessible hone chahiye. `.env`, `vendor`, `app`, aur internal files hide rehni chahiye.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="how to increase upload size">
+                        <summary><span>How to increase upload size?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>`php.ini` me `upload_max_filesize`, `post_max_size`, `max_execution_time`, aur kabhi-kabhi `memory_limit` adjust karte hain. Changes ke baad Apache/PHP-FPM restart karte hain.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="difference apache config and php config">
+                        <summary><span>Difference between Apache config and PHP config?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>Apache config request routing, ports, vhosts, SSL, modules handle karta hai. PHP config script execution limits, uploads, errors, extensions, aur sessions handle karta hai.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="how phpmyadmin connects mysql">
+                        <summary><span>How phpMyAdmin connects to MySQL?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>phpMyAdmin ek PHP app hai jo `mysqli` ya `pdo_mysql` extension se MySQL ko connect karti hai. Apache usko serve karta hai, MySQL backend provide karta hai.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="how to debug 500 error">
+                        <summary><span>How to debug 500 error?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>Pehle app logs, phir Apache error log, phir PHP error log check karte hain. Laravel me `.env`, `APP_KEY`, permissions, cache, aur DB config verify karte hain.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="what is mod_rewrite">
+                        <summary><span>What is `mod_rewrite`?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>`mod_rewrite` Apache module hai jo incoming URLs ko rewrite karta hai. Laravel clean routes isi par depend karte hain.</p>
+                        </div>
+                    </details>
+                    <details class="searchable" data-search="what is allowoverride all">
+                        <summary><span>What is `AllowOverride All`?</span><span>Answer</span></summary>
+                        <div class="details-body">
+                            <p>Iska matlab Apache us directory me `.htaccess` rules allow karega. Agar `AllowOverride None` hua to `.htaccess` ka effect nahi chalega.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section class="callout searchable" data-search="mistakes fixes common troubleshooting checklist">
+                <h3>Most common mistakes aur quick fixes</h3>
+                <ul>
+                    <li><strong>Upload issue:</strong> `upload_max_filesize` badhaya, par `post_max_size` bhool gaye.</li>
+                    <li><strong>Laravel routes 404:</strong> `mod_rewrite` disabled ya `AllowOverride All` missing.</li>
+                    <li><strong>phpMyAdmin import fail:</strong> PHP timeout ya MySQL packet limit low.</li>
+                    <li><strong>Apache start fail:</strong> bad syntax ya port conflict.</li>
+                    <li><strong>Composer still failing after php.ini change:</strong> wrong `php.ini` edited, CLI wala alag hai.</li>
+                    <li><strong>MySQL import definer error:</strong> dump file me old server user referenced hai.</li>
+                </ul>
+            </section>
+
+            <p class="footer-note">Search box se keywords filter kar sakte ho. `Expand All` se poori study sheet ek saath revise ho jayegi.</p>
+        </main>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const searchableNodes = [...document.querySelectorAll(".searchable")];
+        const navLinks = [...document.querySelectorAll(".nav-links a")];
+        const detailsNodes = [...document.querySelectorAll("details")];
+
+        function applySearch() {
+            const query = searchInput.value.trim().toLowerCase();
+
+            searchableNodes.forEach((node) => {
+                const text = (node.dataset.search || node.textContent || "").toLowerCase();
+                const isMatch = !query || text.includes(query);
+                node.classList.toggle("hidden-by-search", !isMatch);
+            });
+        }
+
+        searchInput.addEventListener("input", applySearch);
+
+        document.getElementById("expandAll").addEventListener("click", () => {
+            detailsNodes.forEach((item) => {
+                if (!item.classList.contains("hidden-by-search")) {
+                    item.open = true;
+                }
+            });
+        });
+
+        document.getElementById("collapseAll").addEventListener("click", () => {
+            detailsNodes.forEach((item) => {
+                item.open = false;
+            });
+        });
+
+        document.querySelectorAll(".copy-btn").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const text = button.dataset.copy;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    const original = button.textContent;
+                    button.textContent = "Copied";
+                    setTimeout(() => {
+                        button.textContent = original;
+                    }, 1200);
+                } catch (error) {
+                    button.textContent = "Copy failed";
+                    setTimeout(() => {
+                        button.textContent = "Copy";
+                    }, 1200);
+                }
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                const id = entry.target.getAttribute("id");
+                const link = navLinks.find((navLink) => navLink.getAttribute("href") === `#${id}`);
+                if (entry.isIntersecting) {
+                    navLinks.forEach((navLink) => navLink.classList.remove("active"));
+                    if (link) link.classList.add("active");
+                }
+            });
+        }, {
+            rootMargin: "-20% 0px -65% 0px",
+            threshold: 0.01
+        });
+
+        document.querySelectorAll("main > section[id]").forEach((section) => observer.observe(section));
+    </script>
+</body>
+</html>
