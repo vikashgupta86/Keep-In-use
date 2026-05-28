@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laravel Advanced Concepts — Visual Deep Dive</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Syne:wght@700&display=swap');
+:root {
+  --bg:     #0f1117;
+  --bg2:    #161b27;
+  --bg3:    #1e2535;
+  --bg4:    #252d3f;
+  --bd:     #2a3347;
+  --bd2:    #364059;
+  --tx:     #e8eaf0;
+  --tx2:    #9ba3b8;
+  --tx3:    #6b7491;
+  --red:    #ff6b6b; --red-bg:    rgba(255,107,107,0.10);
+  --orange: #ff9f43; --orange-bg: rgba(255,159,67,0.10);
+  --yellow: #ffd32a; --yellow-bg: rgba(255,211,42,0.08);
+  --green:  #1dd1a1; --green-bg:  rgba(29,209,161,0.10);
+  --blue:   #54a0ff; --blue-bg:   rgba(84,160,255,0.10);
+  --purple: #a29bfe; --purple-bg: rgba(162,155,254,0.10);
+  --pink:   #fd79a8; --pink-bg:   rgba(253,121,168,0.10);
+  --cyan:   #00cec9; --cyan-bg:   rgba(0,206,201,0.10);
+  --r: 10px; --rs: 6px;
+  --mono: 'JetBrains Mono', monospace;
+  --ui: 'Inter', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--ui);background:var(--bg);color:var(--tx);min-height:100vh;line-height:1.6}
+
+/* ── HEADER ── */
+.header{
+  background:linear-gradient(135deg,#0f1117 0%,#161b27 60%,#1a2030 100%);
+  border-bottom:1px solid var(--bd);
+  padding:20px 24px 16px;
+  position:sticky;top:0;z-index:100;
+}
+.header-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.logo{
+  width:40px;height:40px;border-radius:var(--rs);
+  background:linear-gradient(135deg,var(--red),var(--orange));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.h-title{font-family:var(--display);font-size:20px;font-weight:700;color:var(--tx)}
+.h-sub{font-size:11px;color:var(--tx3);margin-top:2px}
+.top-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.search-input{
+  flex:1;min-width:200px;padding:8px 14px;
+  background:var(--bg3);border:1px solid var(--bd);
+  border-radius:20px;color:var(--tx);font-size:13px;
+  font-family:var(--ui);outline:none;transition:border-color .2s;
+}
+.search-input:focus{border-color:var(--blue)}
+.search-input::placeholder{color:var(--tx3)}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.cat-btn{
+  padding:5px 14px;border-radius:20px;border:1px solid var(--bd);
+  font-size:12px;font-weight:500;cursor:pointer;
+  background:transparent;color:var(--tx2);
+  transition:all .2s;font-family:var(--ui);
+}
+.cat-btn:hover{border-color:var(--bd2);color:var(--tx);background:var(--bg3)}
+.cat-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ── MAIN ── */
+.main{padding:20px 24px;max-width:1300px;margin:0 auto}
+.results-info{font-size:12px;color:var(--tx3);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+
+/* ── CARD ── */
+.card{
+  background:var(--bg2);border:1px solid var(--bd);
+  border-radius:var(--r);overflow:hidden;
+  cursor:pointer;transition:border-color .2s,transform .15s;
+}
+.card:hover{border-color:var(--bd2);transform:translateY(-1px)}
+.card.open{border-color:var(--bd2)}
+.card-top{padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.card-icon{
+  width:36px;height:36px;border-radius:var(--rs);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.card-info{flex:1;min-width:0}
+.card-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px}
+.card-tagline{font-size:12px;color:var(--tx3);line-height:1.4}
+.card-chev{color:var(--tx3);font-size:12px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.card.open .card-chev{transform:rotate(180deg)}
+.card-body{display:none;border-top:1px solid var(--bd)}
+.card.open .card-body{display:block}
+
+/* ── BLOCKS INSIDE CARD ── */
+.blk{padding:14px 16px;border-bottom:1px solid var(--bd)}
+.blk:last-child{border-bottom:none}
+.blk-label{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--tx3);margin-bottom:9px;
+}
+/* colored info boxes */
+.box-danger {background:var(--red-bg);   border-left:3px solid var(--red);   border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:13px;color:#ffb3b3;line-height:1.65}
+.box-warn   {background:var(--orange-bg);border-left:3px solid var(--orange); border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:13px;color:#ffc97a;line-height:1.65}
+.box-success{background:var(--green-bg); border-left:3px solid var(--green);  border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:13px;color:#7decd6;line-height:1.65}
+.box-info   {background:var(--blue-bg);  border-left:3px solid var(--blue);   border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:13px;color:#93c3ff;line-height:1.65}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:5px}
+.flow-box{
+  padding:8px 14px;border-radius:var(--rs);
+  font-size:12px;font-weight:500;color:var(--tx);
+}
+.flow-arr{display:flex;align-items:center;gap:8px;padding:0 6px}
+.flow-arr-icon{font-size:16px;color:var(--tx3)}
+.flow-arr-lbl{font-size:11px;color:var(--tx3)}
+
+/* alternatives */
+.alt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.alt-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px}
+.alt-name{font-size:12px;font-weight:600;color:var(--tx);margin-bottom:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.alt-desc{font-size:11px;color:var(--tx3);line-height:1.5}
+.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.badge-best{background:var(--green-bg);color:var(--green);border:1px solid rgba(29,209,161,.25)}
+.badge-ok  {background:var(--orange-bg);color:var(--orange);border:1px solid rgba(255,159,67,.25)}
+.badge-bad {background:var(--red-bg);color:var(--red);border:1px solid rgba(255,107,107,.25)}
+
+/* vs code */
+.vs-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vs-bad,.vs-good{border-radius:var(--rs);padding:10px 12px}
+.vs-bad{background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.2)}
+.vs-good{background:rgba(29,209,161,.06);border:1px solid rgba(29,209,161,.2)}
+.vs-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.vs-bad .vs-lbl{color:var(--red)}
+.vs-good .vs-lbl{color:var(--green)}
+.vs-code{font-size:11px;font-family:var(--mono);color:var(--tx2);line-height:1.7;white-space:pre-wrap;word-break:break-word}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* empty */
+.empty{text-align:center;padding:60px 20px;color:var(--tx3);font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-row">
+    <div class="logo">🏗️</div>
+    <div>
+      <div class="h-title">Laravel Advanced Concepts</div>
+      <div class="h-sub">Visual Deep Dive — Problem · Without it · Alternatives · Why Laravel wins</div>
+    </div>
+    <input class="search-input" type="text" placeholder="🔍  Search concept, category..." oninput="doSearch(this.value)" style="margin-left:auto">
+  </div>
+  <div class="cats" id="cats"></div>
+</header>
+
+<main class="main">
+  <div class="results-info" id="info"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+const DATA = [
+{id:1,icon:"📦",title:"Service Container",cat:"Core",
+tagline:"Laravel ka smart dependency manager — classes ko auto-wire karta hai",
+visual:[
+  {lbl:"🔴 Problem (ye kyu chahiye?)",cls:"box-danger",txt:"Har jagah new ClassName() likhna padta tha. Test karna impossible — real DB hit hoti thi. Code tightly coupled rehta tha. Change ek class = ripple effect sab jagah."},
+  {lbl:"⚠️ Agar ye nahi hota — kya hota",cls:"box-warn",txt:"Har controller mein dependencies manually banate. Service swap karna = 50 jagah code change. Mock inject karna = impossible. Spaghetti code everywhere."},
+  {lbl:"✅ Laravel ka solution",cls:"box-success",txt:"Ek container mein register karo → container khud resolve karta hai. Type-hint karo constructor mein, Laravel inject kar deta hai automatically. Zero manual wiring."},
+  {lbl:"💡 Ye kyun best hai",cls:"box-info",txt:"Auto-wiring = zero boilerplate. Interface bind karo, implementation swap karo bina client code touch kiye. Testing mein mock inject = sirf 2 lines. Enterprise-grade IoC, zero config."}
+],
+flow:[
+  {box:"bind(Interface → Class)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Container registers binding"},
+  {box:"Type-hint in constructor",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Request comes in"},
+  {box:"Container auto-resolves & injects ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"PHP new keyword",badge:"bad",desc:"Tight coupling, untestable, manual wiring har jagah"},
+  {name:"Static factories",badge:"bad",desc:"Slightly better but still not mockable easily"},
+  {name:"Pimple / PHP-DI",badge:"ok",desc:"Good containers but need manual config, no auto-wiring"},
+  {name:"Laravel Container",badge:"best",desc:"Auto-wiring, interface binding, contextual binding, zero config"},
+],
+vs:{bad:`// Without Container
+class OrderService {
+  public function __construct() {
+    // hardcoded! can't swap
+    $this->repo = new OrderRepository(
+      new Database(config('db'))
+    );
+  }
+}`,good:`// With Laravel Container
+class OrderService {
+  public function __construct(
+    private OrderRepositoryInterface $repo
+  ) {}
+  // Laravel injects automatically!
+  // In tests → inject MockRepository
+}`}
+},
+{id:2,icon:"💉",title:"Dependency Injection",cat:"Core",
+tagline:"Dependencies bahar se do — andar mat banao",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Class khud apni dependencies banata tha — new kar ke. Ye ek factory aur worker dono ek sath tha. Change ek cheez = ripple effect across everything."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Unit test likhna impossible — real database hit. Class ko test karne ke liye poora infrastructure chahiye. Code reuse nahi ho sakta tha."},
+  {lbl:"✅ DI ka solution",cls:"box-success",txt:"Dependencies constructor se pass karo. Class ko nahi pata kaise bana — sirf use karta hai. Swap karna = just pass different object. Clean aur flexible."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"SOLID S principle — Single Responsibility. Class ka kaam ek hai. Testing: MockRepo inject karo, no DB. Flexibility: tomorrow Redis repo inject karo, zero change in class."}
+],
+flow:[
+  {box:"Controller needs DocumentService",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Constructor type-hint se declare kiya"},
+  {box:"Container sees type-hint",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Resolves from bindings"},
+  {box:"Correct instance injected ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"new inside class",badge:"bad",desc:"Hard coupling, untestable, can't swap implementations"},
+  {name:"Service Locator (app())",badge:"bad",desc:"Hidden dependencies, still hard to test"},
+  {name:"Setter Injection",badge:"ok",desc:"Works but optional deps are risky — null pointer danger"},
+  {name:"Constructor DI",badge:"best",desc:"Explicit, required, mockable, self-documenting"},
+],
+vs:{bad:`// Bad — tight coupling
+class PaymentService {
+  private $gateway;
+  public function __construct() {
+    // Can't mock this in tests!
+    $this->gateway = new StripeGateway(
+      config('stripe.key')
+    );
+  }
+}`,good:`// Good — injected
+class PaymentService {
+  public function __construct(
+    private PaymentGatewayInterface $gateway
+  ) {}
+  // Test: inject MockGateway
+  // Prod: inject StripeGateway
+  // Switch to Razorpay: zero code change
+}`}
+},
+{id:3,icon:"🏗️",title:"Service Provider",cat:"Core",
+tagline:"App ka setup contractor — boot hone se pehle sab kuch ready karta hai",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Bindings kahan register karein? Observers kahan boot karein? Config kahan load karein? Sab cheez scatter ho jati thi controllers aur models mein."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"AppServiceProvider ek 500-line file banta. Ya App::bind() calls scattered everywhere. Ya sab kuch routes files mein. Maintenance nightmare."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Ek Provider per domain — DocumentServiceProvider, PaymentServiceProvider. register() = bind. boot() = start. Clean separation per domain."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Single Responsibility per provider. Lazy loading possible. Deferred providers = load only when needed = better performance. Domain teams work independently."}
+],
+flow:[
+  {box:"app()->register(all providers)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"All providers registered first"},
+  {box:"register() → bind to container",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Then all providers boot"},
+  {box:"boot() → observers, macros ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Everything in AppServiceProvider",badge:"bad",desc:"One giant file — impossible to maintain at scale"},
+  {name:"Config in .env only",badge:"bad",desc:"Logic that belongs in providers ends up in controllers"},
+  {name:"Symfony Bundles",badge:"ok",desc:"Similar concept but more verbose, less magic"},
+  {name:"Laravel ServiceProvider",badge:"best",desc:"register/boot lifecycle, deferred loading, domain isolation"},
+],
+vs:{bad:`// Bad — everything in one place
+// AppServiceProvider.php — 800 lines!
+// Documents, Users, Payments, Cache
+// Observers, Macros, Bindings — sab ek jagah
+// Ek change = sab kuch break hone ka risk`,good:`// Good — per-domain providers
+// DocumentServiceProvider.php
+// UserServiceProvider.php
+// PaymentServiceProvider.php
+
+'providers' => [
+  DocumentServiceProvider::class,
+  PaymentServiceProvider::class,
+]`}
+},
+{id:4,icon:"🗄️",title:"Repository Pattern",cat:"Architecture",
+tagline:"Data access ko centralize karo — business logic se alag rakho",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Controller mein User::where(...), Service mein Document::with(...), Job mein Order::latest() — query logic har jagah scattered. Change ek query = 10 files dhundho."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Testing impossible bina real DB ke. Query optimization = sab files dhundho. MySQL se PostgreSQL move = rewrite everything. Code duplication everywhere."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentRepository.php mein sab queries. Service calls repo method. Controller calls service. Sirf repository ko DB ka pata hai. Perfect separation."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Mock repo = zero DB in tests. Optimize one place = everywhere faster. Swap MySQL → MongoDB = sirf repo change. DRY principle enforced by architecture."}
+],
+flow:[
+  {box:"Controller",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"HTTP only — no query logic"},
+  {box:"Service (business logic)",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Calls repository"},
+  {box:"Repository → Database ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Direct Eloquent in controllers",badge:"bad",desc:"Query logic scattered, untestable, hard to optimize"},
+  {name:"Active Record only",badge:"bad",desc:"$model->save() everywhere = no separation of concerns"},
+  {name:"QueryObject pattern",badge:"ok",desc:"More granular but more files, more complex"},
+  {name:"Repository + Interface",badge:"best",desc:"Swappable, mockable, centralized, testable"},
+],
+vs:{bad:`// Bad — queries scattered everywhere
+class DocumentController {
+  public function index() {
+    // Query logic in controller!
+    return Document::where('status','published')
+      ->with(['category','uploader'])
+      ->orderBy('published_at','desc')
+      ->paginate(20);
+  }
+}`,good:`// Good — centralized in Repository
+class DocumentController {
+  public function index() {
+    return DocumentResource::collection(
+      $this->repo->getPublished()
+    );
+  }
+}
+// All query logic in DocumentRepository`}
+},
+{id:5,icon:"⚙️",title:"Service Layer",cat:"Architecture",
+tagline:"Business logic ka ghar — Controller aur Repository ke beech mein",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Document submit karne par: validate, save, send notification, generate PDF, clear cache, fire event — sab controller mein? 200 line ka fat controller?"},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Fat controllers. Same logic multiple controllers mein. API controller aur Web controller duplicate karte. Testing = test HTTP layer for business logic."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentService.create() mein sab business logic. Controller sirf: validate request → call service → return response. Service independently testable hai."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Controller thin = HTTP concerns only. Service = business rules. Reusable from: Controller, Job, Artisan Command, Test. DRY + Single Responsibility + Testable."}
+],
+flow:[
+  {box:"HTTP Request",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"FormRequest validates"},
+  {box:"Controller (thin — HTTP only)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Calls service method"},
+  {box:"Service (all business logic)",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Calls repository for data"},
+  {box:"Repository → DB ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Fat Controllers",badge:"bad",desc:"All logic in controllers — untestable, unreusable"},
+  {name:"Fat Models (ActiveRecord)",badge:"bad",desc:"Logic in models — violates SRP, hard to test"},
+  {name:"Action classes (one per action)",badge:"ok",desc:"More granular — good for simple CRUD, verbose for complex"},
+  {name:"Service classes",badge:"best",desc:"Groups related business operations, injectable, testable"},
+],
+vs:{bad:`// Bad — fat controller (100+ lines)
+public function store(Request $request) {
+  $data = $request->validate([...]);
+  $doc = Document::create($data);
+  $doc->slug = Str::slug($data['title']);
+  $doc->save();
+  Mail::send(...);
+  Cache::forget(...);
+  event(new ...);
+  ProcessPDF::dispatch(...);
+  // 50 more lines...
+}`,good:`// Good — thin controller (5 lines)
+public function store(
+  DocumentUploadRequest $request
+) {
+  $doc = $this->service->create(
+    $request->validated()
+  );
+  return new DocumentResource($doc);
+}`}
+},
+{id:6,icon:"🔒",title:"Form Request Validation",cat:"HTTP",
+tagline:"Validation ko controller se bahar nikalo — dedicated class mein",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Controller mein $request->validate([...50 rules...]) — controller 100+ lines ka. Validation logic reuse nahi hoti. Authorization check alag jagah hai."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Validation rules Web + API controllers mein duplicate hoti. Authorization checks scattered. Controller mein business logic + validation + HTTP = mess."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentUploadRequest class: authorize() = permission check, rules() = data validation. Controller receives only validated, clean data. Done."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Reusable across multiple controllers. Independently testable. authorize() + rules() = 2 concerns separated. Custom messages in one place. prepareForValidation() for data transformation."}
+],
+flow:[
+  {box:"HTTP Request arrives",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Middleware runs"},
+  {box:"FormRequest.authorize() — 403 if false",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Permission check passed"},
+  {box:"FormRequest.rules() — 422 if fails",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Validation passed"},
+  {box:"Controller receives ✓ clean data",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"$request->validate() inline",badge:"bad",desc:"Works for small apps but pollutes controllers at scale"},
+  {name:"Validator::make() manually",badge:"bad",desc:"More verbose, same problem — in controller"},
+  {name:"DTO + manual validation",badge:"ok",desc:"More explicit but more boilerplate"},
+  {name:"FormRequest",badge:"best",desc:"Built-in, reusable, authorize + rules, custom messages"},
+],
+vs:{bad:`// Bad — validation in controller
+public function store(Request $request) {
+  $validated = $request->validate([
+    'title' => 'required|unique:docs|max:255',
+    'file'  => 'required|file|mimes:pdf',
+    // 10 more rules...
+  ]);
+  if (!auth()->user()->can('upload')) abort(403);
+  // Ab business logic...
+}`,good:`// Good — FormRequest
+// Controller pe pahunchte hi = validated + authorized
+public function store(DocumentUploadRequest $req) {
+  $doc = $this->service->create($req->validated());
+  return new DocumentResource($doc);
+}`}
+},
+{id:7,icon:"🚦",title:"Middleware",cat:"HTTP",
+tagline:"Request pipeline mein filters — controller se pehle aur baad chalte hain",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Har controller action mein: auth check, role check, rate limit check, CORS header — duplicate code across 50 controllers."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"if (!auth()->check()) return redirect('/login'); — har controller mein. Forget karo ek jagah = security hole. Logic update = 50 files change."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Middleware once register karo — route pe lagao. Sab routes automatically filter hote. Code ek jagah, effect everywhere."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Onion architecture — layers of processing. Before AND after response hooks. Terminable middleware = post-response work. Groups = reuse. Zero duplication."}
+],
+flow:[
+  {box:"HTTP Request",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Global middleware (cors, session, trim)"},
+  {box:"Route Middleware (auth, role, throttle)",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Pass through or block with 403"},
+  {box:"Controller Action",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Response travels back through middleware"},
+  {box:"Middleware after (add headers) ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Check in every controller",badge:"bad",desc:"Duplicated checks, easy to miss, maintenance nightmare"},
+  {name:"Base controller checks",badge:"ok",desc:"Better but still inheritance coupling"},
+  {name:"Events/Hooks",badge:"ok",desc:"Works but less readable than middleware pipeline"},
+  {name:"Laravel Middleware",badge:"best",desc:"Pipeline pattern, before+after, groups, terminable"},
+],
+vs:{bad:`// Bad — auth check in every method
+class DocumentController {
+  public function approve($id) {
+    if (!auth()->check())
+      return redirect('/login');
+    if (!auth()->user()->hasRole('approver'))
+      return response()->json(['error'=>'No'],403);
+    // Same 4 lines in every method!
+  }
+}`,good:`// Good — one middleware
+class CheckApproverRole {
+  public function handle($request, Closure $next) {
+    if (!$request->user()->hasRole('approver'))
+      return response()->json(['error'=>'No'],403);
+    return $next($request); // pass it forward
+  }
+}
+// Route: ->middleware('role:approver')`}
+},
+{id:8,icon:"🛡️",title:"Policies & Gates",cat:"Authorization",
+tagline:"Authorization logic centralize karo — model-linked permission system",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"if ($user->id === $doc->user_id || $user->role === 'admin') — ye check har jagah. Controller, Blade, API — duplicate everywhere. Change = many files."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Authorization conditions scattered. Miss ek jagah = security vulnerability. Business rules change = grep karo sab files. Testing authorization = test controller."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentPolicy.approve() = ek jagah sab logic. $this->authorize('approve', $document) = ek line. Auto 403 if fails. Blade: @can('approve', $doc)."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Policy = single source of truth for model authorization. Testable independently. Blade directives automatically use same policy. Super admin override via Gate::before(). Clean."}
+],
+flow:[
+  {box:"$this->authorize('approve', $doc)",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Laravel finds DocumentPolicy"},
+  {box:"DocumentPolicy.approve(user, doc)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Returns bool — checks role + status"},
+  {box:"true → continue / false → 403 auto ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"if/else in controllers",badge:"bad",desc:"Scattered, duplicate, easy to miss, untestable"},
+  {name:"Role checks only (Spatie)",badge:"ok",desc:"Simple roles work but model-level ownership = complex"},
+  {name:"ACL packages",badge:"ok",desc:"More powerful but heavy, overkill for most cases"},
+  {name:"Policies + Gates",badge:"best",desc:"Built-in, model-linked, testable, Blade integrated"},
+],
+vs:{bad:`// Bad — authorization scattered
+public function approve($id) {
+  $doc = Document::findOrFail($id);
+  // Same check copy-pasted in 5 controllers!
+  if (!auth()->user()->hasRole('approver')
+    || $doc->status !== 'pending') {
+    abort(403);
+  }
+}`,good:`// Good — Policy ek jagah
+public function approve(Document $document) {
+  $this->authorize('approve', $document);
+  // One line! Policy has ALL logic.
+  return $this->service->approve($document);
+}`}
+},
+{id:9,icon:"📣",title:"Events & Listeners",cat:"Events",
+tagline:"Kuch hua → sabko batao — decoupled reactive system",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Document submit hone par: notify karo, log karo, stats update karo, PDF banao — sab ek service method mein? Tight coupling aur 200-line unreadable method."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"DocumentService.create() = 200 lines. Ek notification add karni = service modify karo. Remove karni = service modify karo. Open/Closed Principle violate."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"event(new DocumentSubmitted($doc)) — ek line. 3 listeners independently react. Add new listener = zero change in submission code. Remove = delete listener file."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Open/Closed Principle. Listeners queue mein = submission fast. Independent testing. Event = fact (kuch hua), Listener = reaction (ab kya karna hai)."}
+],
+flow:[
+  {box:"DocumentService.create()",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"event(new DocumentSubmitted($doc))"},
+  {box:"DocumentSubmitted Event",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"3 listeners independently react"},
+  {box:"SendNotification + AuditLog + UpdateStats ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Call everything in service",badge:"bad",desc:"Tight coupling, fat service, hard to extend"},
+  {name:"Observer only",badge:"ok",desc:"Good for model events but not for business events"},
+  {name:"Pub/Sub (Redis, RabbitMQ)",badge:"ok",desc:"Powerful for multi-service but overkill within one app"},
+  {name:"Laravel Events + Queued Listeners",badge:"best",desc:"Built-in, decoupled, async-ready, testable with Event::fake()"},
+],
+vs:{bad:`// Bad — all reactions in service
+public function create(array $data): Document {
+  $doc = $this->repo->create($data);
+  // Tightly coupled — can't remove any!
+  $this->notification->notifyApprovers($doc);
+  $this->audit->log('created', $doc);
+  $this->stats->increment('pending');
+  $this->pdf->generate($doc);
+}`,good:`// Good — fire event, listeners react
+public function create(array $data): Document {
+  $doc = $this->repo->create($data);
+  event(new DocumentSubmitted($doc));
+  return $doc; // Service stays clean forever!
+  // Add/remove reactions = add/remove listeners
+}`}
+},
+{id:10,icon:"👁️",title:"Observers",cat:"Events",
+tagline:"Model lifecycle ka automatic watcher — creating se deleting tak",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Har Document::create() ke baad manually: slug banao, audit log karo, cache clear karo — forget kiya ek jagah = inconsistent data throughout app."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"createDocument(), updateDocument() functions mein duplicate logic. Direct Document::create() call kiya kisi aur ne = slug missing. Inconsistency in data."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentObserver register karo — ab koi bhi document create kare (controller, job, seeder, test) = slug automatic. Observer = model ka bodyguard."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Works for every code path. getOriginal() + getDirty() = perfect for audit logs. withoutObservers() = disable during bulk seeding for performance boost."}
+],
+flow:[
+  {box:"Anyone calls Document::create()",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Eloquent fires 'creating' event"},
+  {box:"DocumentObserver.creating()",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Auto-sets slug, submitted_by, etc."},
+  {box:"Document saved with correct data ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Manual calls in every controller",badge:"bad",desc:"Forget one place = inconsistent data, production bugs"},
+  {name:"Model boot() methods",badge:"ok",desc:"Same effect but clutters the Model class"},
+  {name:"Database triggers",badge:"bad",desc:"Logic hidden in DB, not codebase, untestable"},
+  {name:"Laravel Observers",badge:"best",desc:"Separate class, all lifecycle hooks, withoutObservers() support"},
+],
+vs:{bad:`// Bad — manual calls (easy to forget!)
+// Controller 1
+$doc = Document::create($data);
+$doc->slug = Str::slug($doc->title); // forgot?
+$doc->save();
+AuditLog::create([...]); // forgot?
+
+// Controller 2 — same code OR forgot!
+$doc = Document::create($data);
+// Oops — no slug! No audit log!`,good:`// Good — Observer handles automatically
+class DocumentObserver {
+  public function creating(Document $doc) {
+    $doc->slug = Str::slug($doc->title);
+    $doc->submitted_by = auth()->id();
+  }
+}
+// Now ANY Document::create() anywhere:
+// slug ✓ submitted_by ✓ — always!`}
+},
+{id:11,icon:"⚡",title:"Jobs & Queues",cat:"Background",
+tagline:"Heavy kaam background mein — user wait nahi karta",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"PDF watermark karna = 5 seconds. Email bhejna = 2 seconds. Image resize = 3 seconds. User ko page load karne mein 10 seconds wait? Bounce rate 90%!"},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Synchronous processing = user waits forever. Server timeout on heavy tasks. One slow task blocks entire HTTP request. Email server down = user gets error page."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"ProcessDocumentPDF::dispatch($doc) — request returns in <100ms. Worker queue mein process karta hai. User ko message: 'Processing...' then notification when done."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Retry logic built-in ($tries, $backoff). Failed job = failed_jobs table, recoverable. Priority queues. Delay dispatch. Batch jobs. Unique jobs. Horizon for monitoring."}
+],
+flow:[
+  {box:"HTTP Request → ProcessPDF::dispatch($doc)",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Job pushed to Redis/DB queue instantly"},
+  {box:"Response returns < 100ms ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+  {arr:"↓",lbl:"Meanwhile, separately..."},
+  {box:"Queue Worker processes Job",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Retry up to $tries times on failure"},
+  {box:"Job completes / failed() called ✓",bg:"var(--orange-bg)",tc:"var(--orange)"},
+],
+alts:[
+  {name:"Synchronous processing",badge:"bad",desc:"User waits, server timeouts, blocks request thread"},
+  {name:"Cron-based batch",badge:"bad",desc:"Delayed processing, no real-time, complex management"},
+  {name:"ReactPHP / Swoole async",badge:"ok",desc:"Powerful but complex, different paradigm"},
+  {name:"Laravel Queues + Horizon",badge:"best",desc:"Simple dispatch, retry logic, monitoring, delay, batch, unique"},
+],
+vs:{bad:`// Bad — synchronous (user waits 10s!)
+public function store(Request $request) {
+  $doc = Document::create($request->all());
+  PDF::watermark($doc);      // 3s — user waits
+  Storage::upload($doc);    // 4s — user waits
+  Mail::send(...);           // 2s — user waits
+  // 9 seconds! User bounced long ago.
+}`,good:`// Good — async queue (returns < 100ms)
+public function store(Request $request) {
+  $doc = Document::create($request->all());
+  ProcessDocumentPDF::dispatch($doc); // instant!
+  return response()->json([
+    'status' => 'processing', 'id' => $doc->id
+  ]);
+  // Worker handles heavy work in background!
+}`}
+},
+{id:12,icon:"🔔",title:"Notifications",cat:"Background",
+tagline:"Ek class se multiple channels pe bhejo — mail, SMS, database, Slack",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Email code alag, SMS code alag, database notification alag — same event ke liye 3 different places mein logic. Channel add karna = new file, new logic har jagah."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Mail::send() + Nexmo::send() + DB::insert() — scattered across codebase. Change template = multiple places. Channel add/remove = big refactor."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"$user->notify(new DocumentApproved($doc)) — ek call. via() returns ['mail','database']. Add 'slack' = ek line. Remove 'sms' = ek line. Simple."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Single notification class, multiple channels. Database channel = in-app notification center free. $user->unreadNotifications works out of box. ShouldQueue implement = auto queued."}
+],
+flow:[
+  {box:"$user->notify(new DocumentApproved($doc))",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"via() returns ['mail', 'database']"},
+  {box:"toMail() → Email queued",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"+ parallel"},
+  {box:"toArray() → notifications table row ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Mail::send() directly",badge:"bad",desc:"Only email, no channels, no database, scattered code"},
+  {name:"Custom notification tables",badge:"bad",desc:"Reinventing the wheel — Laravel already has this"},
+  {name:"Firebase/OneSignal push",badge:"ok",desc:"Good for push but adds external dependency"},
+  {name:"Laravel Notifications",badge:"best",desc:"Multi-channel, database built-in, queueable, OnDemand"},
+],
+vs:{bad:`// Bad — multiple scattered calls
+public function approve(Document $doc) {
+  $doc->update(['status' => 'approved']);
+  Mail::to($doc->submitter)->send(new ApprovedMail());
+  DB::table('notifications')->insert([...]); // manual!
+  Nexmo::message()->send([...]);
+  // Channel add karni? Find all 3 places!
+}`,good:`// Good — one notification, all channels
+public function approve(Document $doc) {
+  $doc->update(['status' => 'approved']);
+  $doc->submitter->notify(
+    new DocumentStatusNotification($doc, 'approved')
+  );
+  // Add channel = 1 line in via() method only
+}`}
+},
+{id:13,icon:"⏰",title:"Scheduler / Cron",cat:"Background",
+tagline:"Ek cron entry se sab scheduled tasks — version controlled PHP mein",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"10 scheduled tasks = 10 cron entries on server. Server change = re-configure sab. Developer ne new task add kiya = sysadmin ko batao. Cron syntax = error-prone."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Multiple cron entries on server, not in Git. Someone deletes a cron = task silently stops forever. No overlap prevention. No output capture. No failure alerts."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Ek cron: * * * * * php artisan schedule:run. Baaki sab Kernel.php mein PHP code — Git mein tracked. Developer khud manage kare without sysadmin ticket."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Version controlled schedule. onOneServer() for multi-server. withoutOverlapping() mutex lock. onFailure() callback. emailOutputTo(). runInBackground(). Human-readable PHP API."}
+],
+flow:[
+  {box:"Server: 1 cron — schedule:run (every min)",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Kernel.php checked for due tasks"},
+  {box:"Task due? withoutOverlapping check",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Not overlapping — safe to run"},
+  {box:"Command/Job executes ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Multiple server cron entries",badge:"bad",desc:"Not version controlled, manual on each server, error-prone"},
+  {name:"Database-based cron manager",badge:"ok",desc:"UI-based but adds complexity and DB dependency"},
+  {name:"Kubernetes CronJobs",badge:"ok",desc:"Good for containers but heavy setup overhead"},
+  {name:"Laravel Scheduler",badge:"best",desc:"1 cron entry, version controlled, rich PHP API, multi-server safe"},
+],
+vs:{bad:`# Bad — multiple cron entries (server level, not in Git!)
+0 * * * * php artisan email:digest
+*/5 * * * * php artisan cache:clear-old
+0 2 * * * php artisan cleanup:temp
+0 9 * * 1 php artisan report:weekly
+# New task = sysadmin ticket. Delete one = silent failure!`,good:`// Good — Kernel.php (Git tracked!)
+$schedule->command('email:digest')->hourly();
+$schedule->command('cache:clear-old')->everyFiveMinutes();
+$schedule->command('cleanup:temp')->dailyAt('02:00');
+$schedule->command('report:weekly')
+         ->weeklyOn(1,'09:00')->withoutOverlapping();
+// Add task = just add one PHP line!`}
+},
+{id:14,icon:"🚀",title:"Caching",cat:"Performance",
+tagline:"Expensive queries ka result store karo — dobara calculate mat karo",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Homepage load = 5 complex queries + 3 joins + 200ms. 10,000 users = 10,000 identical DB hits per hour. Database overwhelmed. Slow page. High server cost."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Database pe har request hit. Same data baar baar fetch. Expensive joins repeat. Peak traffic = DB bottleneck. Scale karne ke liye bigger DB = expensive."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Cache::remember('published_docs', 3600, fn() => DB query). Pehli baar = DB hit + cache mein save. Baaki sab = cache hit (<1ms). Observer se stale hone pe auto-invalidate."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Redis: sub-millisecond. Cache tags = bulk invalidation. rememberForever for config. Multiple drivers: Redis, Memcached, DB, File, Array (tests). Cache locks for atomic operations."}
+],
+flow:[
+  {box:"Request: get published documents",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Cache::remember('key', 3600, fn)"},
+  {box:"Cache HIT? → return instantly < 1ms",bg:"var(--green-bg)",tc:"var(--green)"},
+  {arr:"or MISS (first time / invalidated)"},
+  {box:"Run DB query — 200ms",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Store result in cache"},
+  {box:"Return result — next request = HIT ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"No caching (raw DB every time)",badge:"bad",desc:"Slow, expensive, doesn't scale at all"},
+  {name:"HTTP caching (ETags)",badge:"ok",desc:"Good for public APIs but not for DB query reduction"},
+  {name:"Varnish / Nginx full-page cache",badge:"ok",desc:"Great for public pages but can't do per-user granular cache"},
+  {name:"Laravel Cache + Redis",badge:"best",desc:"Granular, taggable, per-user possible, easy invalidation"},
+],
+vs:{bad:`// Bad — no caching
+public function getPublished(): Collection {
+  // 200ms query, EVERY SINGLE REQUEST
+  // 10,000 users = 10,000 × 200ms DB hits!
+  return Document::published()
+    ->with(['category', 'uploader'])
+    ->latest()->get();
+}`,good:`// Good — cached
+public function getPublished(): Collection {
+  return Cache::remember(
+    'published_documents',
+    now()->addHour(),
+    fn() => Document::published()
+      ->with(['category', 'uploader'])
+      ->latest()->get()
+  );
+  // First: 200ms. All subsequent: < 1ms!
+}`}
+},
+{id:15,icon:"🎁",title:"API Resources",cat:"HTTP",
+tagline:"Model ka JSON output control karo — sensitive data hide, structure consistent",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"return $document; ya return $document->toArray() — password_reset_token, internal_notes, raw file_path, processing_metadata sab expose ho jaata hai!"},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Security risk — sensitive fields expose. Inconsistent API structure. Frontend team ko pata nahi konsa field aayega. API versioning impossible. Every response different."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentResource — exactly jo fields chahiye. when() for conditional fields. whenLoaded() for relationships. Status ko label mein transform. Timestamps format karo."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"whenLoaded() = N+1 prevent automatically. V1/V2 resource classes = API versioning easy. Conditional fields = one resource for all user types. Consistent frontend contract."}
+],
+flow:[
+  {box:"Eloquent Model (sab fields — sensitive bhi)",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"new DocumentResource($model)"},
+  {box:"toArray() — pick only safe fields",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Transform values, conditional fields"},
+  {box:"Clean safe JSON Response ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"return $model directly",badge:"bad",desc:"Exposes ALL fields including sensitive ones — DANGEROUS"},
+  {name:"$model->makeHidden([...])",badge:"bad",desc:"Fragile — forget to hide new sensitive field = leak"},
+  {name:"Manual array building",badge:"ok",desc:"Works but verbose and not reusable"},
+  {name:"API Resources",badge:"best",desc:"Reusable, conditional, versioned, whenLoaded for N+1"},
+],
+vs:{bad:`// Bad — exposes everything!
+return response()->json($document);
+// Response includes:
+// password_reset_token, internal_notes
+// raw file_path, processing_metadata
+// All timestamps, all foreign keys
+// SECURITY RISK!`,good:`// Good — Resource controls output
+return new DocumentResource($document);
+// Only exposes: id, title, slug, status_label
+// file_url (only if published)
+// published_at formatted as "12 Jan 2025"
+// Never exposes: file_path, internal notes!`}
+},
+{id:16,icon:"🧰",title:"Traits & Helpers",cat:"Core",
+tagline:"Reusable code — inheritance ke bina multiple classes mein use karo",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Document, User, Category — teeno ko audit logging chahiye. Copy paste? Ya ek common base class banao? But PHP single inheritance hai aur ye unrelated models hain."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Code duplicate across 3 models. Bug fix = 3 places. PHP single inheritance = can't extend multiple base classes. Trait ke bina PHP mein koi clean solution nahi."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"HasAuditLog trait. use HasAuditLog in Document, User, Category. Ek jagah fix = everywhere fixed. use HasAuditLog, SoftDeletes, HasFactory — multiple traits ek saath."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"PHP single inheritance problem solved. Horizontal code reuse. boot{TraitName}() = automatic Eloquent hooks. PHP mein mixins nahi hain — Traits ARE the solution."}
+],
+flow:[
+  {box:"HasAuditLog Trait (ek jagah defined)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"used by (multiple unrelated classes)"},
+  {box:"Document + User + Category",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"bootHasAuditLog() auto-hooks into Eloquent"},
+  {box:"Audit log on EVERY model update ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Copy-paste same code",badge:"bad",desc:"DRY violation — bug fix = multiple places"},
+  {name:"Base Model class",badge:"ok",desc:"Works for related models but wrong for unrelated ones"},
+  {name:"Service class for each",badge:"ok",desc:"External service works but adds injection complexity"},
+  {name:"PHP Traits",badge:"best",desc:"Horizontal reuse, multiple traits, bootTrait hooks, PHP native"},
+],
+vs:{bad:`// Bad — duplicate in every model
+class Document extends Model {
+  protected static function boot() {
+    parent::boot();
+    static::updated(fn($m) => AuditLog::create([...]));
+  }
+}
+class User extends Model { // SAME CODE AGAIN
+  protected static function boot() {
+    parent::boot();
+    static::updated(fn($m) => AuditLog::create([...]));
+  }
+}`,good:`// Good — Trait (DRY!)
+trait HasAuditLog {
+  public static function bootHasAuditLog() {
+    static::updated(fn($m) => AuditLog::create([...]));
+  }
+}
+class Document extends Model { use HasAuditLog; }
+class User extends Model    { use HasAuditLog; }
+class Category extends Model{ use HasAuditLog; }
+// Bug fix = 1 place, fixed everywhere!`}
+},
+{id:17,icon:"📊",title:"Eager Loading",cat:"Performance",
+tagline:"N+1 problem solve karo — with() se related data ek saath fetch karo",
+visual:[
+  {lbl:"🔴 Problem — N+1",cls:"box-danger",txt:"100 documents fetch = 1 query. Phir har ek ka category access karo = 100 more queries. Total = 101 queries. 10,000 rows = 10,001 queries. App crawl karta hai."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"N+1 = silent performance killer. Locally fast (10 records), production slow (10k records). Hard to detect without Debugbar. Database overwhelmed. Users complain."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Document::with(['category','uploader'])->get() = 3 queries TOTAL regardless of how many documents. SQL IN clause use karta hai — ek query mein sab related records."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Fixed number of queries regardless of data size. select() se columns limit karo. withCount() for counts without loading. loadMissing() for already-loaded collections."}
+],
+flow:[
+  {box:"Document::with(['category','uploader'])->get()",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Query 1: SELECT id,title FROM documents"},
+  {box:"Query 2: SELECT * FROM categories WHERE id IN (1,2,3...)",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Query 3: SELECT * FROM users WHERE id IN (...)"},
+  {box:"Laravel matches in PHP — 3 queries total ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Lazy loading (default)",badge:"bad",desc:"N+1 problem — 1 query per relation access per record"},
+  {name:"Manual JOIN queries",badge:"ok",desc:"Works but complex, loses Eloquent features, hard to maintain"},
+  {name:"GraphQL with DataLoader",badge:"ok",desc:"Batching built-in but GraphQL adds significant complexity"},
+  {name:"Eloquent with()",badge:"best",desc:"Zero N+1, simple syntax, nested eager loading, withCount"},
+],
+vs:{bad:`// Bad — N+1 Problem!
+$docs = Document::all(); // 1 query
+foreach ($docs as $doc) {
+  echo $doc->category->name;  // 1 query EACH!
+  echo $doc->uploader->name;  // 1 query EACH!
+}
+// 100 docs = 201 queries!
+// 1000 docs = 2001 queries — CRASH!`,good:`// Good — Eager Loading
+$docs = Document::with([
+  'category:id,name',    // only needed columns
+  'uploader:id,name',    // only needed columns
+])->get();
+// 3 queries TOTAL (not 201!)
+foreach ($docs as $doc) {
+  echo $doc->category->name; // no new query!
+}`}
+},
+{id:18,icon:"🎯",title:"Query Optimization",cat:"Performance",
+tagline:"Slow queries fast karo — indexes, scopes, select, chunk, paginate",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Document list page = 800ms. SELECT * (50 columns), no index on status/date column, full table scan 100k rows. User bounces. Server CPU 100%. High DB bill."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Unoptimized queries = slow at scale. Full table scans = no indexes = O(n) lookup. SELECT * = unnecessary data transfer. No pagination = memory exhaustion."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"select(['id','title','slug']) + index(['status','published_at']) + paginate(20) + query scope. 800ms → 40ms. Same data, 20x faster."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Composite index = query planner uses it for WHERE+ORDER. Query scopes = reusable, chainable conditions. chunk()/cursor() for large datasets — memory safe."}
+],
+flow:[
+  {box:"Identify slow query (Debugbar / Telescope)",bg:"var(--red-bg)",tc:"var(--red)"},
+  {arr:"↓",lbl:"Add composite index on WHERE+ORDER columns"},
+  {box:"Add select() — only needed columns",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Add query scopes + paginate(20)"},
+  {box:"800ms → 40ms ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"SELECT * without indexes",badge:"bad",desc:"Full table scan, over-fetching, slow at scale"},
+  {name:"Raw SQL everywhere",badge:"bad",desc:"Faster but loses Eloquent, injection risk, unmaintainable"},
+  {name:"Elasticsearch for all queries",badge:"ok",desc:"Overkill for simple filtering, added infrastructure cost"},
+  {name:"Eloquent optimization techniques",badge:"best",desc:"select, indexes, scopes, chunk, paginate — all built-in"},
+],
+vs:{bad:`// Bad — unoptimized
+// SELECT * = 50 columns (need only 4)
+// No index on status/published_at
+// Full table scan = 100k rows checked
+Document::where('status', 'published')
+  ->orderBy('published_at', 'desc')
+  ->get(); // 800ms, memory heavy!`,good:`// Good — optimized
+Document::select(['id','title','slug','published_at'])
+  ->published()                    // scoped + indexed
+  ->with(['category:id,name'])     // eager load
+  ->when($request->category,
+    fn($q) => $q->where('category_id', $request->category))
+  ->paginate(20); // 40ms, 4 columns, 20 rows!`}
+},
+{id:19,icon:"💰",title:"DB Transactions",cat:"Data",
+tagline:"Multiple queries atomically — ya sab hoga ya kuch nahi — data consistency",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Approval: document status update (SUCCESS) + approval record create (FAIL) — partial state! Document 'approved' hai but koi approval record nahi. Corrupt data in production."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Partial updates = inconsistent database state. Hard to debug — 'approved' document with no approver. Financial apps = money deducted but not credited. Data corruption."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DB::transaction(closure) — agar kuch bhi fail hota hai = automatic rollback. Commit sirf tab hoga jab sab succeed hoga. ACID guarantee. Atomicity ensured."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"ACID: Atomicity, Consistency, Isolation, Durability. Nested transactions supported (savepoints). Isolation levels configurable. Automatic rollback on any exception."}
+],
+flow:[
+  {box:"DB::transaction() — begin",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Step 1: update document status"},
+  {box:"Step 2: create DocumentApproval record",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Step 3: create AuditLog entry"},
+  {box:"ALL succeed → COMMIT ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+  {arr:"or ANY step throws exception"},
+  {box:"ROLLBACK — zero partial state ✓",bg:"var(--orange-bg)",tc:"var(--orange)"},
+],
+alts:[
+  {name:"Sequential queries without transaction",badge:"bad",desc:"Partial failure = inconsistent data — data corruption"},
+  {name:"Application-level rollback (manual)",badge:"bad",desc:"Error-prone, complex, not truly atomic"},
+  {name:"Event sourcing",badge:"ok",desc:"Solves it differently but massive complexity overhead"},
+  {name:"DB::transaction()",badge:"best",desc:"Built-in, automatic rollback, nested, clean closure API"},
+],
+vs:{bad:`// Bad — no transaction!
+$document->update(['status' => 'approved']); // OK
+DocumentApproval::create([...]); // FAILS!
+// Result: document=approved, no approval record
+// CORRUPT STATE! Hard to detect and fix.
+AuditLog::create([...]); // Never even reached!`,good:`// Good — transaction (all or nothing!)
+DB::transaction(function () use ($document) {
+  $document->update(['status' => 'approved']);
+  DocumentApproval::create([...]);
+  AuditLog::create([...]);
+});
+// If ANY line throws = ALL rollback. Safe!`}
+},
+{id:20,icon:"📝",title:"Logging & Error Handling",cat:"Operations",
+tagline:"Kya hua, kab hua, kyon hua — production mein debugging ka lifeline",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Production mein error aaya. No logs. No context. 'Something failed somewhere' — kahan? Kyon? Kiska request tha? Debug karna = hours of guesswork."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"echo aur var_dump in production (security risk). No error tracking. Silent failures. Users report bugs, you have no clue why. Security incidents undetected."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Structured logging: Log::info('Document submitted', ['doc_id'=>1,'user_id'=>5,'ip'=>'..']). Context array searchable. Custom channels per domain. Handler.php consistent API errors."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Monolog channels: daily, slack, papertrail. Log levels filter noise in prod. Context arrays queryable in ELK/Sentry. $this->reportable() = Sentry integration. $this->renderable() = custom error responses."}
+],
+flow:[
+  {box:"Exception occurs anywhere in app",bg:"var(--red-bg)",tc:"var(--red)"},
+  {arr:"↓",lbl:"Handler.php catches it"},
+  {box:"$this->reportable() → Sentry / Slack",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"$this->renderable() → custom response"},
+  {box:"Consistent JSON error + structured log ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"echo / var_dump in production",badge:"bad",desc:"Security risk, no history, no search, exposes internals"},
+  {name:"PHP error_log()",badge:"bad",desc:"No structure, no channels, hard to parse"},
+  {name:"Custom exception handling from scratch",badge:"ok",desc:"Works but reinventing what Laravel's Handler provides"},
+  {name:"Laravel Logging + Sentry + Handler",badge:"best",desc:"Monolog channels, structured context, Sentry, Telescope"},
+],
+vs:{bad:`// Bad — no context (useless in production!)
+Log::info('Document submitted');
+// Production error: WHERE? WHICH? WHO? WHEN?
+// Can't search. Can't filter. USELESS.
+
+// Even worse!
+var_dump($document); // In production! Security hole!`,good:`// Good — structured with rich context
+Log::channel('documents')->info('Document submitted', [
+  'document_id' => $document->id,
+  'user_id'     => auth()->id(),
+  'ip'          => request()->ip(),
+  'file_size'   => $document->file_size,
+  'duration_ms' => $duration,
+]);
+// Searchable! Filterable! Actionable! Debuggable!`}
+},
+{id:21,icon:"🔧",title:"Custom Artisan Commands",cat:"Operations",
+tagline:"CLI tools — maintenance, automation, aur scheduled tasks ke liye",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Scheduled documents ko publish karna hai — cron calls what? Random PHP file in root? No dependency injection, no logging, no progress bar, no testing."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Random PHP scripts in root folder. No DI — can't inject services. No progress reporting. Can't write tests. Scheduler se call karna = ugly path to raw PHP file."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"php artisan documents:publish-scheduled — clean, injected, testable, progress bar, dry-run option, returns exit code, works with Scheduler seamlessly."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Dependency injection in handle(). $this->info(), $this->error(), progressBar(). Options/arguments/flags. Return self::SUCCESS/FAILURE — exit codes for CI/CD. $this->artisan() in tests."}
+],
+flow:[
+  {box:"Scheduler triggers: documents:publish",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Laravel DI resolves DocumentService"},
+  {box:"handle(DocumentService $service) called",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"--dry-run? preview only, else execute"},
+  {box:"Publish + clear cache + log + return SUCCESS ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Random PHP scripts",badge:"bad",desc:"No DI, no testing, not integrated, messy"},
+  {name:"Routes for admin actions",badge:"bad",desc:"HTTP overhead for CLI tasks, security concern"},
+  {name:"Deployer/Envoy scripts",badge:"ok",desc:"Good for deployment but not business logic"},
+  {name:"Artisan Commands",badge:"best",desc:"DI, testable, Scheduler-ready, progress bar, exit codes"},
+],
+vs:{bad:`// Bad — raw PHP script
+// /scripts/publish_documents.php
+require 'vendor/autoload.php';
+$app = require 'bootstrap/app.php';
+// No DI. No testing. No progress.
+// No exit codes. Ugly. Untestable.
+$docs = DB::table('documents')...`,good:`// Good — Artisan Command
+class PublishDocuments extends Command {
+  protected $signature =
+    'documents:publish {--dry-run}';
+  public function handle(DocumentService $service) {
+    // Injected! Testable! Progress bar!
+    // Scheduler-ready, exit codes, options
+    return self::SUCCESS;
+  }
+}`}
+},
+{id:22,icon:"🔄",title:"Events vs Jobs vs Observers",cat:"Events",
+tagline:"Sahi tool sahi kaam ke liye — teen alag tools, teen alag purposes",
+visual:[
+  {lbl:"🔴 Confusion — misuse",cls:"box-danger",txt:"Event fire kiya PDF generate karne ke liye (single task = Job chahiye tha). Ya Observer mein 200 lines business logic daali (model lifecycle = clean rehna chahiye tha)."},
+  {lbl:"⚠️ Ye confuse karo toh",cls:"box-warn",txt:"Observer mein notification code = model lifecycle se unrelated logic. Job se multiple services notify = tight coupling. Event for single task = unnecessary complexity."},
+  {lbl:"✅ Clear rule of thumb",cls:"box-success",txt:"Observer = model AUTOMATICALLY dekhta hai (slug, audit auto-set). Event = business action hua (multiple reactions chahiye). Job = ek heavy kaam background mein (retry chahiye)."},
+  {lbl:"💡 Decision tree",cls:"box-info",txt:"Model lifecycle pe auto-react? → Observer. Multiple independent reactions needed? → Event + Listeners. Single heavy task background mein? → Job. PDF generate = Job. Doc submitted = Event. Slug = Observer."}
+],
+flow:[
+  {box:"Model change (create/update/delete)?",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"→ Observer"},
+  {box:"Business event (multiple reactions needed)?",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"→ Event + Listeners"},
+  {box:"Heavy single background task?",bg:"var(--green-bg)",tc:"var(--green)"},
+  {arr:"→ Job"},
+],
+alts:[
+  {name:"Events for everything",badge:"bad",desc:"Overkill for single tasks, hard to trace execution flow"},
+  {name:"Jobs for notifications",badge:"bad",desc:"N jobs for N reactions = tight coupling, hard to remove one"},
+  {name:"Observer for business logic",badge:"bad",desc:"Observer = model lifecycle only, not business events"},
+  {name:"Right tool for right job",badge:"best",desc:"Observer + Event + Job = three clear separate concerns"},
+],
+vs:{bad:`// Bad — wrong tools everywhere
+// Observer mein business logic (WRONG!)
+public function created(Document $doc) {
+  Mail::send(...);        // Not observer's job!
+  PDF::generate($doc);   // Not observer's job!
+}
+// Job for multiple reactions (WRONG!)
+// DocumentSubmittedJob → notifies 5 services?`,good:`// Correct — right tool each time
+// Observer: auto model-level stuff only
+public function creating($doc) {
+  $doc->slug = Str::slug($doc->title);
+}
+// Event: business notification (multiple reactions)
+event(new DocumentSubmitted($doc));
+// Job: single heavy background task
+ProcessDocumentPDF::dispatch($doc);`}
+},
+{id:23,icon:"📁",title:"File Upload Handling",cat:"HTTP",
+tagline:"Secure file handling — validate, UUID store, private disk, temp URL",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"User uploads '../../../etc/passwd' as filename (path traversal). Ya executable .php file rename karke document.pdf bana ke upload karta hai. Dangerous!"},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Path traversal attacks. Code execution via uploaded PHP files. Private documents publicly accessible via direct URL. Original filename = security nightmare."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"mimes:pdf validation. UUID filename (Str::uuid()).pdf. Private S3 disk (not public). Storage::temporaryUrl() = 15-minute signed URL. Policy check before URL generation."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"UUID = path traversal impossible. mimes = server-side MIME check (not just extension). Private disk = no public URL ever. temporaryUrl = expiry + HMAC signature = proper access control."}
+],
+flow:[
+  {box:"File upload request arrives",bg:"var(--red-bg)",tc:"var(--red)"},
+  {arr:"↓",lbl:"FormRequest: mimes:pdf, max:10240"},
+  {box:"Generate UUID filename (Str::uuid().'.pdf')",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Store in PRIVATE S3 disk"},
+  {box:"Policy check → temporaryUrl (15 min) ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Store with original user filename",badge:"bad",desc:"Path traversal attack, code injection possible"},
+  {name:"Store in public/ folder",badge:"bad",desc:"Anyone can access any file by guessing URL"},
+  {name:"Store as base64 in DB",badge:"bad",desc:"Bloats database, slow queries, no streaming"},
+  {name:"UUID + private disk + temp URL",badge:"best",desc:"Secure, controlled access, expiring URLs, policy-guarded"},
+],
+vs:{bad:`// Bad — security nightmare!
+$request->file->move(
+  public_path('uploads'),
+  $request->input('filename') // USER-PROVIDED NAME!
+);
+// User sends: ../../../../config/app.php
+// User sends: shell.php renamed to file.pdf
+// Direct URL: yoursite.com/uploads/secret.pdf`,good:`// Good — secure upload
+$path = $file->storeAs(
+  'documents/'.date('Y/m'),
+  Str::uuid().'.'.$file->extension(), // UUID!
+  'private' // NOT public disk!
+);
+// Serve: Storage::temporaryUrl($path, now()->addMinutes(15))`}
+},
+{id:24,icon:"🏢",title:"Role Permission System",cat:"Authorization",
+tagline:"Kaun kya kar sakta hai — industry standard RBAC implementation",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"if ($user->role === 'admin') har jagah hardcoded strings. Role change = 50 files change. 'Editor' role add karna = grep karo codebase. No caching = DB hit on every permission check."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"String comparison scattered everywhere. New role add = massive refactor. Permission granularity impossible with simple role column. No easy way to manage from UI."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Spatie Laravel Permission — roles + permissions tables. $user->assignRole('approver'). $user->can('approve-documents'). Middleware: role:approver. Cached per user. Industry standard."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Roles + direct permissions on user. Cache = no DB hit per check. Gate integration = Policy + Permission unified. Gate::before() for super admin bypass. Team management support."}
+],
+flow:[
+  {box:"$user->can('approve-documents')",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Check Redis cache first"},
+  {box:"Cache HIT → instant bool (< 1ms)",bg:"var(--green-bg)",tc:"var(--green)"},
+  {arr:"or CACHE MISS (first time)"},
+  {box:"DB: user → roles → permissions",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Store in cache for future requests"},
+  {box:"Return bool + cached ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Simple role column on users",badge:"bad",desc:"No granularity, hard to extend, string comparisons"},
+  {name:"Custom pivot tables",badge:"ok",desc:"Works but reinventing Spatie's wheel — why?"},
+  {name:"Zizaco Entrust (old)",badge:"ok",desc:"Similar but old, less maintained"},
+  {name:"Spatie Laravel Permission",badge:"best",desc:"Industry standard, cached, Gate integrated, teams support"},
+],
+vs:{bad:`// Bad — scattered string comparison
+// In controller:
+if ($user->role !== 'admin'
+  && $user->role !== 'approver') { abort(403); }
+// In another controller:
+if ($user->role === 'admin') { ... }
+// How to add 'senior-approver'? Edit 50 files!`,good:`// Good — Spatie Permission
+$user->assignRole('approver');
+$user->givePermissionTo('approve-documents');
+
+// Check (from cache — no DB!):
+if ($user->can('approve-documents')) { ... }
+if ($user->hasRole('approver')) { ... }
+// Add role = just assign it. Zero code change!`}
+},
+{id:25,icon:"📋",title:"Audit Logs",cat:"Data",
+tagline:"Who did what when — compliance aur debugging ke liye complete change trail",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Document mysteriously changed from 'approved' to 'pending'. Kab? Kisne? Kyon? No logs = impossible to answer. Compliance audit = fail. Legal liability."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Data changes untracked. Security breach undetectable. Compliance requirements failed. 'Who deleted this record?' = no answer. Production bugs = detective work."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"HasAuditLog trait — har model update pe automatically: old_values JSON, new_values JSON, user_id, IP address, timestamp. Separate immutable table. Git of your database."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"getOriginal() + getDirty() = perfect before/after values. Trait = automatic for all models using it. JSON columns = any field structure. Index on model+model_id = fast history lookup."}
+],
+flow:[
+  {box:"$document->update(['status' => 'approved'])",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Eloquent fires 'updating' event"},
+  {box:"HasAuditLog.bootHasAuditLog() catches it",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"getOriginal() + getDirty() captured"},
+  {box:"audit_logs row: who, what, when, IP ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Manual log calls everywhere",badge:"bad",desc:"Forget one place = missing audit trail, inconsistent"},
+  {name:"Database triggers",badge:"ok",desc:"Works but logic in DB not codebase, untestable"},
+  {name:"Spatie Activity Log package",badge:"best",desc:"Package version with more features — recommended"},
+  {name:"HasAuditLog Trait (custom)",badge:"best",desc:"Full control, simple, automatic via Eloquent hooks"},
+],
+vs:{bad:`// Bad — manual logging (easy to forget!)
+public function approve(Document $doc) {
+  $doc->update(['status' => 'approved']);
+  // Developer A forgot to log!
+  // Or logged wrong data.
+  // Or this code path skips logging.
+  // No consistent audit trail = compliance fail.
+}`,good:`// Good — automatic via Trait
+class Document extends Model {
+  use HasAuditLog; // That's literally it!
+}
+// Now EVERY update to Document ANYWHERE
+// auto-creates audit_log with:
+// old_values, new_values, user_id, IP, timestamp`}
+},
+{id:26,icon:"🗑️",title:"Soft Deletes",cat:"Data",
+tagline:"Delete = recycle bin — recovery possible, audit trail maintained",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Admin accidentally deletes important government document. Permanent delete = gone forever. Recovery impossible. Compliance audit requires full document history."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Hard delete = permanent data loss. Audit trail broken. FK violations if child records exist. 'We accidentally deleted 1000 records' = catastrophic. No recoverability."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"use SoftDeletes; + $table->softDeletes(). $doc->delete() = sets deleted_at to now(). All queries auto-exclude. $doc->restore() = recovered. forceDelete() = permanent only when intended."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Global scope auto-adds WHERE deleted_at IS NULL — zero code change in existing queries. withTrashed() when admin needs it. Works with relationships. Recovery = compliance ready."}
+],
+flow:[
+  {box:"$document->delete()",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Sets deleted_at = now() (NOT actual delete)"},
+  {box:"Document::all() → auto-excludes (WHERE deleted_at IS NULL)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Admin: Document::onlyTrashed()->find()"},
+  {box:"$doc->restore() → deleted_at = null ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Hard delete (permanent)",badge:"bad",desc:"No recovery, breaks audit trail, compliance risk"},
+  {name:"is_deleted boolean flag",badge:"ok",desc:"Works but requires manual WHERE is_deleted=0 everywhere"},
+  {name:"Archive table (copy rows)",badge:"ok",desc:"Works but separate table = complex queries"},
+  {name:"SoftDeletes trait",badge:"best",desc:"Global scope auto-applies, restore built-in, zero code change"},
+],
+vs:{bad:`// Bad — hard delete (permanent!)
+$document->delete(); // GONE FOREVER!
+// User: "I deleted it by mistake!"
+// Admin: "Sorry, completely unrecoverable :("
+// Auditor: "Show me document #4523 history"
+// Dev: "It's just... gone."`,good:`// Good — soft delete
+$document->delete(); // Just sets deleted_at
+// User: "I deleted it by mistake!"
+$document->restore(); // Done! 1 line. Recovered.
+// Auditor: Document::withTrashed()->find(4523); ✓
+// History complete. Compliance satisfied.`}
+},
+{id:27,icon:"⛔",title:"Rate Limiting",cat:"HTTP",
+tagline:"Abuse aur DDoS rokao — per user/IP intelligent request limits",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Bot runs 10,000 login attempts per minute (credential stuffing). Ya scrapes all documents in 1 second. Ya floods upload endpoint. Server overloaded. Legitimate users can't access."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Open to brute force attacks. Credential stuffing. Data scraping. DDoS. Server bills spike. Database overwhelmed. Security breach possible. Users blocked by bot traffic."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"RateLimiter::for('api', fn($req) => Limit::perMinute(60)->by($req->user()?->id ?: $req->ip())). Admin = Limit::none(). Custom 429 JSON response. Per-device limits."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Per-user limits (not just IP — offices share IPs). Role-based different limits. Custom response with retry_after header. Named limiters = reusable. Redis-backed = accurate across servers."}
+],
+flow:[
+  {box:"Request arrives at API endpoint",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"throttle:api middleware runs"},
+  {box:"Check: user X — exceeded 60 requests/min?",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"YES — return 429"},
+  {box:"429 Too Many Requests + retry_after header",bg:"var(--red-bg)",tc:"var(--red)"},
+  {arr:"NO — proceed"},
+  {box:"Continues to controller ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"No rate limiting at all",badge:"bad",desc:"Open to abuse, brute force, DDoS, scraping"},
+  {name:"IP-only rate limiting",badge:"bad",desc:"Office/NAT IPs are shared — blocks legitimate users"},
+  {name:"Nginx rate limiting",badge:"ok",desc:"Works but can't differentiate authenticated users"},
+  {name:"Laravel RateLimiter",badge:"best",desc:"Per-user, per-role, custom response, named, Redis-backed"},
+],
+vs:{bad:`// Bad — no rate limiting!
+Route::post('/login', [LoginController::class, 'login']);
+// Bot: 10,000 attempts/minute — welcome!
+// Brute force, credential stuffing — no defense!
+
+// Or IP-only (bad for offices)
+Limit::perMinute(5)->by($request->ip());
+// Everyone in office gets blocked together!`,good:`// Good — per-user rate limiting
+RateLimiter::for('login', fn($req) =>
+  Limit::perMinute(5)
+    ->by($req->ip()) // IP for unauthenticated
+    ->response(fn() => response()->json(
+      ['error' => 'Too many attempts', 'retry_after' => 60], 429
+    ))
+);`}
+},
+{id:28,icon:"📧",title:"Mail System",cat:"Background",
+tagline:"Emails properly structured — Mailable classes, queued, fully testable",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Mail::send() mein inline HTML string, synchronous call in controller. User waits 3 seconds. Mail server down = error to user. No template reuse. No testing without sending real emails."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Inline HTML in PHP strings = unmaintainable. Synchronous = user waits for every email. Mail server timeout = failed user request. Can't test without actually sending."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"DocumentApprovedMail extends Mailable implements ShouldQueue — Blade template, queued automatically. Mail::fake() in tests. Driver switch: SMTP → Mailgun → SES = env change only."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Mailable class: envelope(), content(), attachments(). Markdown templates built-in. ShouldQueue = auto queued. Multiple driver support. Mail::fake() = test without any real sending."}
+],
+flow:[
+  {box:"Mail::to($user)->queue(new ApprovedMail($doc))",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Pushed to queue (not sent yet)"},
+  {box:"HTTP Response returns instantly ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+  {arr:"↓",lbl:"Queue worker picks it up (background)"},
+  {box:"Blade template rendered → sent via Mailgun ✓",bg:"var(--blue-bg)",tc:"var(--blue)"},
+],
+alts:[
+  {name:"PHP mail() function",badge:"bad",desc:"No template, synchronous, no queue, likely spam"},
+  {name:"PHPMailer direct",badge:"ok",desc:"Works but no Laravel integration, no queue, no fakes"},
+  {name:"Inline HTML strings",badge:"bad",desc:"Unmaintainable, no template, impossible to test"},
+  {name:"Laravel Mailable + Queue",badge:"best",desc:"Class-based, Blade template, queued, driver abstraction, testable"},
+],
+vs:{bad:`// Bad — inline HTML, synchronous
+Mail::send([], [], function ($m) use ($doc) {
+  $m->to($doc->submitter->email)
+    ->subject('Approved')
+    ->setBody('<h1>Approved!</h1>...'); // HTML in PHP!
+});
+// User waits 3 seconds!
+// Mail server down = user gets error page!`,good:`// Good — Mailable + queued
+Mail::to($doc->submitter)
+  ->queue(new DocumentApprovedMail($doc));
+// Response to user: INSTANT!
+// Worker sends in background
+// Mail server down = retries 3 times automatically`}
+},
+{id:29,icon:"🎫",title:"Sanctum / API Auth",cat:"Security",
+tagline:"Mobile app aur SPA ke liye lightweight, revocable token auth",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"Mobile app ko authenticate karna hai. Session cookies mobile par kaam nahi karte. JWT revocation hard hai. OAuth2 (Passport) overkill hai. Custom token = security bugs."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Custom token system = potential security vulnerabilities. JWT = stateless, revocation complex. Session = not for stateless mobile APIs. Passport = full OAuth2 = unnecessary complexity."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"$user->createToken('mobile-app', ['docs:read'], now()->addDay()). Token + abilities + expiry. One device = one token. Logout = revoke only that device's token. Simple."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"Simple API tokens for mobile. Cookie-based for SPAs (same domain — CSRF handled). Per-device tokens = logout one device only. DB-stored = revocable anytime. Abilities = fine-grained permissions."}
+],
+flow:[
+  {box:"POST /api/login with credentials",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"Verify credentials → create token"},
+  {box:"Token returned to mobile app (store it)",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Send: Authorization: Bearer {token}"},
+  {box:"auth:sanctum middleware verifies",bg:"var(--orange-bg)",tc:"var(--orange)"},
+  {arr:"↓",lbl:"Valid token → user resolved"},
+  {box:"API access granted ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Session auth for APIs",badge:"bad",desc:"CSRF complexity, not truly stateless, mobile = problematic"},
+  {name:"JWT (tymon/jwt-auth)",badge:"ok",desc:"Stateless but revocation needs blacklist, more complex"},
+  {name:"Laravel Passport (OAuth2)",badge:"ok",desc:"Full OAuth2 — overkill unless building OAuth provider"},
+  {name:"Laravel Sanctum",badge:"best",desc:"Simple tokens, abilities, per-device, revocable, SPA + mobile"},
+],
+vs:{bad:`// Bad — manual token (security risks!)
+$token = Str::random(60);
+DB::table('api_tokens')->insert([
+  'user_id' => $user->id,
+  'token'   => hash('sha256', $token),
+  'expires' => now()->addDay(),
+]);
+// No abilities. No device tracking.
+// No built-in revoke. Security = your problem!`,good:`// Good — Sanctum (production-ready)
+$token = $user->createToken(
+  'mobile-iphone-14',           // device name
+  ['documents:read', 'upload'], // abilities
+  now()->addDay()               // expiry
+);
+return ['token' => $token->plainTextToken];
+// Logout: $user->tokens()->where('name',...)->delete()`}
+},
+{id:30,icon:"✅",title:"Testing Basics",cat:"Quality",
+tagline:"Automated tests — code ka safety net, regressions se bachao",
+visual:[
+  {lbl:"🔴 Problem",cls:"box-danger",txt:"New feature add kiya → purana feature break ho gaya. Deploy ke 2 hours baad user ne report kiya. 3 hours debug. Hotfix deploy. Reputation damage. Recurring nightmare."},
+  {lbl:"⚠️ Ye nahi hota toh",cls:"box-warn",txt:"Manual testing = slow, incomplete, human error. Every deploy = fingers crossed. Refactoring = scary. New developer joins = accidentally breaks things. No confidence."},
+  {lbl:"✅ Solution",cls:"box-success",txt:"Feature test: full HTTP flow. Unit test: isolated service test. Mail::fake(), Queue::fake() = no real sending. RefreshDatabase = clean state. CI runs on every push = instant feedback."},
+  {lbl:"💡 Kyun best",cls:"box-info",txt:"RefreshDatabase = fresh DB every test. Fakes: Mail, Queue, Event, Storage — no external services needed. actingAs() = simulate any user. assertDatabaseHas() = verify DB state. Fast + reliable."}
+],
+flow:[
+  {box:"$this->actingAs($approver, 'sanctum')",bg:"var(--bg3)",tc:"var(--tx)"},
+  {arr:"↓",lbl:"PATCH /api/documents/1/approve"},
+  {box:"Full HTTP lifecycle: middleware → policy → service",bg:"var(--blue-bg)",tc:"var(--blue)"},
+  {arr:"↓",lbl:"Assert response + DB state + fakes"},
+  {box:"assertOk() + assertDatabaseHas() + Mail::assertQueued() ✓",bg:"var(--green-bg)",tc:"var(--green)"},
+],
+alts:[
+  {name:"Manual testing only",badge:"bad",desc:"Slow, incomplete, doesn't scale, human error guaranteed"},
+  {name:"Postman tests only",badge:"ok",desc:"Good for API but no DB assertions, hard to run in CI"},
+  {name:"PHPUnit without fakes",badge:"ok",desc:"Works but slow, requires real external services running"},
+  {name:"Laravel Feature + Unit + Fakes",badge:"best",desc:"Fast, isolated, DB clean state, fakes for all externals"},
+],
+vs:{bad:`// Bad — no tests
+// New feature added
+// Manual click-through testing
+// Deploy to production
+// "The approve button is broken for admins"
+// 3 hours debugging production
+// Hotfix at 11pm
+// This repeats every release`,good:`// Good — automated tests
+public function test_approver_can_approve() {
+  Mail::fake(); Queue::fake(); // no real sending
+  $approver = User::factory()->create()->assignRole('approver');
+  $doc = Document::factory()->pending()->create();
+  $this->actingAs($approver, 'sanctum')
+    ->patchJson("/api/docs/{$doc->id}/approve")
+    ->assertOk()->assertJsonPath('data.status','approved');
+  Mail::assertQueued(DocumentApprovedMail::class); // ✓
+}`}
+}
+];
+
+const CAT_COLORS = {
+  Core:'#a29bfe',Architecture:'#1dd1a1',HTTP:'#54a0ff',
+  Authorization:'#fd79a8',Events:'#ff9f43',Background:'#1dd1a1',
+  Performance:'#00cec9',Data:'#ff9f43',Operations:'#ff6b6b',
+  Quality:'#1dd1a1',Security:'#fd79a8'
+};
+const CAT_BG = {
+  Core:'rgba(162,155,254,.12)',Architecture:'rgba(29,209,161,.12)',
+  HTTP:'rgba(84,160,255,.12)',Authorization:'rgba(253,121,168,.12)',
+  Events:'rgba(255,159,67,.12)',Background:'rgba(29,209,161,.12)',
+  Performance:'rgba(0,206,201,.12)',Data:'rgba(255,159,67,.12)',
+  Operations:'rgba(255,107,107,.12)',Quality:'rgba(29,209,161,.12)',
+  Security:'rgba(253,121,168,.12)'
+};
+const FLOW_COLORS = [
+  'var(--bg3)','var(--blue-bg)','var(--orange-bg)','var(--green-bg)',
+  'var(--purple-bg)','var(--cyan-bg)','var(--red-bg)'
+];
+const FLOW_TC = [
+  'var(--tx)','var(--blue)','var(--orange)','var(--green)',
+  'var(--purple)','var(--cyan)','var(--red)'
+];
+
+let currentCat = 'All', currentSearch = '';
+
+function buildCats() {
+  const cats = ['All', ...new Set(DATA.map(d => d.cat))];
+  document.getElementById('cats').innerHTML = cats.map((c, i) =>
+    `<button class="cat-btn${i === 0 ? ' active' : ''}" onclick="setCat('${c}',this)">${c}${c === 'All' ? ` (${DATA.length})` : ''}</button>`
+  ).join('');
+}
+
+function setCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function doSearch(val) {
+  currentSearch = val.toLowerCase();
+  renderGrid();
+}
+
+function renderGrid() {
+  const items = DATA.filter(d => {
+    const matchCat = currentCat === 'All' || d.cat === currentCat;
+    const matchQ = !currentSearch ||
+      d.title.toLowerCase().includes(currentSearch) ||
+      d.tagline.toLowerCase().includes(currentSearch) ||
+      d.cat.toLowerCase().includes(currentSearch);
+    return matchCat && matchQ;
+  });
+
+  document.getElementById('info').textContent =
+    `Showing ${items.length} of ${DATA.length} concepts`;
+
+  if (items.length === 0) {
+    document.getElementById('grid').innerHTML =
+      `<div class="empty">No concepts found. Try a different search term.</div>`;
+    return;
+  }
+
+  document.getElementById('grid').innerHTML = items.map(d => {
+    const col = CAT_COLORS[d.cat] || '#9ba3b8';
+    const bg  = CAT_BG[d.cat]    || 'rgba(155,163,184,.1)';
+    return `
+<div class="card" id="card-${d.id}" onclick="toggle(${d.id})">
+  <div class="card-top">
+    <div class="card-icon" style="background:${bg}">${d.icon}</div>
+    <div class="card-info">
+      <div class="card-title"><span style="color:${col};font-family:var(--mono);font-size:11px;margin-right:6px">#${String(d.id).padStart(2,'0')}</span>${d.title}</div>
+      <div class="card-tagline">${d.tagline}</div>
+    </div>
+    <div class="card-chev">▼</div>
+  </div>
+  <div class="card-body">
+    ${d.visual.map(v => `
+      <div class="blk">
+        <div class="blk-label">${v.lbl}</div>
+        <div class="${v.cls}">${v.txt}</div>
+      </div>
+    `).join('')}
+    <div class="blk">
+      <div class="blk-label">🔄 Flow visualization</div>
+      <div class="flow">${buildFlow(d.flow)}</div>
+    </div>
+    <div class="blk">
+      <div class="blk-label">⚖️ Alternatives — kya use karein?</div>
+      <div class="alt-grid">${d.alts.map(a => `
+        <div class="alt-card">
+          <div class="alt-name">${a.name}<span class="badge badge-${a.badge}">${a.badge==='best'?'✓ Best':a.badge==='ok'?'~ OK':'✗ Avoid'}</span></div>
+          <div class="alt-desc">${a.desc}</div>
+        </div>
+      `).join('')}</div>
+    </div>
+    <div class="blk">
+      <div class="blk-label">❌ Wrong way vs ✅ Laravel way</div>
+      <div class="vs-wrap">
+        <div class="vs-bad"><div class="vs-lbl">Without / wrong approach</div><div class="vs-code">${esc(d.vs.bad)}</div></div>
+        <div class="vs-good"><div class="vs-lbl">Laravel best practice</div><div class="vs-code">${esc(d.vs.good)}</div></div>
+      </div>
+    </div>
+  </div>
+</div>`;
+  }).join('');
+}
+
+function buildFlow(flow) {
+  let ci = 0;
+  return flow.map(f => {
+    if (f.arr !== undefined) {
+      return `<div class="flow-arr"><div class="flow-arr-icon">${f.arr}</div><div class="flow-arr-lbl">${f.lbl || ''}</div></div>`;
+    }
+    const bg = f.bg || FLOW_COLORS[ci % FLOW_COLORS.length];
+    const tc = f.tc || FLOW_TC[ci % FLOW_TC.length];
+    ci++;
+    return `<div class="flow-box" style="background:${bg};color:${tc}">${f.box}</div>`;
+  }).join('');
+}
+
+function toggle(id) {
+  document.getElementById('card-' + id).classList.toggle('open');
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+buildCats();
+renderGrid();
+</script>
+</body>
+</html>
